@@ -10,4 +10,8 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->         /                          prod.Routes
+
+POST       /income-tax-subscription-eligibility/test-only/feature-switch            @uk.gov.hmrc.incometaxsubscriptioneligibility.testonly.controllers.FeatureSwitchController.update
+GET        /income-tax-subscription-eligibility/test-only/feature-switch            @uk.gov.hmrc.incometaxsubscriptioneligibility.testonly.controllers.FeatureSwitchController.get
+
+->         /                                                                        prod.Routes
