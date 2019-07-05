@@ -1,4 +1,4 @@
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
+import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, integrationTestSettings}
 import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
@@ -14,11 +14,10 @@ lazy val scoverageSettings = {
     "prod.*",
     "core.config.*",
     "com.*",
-    "uk.gov.hmrc.vatsignupfrontend.views.html.*",
     "testonly.*",
     "business.*",
     "testOnlyDoNotUseInAppConf.*",
-    "uk.gov.hmrc.vatsignupfrontend.testonly.*"
+    "uk.gov.hmrc.incometaxsubscriptioneligibility.testonly.*"
   )
 
   Seq(
@@ -33,11 +32,25 @@ lazy val scoverageSettings = {
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
   .settings(
-    majorVersion                     := 0,
-    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
+    majorVersion := 0,
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    dependencyOverrides ++= AppDependencies.overrides,
     scoverageSettings
   )
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
+  .settings(PlayKeys.playDefaultPort := 9588)
+
+
+Keys.fork in Test := true
+javaOptions in Test += "-Dlogger.resource=logback-test.xml"
+parallelExecution in Test := true
+
+Keys.fork in IntegrationTest := true
+unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it")).value
+javaOptions in IntegrationTest += "-Dlogger.resource=logback-test.xml"
+addTestReportOption(IntegrationTest, "int-test-reports")
+parallelExecution in IntegrationTest := false
+majorVersion := 1
