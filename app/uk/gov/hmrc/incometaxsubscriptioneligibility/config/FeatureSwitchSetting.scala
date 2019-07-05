@@ -18,7 +18,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.config
 
 import play.api.libs.json.{Json, OFormat}
 
-case class FeatureSwitchSetting (name: String, enable: Boolean)
+case class FeatureSwitchSetting(feature: String, enable: Boolean)
 
 object FeatureSwitchSetting extends FeatureSwitching {
 
