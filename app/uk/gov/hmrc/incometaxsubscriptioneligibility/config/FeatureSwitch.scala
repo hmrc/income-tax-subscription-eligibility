@@ -31,9 +31,9 @@ object FeatureSwitch {
     case _ => throw new NoSuchElementException(s"Invalid feature switch $switchName")
   }
 
-  def apply(setting: FeatureSwitchSetting): FeatureSwitch = switches find (_.displayName == setting.name) match {
+  def apply(setting: FeatureSwitchSetting): FeatureSwitch = switches find (_.displayName == setting.feature) match {
     case Some(switch) => switch
-    case _ => throw new NoSuchElementException(s"Invalid feature switch ${setting.name}")
+    case _ => throw new NoSuchElementException(s"Invalid feature switch ${setting.feature}")
   }
 
 }
