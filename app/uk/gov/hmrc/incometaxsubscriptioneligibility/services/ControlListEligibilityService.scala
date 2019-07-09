@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
+package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
-import play.api.http.Status._
-import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.ComponentSpecBase
+import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitching, StubControlListEligible}
 
-class MicroserviceHelloWorldISpec extends ComponentSpecBase {
+@Singleton
+class ControlListEligibilityService @Inject() extends FeatureSwitching {
 
-  "A GET request on '/hello-world' route" should {
-    "return an OK" in {
+  def getEligibilityStatus(sautr: String): Boolean = isEnabled(StubControlListEligible)
 
-      val result = get("/hello-world")
-
-      result should have(
-        httpStatus(OK)
-      )
-
-    }
-  }
 }
+

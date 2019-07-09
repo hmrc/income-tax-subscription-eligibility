@@ -17,16 +17,25 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 
 import javax.inject.{Inject, Singleton}
+import play.api.libs.json.Json
 import play.api.mvc._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibilityService
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 
 @Singleton()
-class MicroserviceHelloWorld @Inject()(cc: ControllerComponents) extends BackendController(cc) {
+class ControlListEligibilityController @Inject()(cc: ControllerComponents,
+                                                 controlListEligibilityService: ControlListEligibilityService
+                                                )(implicit ec: ExecutionContext) extends BackendController(cc) {
 
-  def hello() = Action.async { implicit request =>
-    Future.successful(Ok("Hello world"))
+  def getEligibilityStatus(sautr: String): Action[AnyContent] = Action {
+    implicit request =>
+
+      val key: String = "eligible"
+      val eligible: Boolean = controlListEligibilityService.getEligibilityStatus(sautr)
+
+      Ok(Json.obj(key -> eligible))
   }
 
 }
