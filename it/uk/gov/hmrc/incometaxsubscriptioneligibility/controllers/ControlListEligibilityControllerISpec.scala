@@ -34,7 +34,7 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase {
 
         val result = get(s"/eligibility/$testSautr")
 
-        result should have(
+        result must have(
           httpStatus(OK),
           jsonBodyAs(testJson(eligibility = true))
         )
@@ -46,7 +46,7 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase {
         // Don't need to disable feature switches as they are disabled by an overridden method in ComponentSpecBase
         val result = get(s"/eligibility/$testSautr")
 
-        result should have(
+        result must have(
           httpStatus(OK),
           jsonBodyAs(testJson(eligibility = false))
         )

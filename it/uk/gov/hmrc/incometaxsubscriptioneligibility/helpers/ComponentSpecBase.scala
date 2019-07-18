@@ -16,40 +16,41 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.helpers
 
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Matchers, WordSpecLike}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Writes
-import play.api.libs.ws.{WSClient, WSResponse}
+import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.test.Helpers._
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitch, FeatureSwitching}
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
 
-trait ComponentSpecBase extends WordSpecLike with Matchers with GuiceOneServerPerSuite with CustomMatchers
+trait ComponentSpecBase extends PlaySpec with GuiceOneServerPerSuite with CustomMatchers
   with WiremockHelper with BeforeAndAfterAll with BeforeAndAfterEach with FeatureSwitching {
 
-  lazy val ws = app.injector.instanceOf[WSClient]
+  lazy val ws: WSClient = app.injector.instanceOf[WSClient]
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .in(Environment.simple(mode = Mode.Dev))
     .configure(config)
     .build
-  val mockHost = WiremockHelper.wiremockHost
-  val mockPort = WiremockHelper.wiremockPort.toString
-  val mockUrl = s"http://$mockHost:$mockPort"
+  val mockHost: String = WiremockHelper.wiremockHost
+  val mockPort: String = WiremockHelper.wiremockPort.toString
+  val mockUrl: String = s"http://$mockHost:$mockPort"
 
   def config: Map[String, String] = Map(
     "auditing.enabled" -> "false",
-    "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck"
-    //"" -> mockHost, TODO Add services
-    //"" -> mockPort
+    "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
+    "microservice.services.base.host" -> mockHost,
+    "microservice.services.base.port" -> mockPort,
+    "microservice.services.des.url" -> mockUrl
   )
 
   override def beforeAll(): Unit = {
-    super.beforeAll()
     startWiremock()
+    super.beforeAll()
   }
 
   override def afterAll(): Unit = {
@@ -58,43 +59,34 @@ trait ComponentSpecBase extends WordSpecLike with Matchers with GuiceOneServerPe
   }
 
   override def beforeEach(): Unit = {
-    super.beforeEach()
     FeatureSwitch.switches foreach disable
     resetWiremock()
+    super.beforeEach()
   }
 
-  implicit val timeout = 5 seconds
-
   def get[T](uri: String): WSResponse = {
-    Await.result(
-      awaitable = buildClient(uri).get,
-      atMost = timeout
-    )
+    await(buildClient(uri).get)
   }
 
   def post[T](uri: String)(body: T)(implicit writes: Writes[T]): WSResponse = {
-    Await.result(
-      awaitable =
-        buildClient(uri)
-          .withHttpHeaders("Content-Type" -> "application/json")
-          .post(writes.writes(body).toString()),
-      atMost = timeout
+    await(
+      buildClient(uri)
+        .withHttpHeaders("Content-Type" -> "application/json")
+        .post(writes.writes(body).toString())
     )
   }
 
   def put[T](uri: String)(body: T)(implicit writes: Writes[T]): WSResponse = {
-    Await.result(
-      awaitable =
-        buildClient(uri)
-          .withHttpHeaders("Content-Type" -> "application/json")
-          .put(writes.writes(body).toString()),
-      atMost = timeout
+    await(
+      buildClient(uri)
+        .withHttpHeaders("Content-Type" -> "application/json")
+        .put(writes.writes(body).toString())
     )
   }
 
   val baseUrl: String = "/income-tax-subscription-eligibility"
 
-  def buildClient(path: String) = ws.url(s"http://localhost:$port$baseUrl$path").withFollowRedirects(false)
+  def buildClient(path: String): WSRequest = ws.url(s"http://localhost:$port$baseUrl$path").withFollowRedirects(false)
 
   protected lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 

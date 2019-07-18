@@ -23,8 +23,12 @@ sealed trait FeatureSwitch {
 
 object FeatureSwitch {
 
-  val prefix = "feature-switch"
-  val switches: Set[FeatureSwitch] = Set(StubControlListEligible)
+  val prefix: String = "feature-switch"
+  val switches: Set[FeatureSwitch] =
+    Set(
+      StubControlListEligible,
+      UseStubForDesConnection
+    )
 
   def apply(switchName: String): FeatureSwitch = switches find (_.name == switchName) match {
     case Some(switch) => switch
@@ -38,7 +42,12 @@ object FeatureSwitch {
 
 }
 
-object StubControlListEligible extends FeatureSwitch {
-  override val name = s"${FeatureSwitch.prefix}.control-list-eligible"
+case object StubControlListEligible extends FeatureSwitch {
+  override val name: String = s"${FeatureSwitch.prefix}.control-list-eligible"
   override val displayName: String = "Stub eligibility response to always return Eligible"
+}
+
+case object UseStubForDesConnection extends FeatureSwitch {
+  override val name: String = s"${FeatureSwitch.prefix}.use-stub-for-des-connection"
+  override val displayName: String = "Use stub for DES connection"
 }

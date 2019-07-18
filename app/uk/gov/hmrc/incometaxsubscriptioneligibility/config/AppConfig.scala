@@ -20,6 +20,20 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject()(servicesConfig: ServicesConfig) {
+class AppConfig @Inject()(servicesConfig: ServicesConfig) extends FeatureSwitching {
+
+  private def loadConfig(key: String) = servicesConfig.getString(key) //throws RuntimeException(s"Could not find config key '$key'") if key not found
+
+  def desUrl: String =
+    loadConfig(
+      if (isEnabled(UseStubForDesConnection))
+        "microservice.services.des.stub-url"
+      else
+        "microservice.services.des.url"
+    )
+
+  lazy val desAuthorisationToken: String = s"Bearer ${loadConfig("microservice.services.des.authorisation-token")}"
+
+  lazy val desEnvironmentHeader: (String, String) = "Environment" -> loadConfig("microservice.services.des.environment")
 
 }
