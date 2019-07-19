@@ -39,6 +39,6 @@ object FeatureSwitch {
 }
 
 object StubControlListEligible extends FeatureSwitch {
-  override val name = s"${FeatureSwitch.prefix}-control-list-eligible"
+  override val name = s"${FeatureSwitch.prefix}.control-list-eligible"
   override val displayName: String = "Stub eligibility response to always return Eligible"
 }
