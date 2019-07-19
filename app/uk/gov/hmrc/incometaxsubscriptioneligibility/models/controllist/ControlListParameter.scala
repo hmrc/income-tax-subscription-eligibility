@@ -19,7 +19,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListMessages._
 
-sealed trait ControlListParameters {
+sealed trait ControlListParameter {
   val configKey: String
   val ordinal: Int
   val errorMessage: String
@@ -27,248 +27,248 @@ sealed trait ControlListParameters {
   override def toString: String = errorMessage
 }
 
-case object NonResidentCompanyLandlord extends ControlListParameters {
+case object NonResidentCompanyLandlord extends ControlListParameter {
   val configKey: String = "non-resident-company-landlord"
   val ordinal: Int = NON_RESIDENT_COMPANY_LANDLORD
   val errorMessage: String = nonResidentCompanyLandlordMessage
 }
 
-case object StudentLoans extends ControlListParameters {
+case object StudentLoans extends ControlListParameter {
   val configKey: String = "student-loans"
   val ordinal: Int = STUDENT_LOANS
   val errorMessage: String = studentLoansMessage
 }
 
-case object MarriageAllowance extends ControlListParameters {
+case object MarriageAllowance extends ControlListParameter {
   val configKey: String = "marriage-allowance"
   val ordinal: Int = MARRIAGE_ALLOWANCE
   val errorMessage: String = marriageAllowanceMessage
 }
 
-case object EmploymentIncome extends ControlListParameters {
+case object EmploymentIncome extends ControlListParameter {
   val configKey: String = "employment-income"
   val ordinal: Int = EMPLOYMENT_INCOME
   val errorMessage: String = employmentIncomeMessage
 }
 
-case object Compliance extends ControlListParameters {
+case object Compliance extends ControlListParameter {
   val configKey: String = "compliance"
   val ordinal: Int = COMPLIANCE
   val errorMessage: String = complianceMessage
 }
 
-case object ExistingIdmsDebt extends ControlListParameters {
+case object ExistingIdmsDebt extends ControlListParameter {
   val configKey: String = "existing-idms-debt"
   val ordinal: Int = EXISTING_IDMS_DEBT
   val errorMessage: String = existingIdmsDebtMessage
 }
 
-case object BudgetPaymentPlan extends ControlListParameters {
+case object BudgetPaymentPlan extends ControlListParameter {
   val configKey: String = "budget-payment-plan"
   val ordinal: Int = BUDGET_PAYMENT_PLAN
   val errorMessage: String = budgetPaymentPlanMessage
 }
 
-case object Deceased extends ControlListParameters {
+case object Deceased extends ControlListParameter {
   val configKey: String = "deceased"
   val ordinal: Int = DECEASED
   val errorMessage: String = deceasedMessage
 }
 
-case object TimeToPay extends ControlListParameters {
+case object TimeToPay extends ControlListParameter {
   val configKey: String = "time-to-pay"
   val ordinal: Int = TIME_TO_PAY
   val errorMessage: String = timeToPayMessage
 }
 
-case object SelfServeTimeToPay extends ControlListParameters {
+case object SelfServeTimeToPay extends ControlListParameter {
   val configKey: String = "self-serve-time-to-pay"
   val ordinal: Int = SELF_SERVE_TIME_TO_PAY
   val errorMessage: String = selfServeTimeToPayMessage
 }
 
-case object NoRepayment extends ControlListParameters {
+case object NoRepayment extends ControlListParameter {
   val configKey: String = "no-repayment"
   val ordinal: Int = NO_REPAYMENT
   val errorMessage: String = noRepaymentMessage
 }
 
-case object OutstandingReturns extends ControlListParameters {
+case object OutstandingReturns extends ControlListParameter {
   val configKey: String = "outstanding-returns"
   val ordinal: Int = OUTSTANDING_RETURNS
   val errorMessage: String = outstandingReturnsMessage
 }
 
-case object RlsCase extends ControlListParameters {
+case object RlsCase extends ControlListParameter {
   val configKey: String = "rls-case"
   val ordinal: Int = RLS_CASE
   val errorMessage: String = rlsCaseMessage
 }
 
-case object Enforcement extends ControlListParameters {
+case object Enforcement extends ControlListParameter {
   val configKey: String = "enforcement"
   val ordinal: Int = ENFORCEMENT
   val errorMessage: String = enforcementMessage
 }
 
-case object CollectionPriority extends ControlListParameters {
+case object CollectionPriority extends ControlListParameter {
   val configKey: String = "collection-priority"
   val ordinal: Int = COLLECTION_PRIORITY
   val errorMessage: String = collectionPriorityMessage
 }
 
-case object FailureToNotify extends ControlListParameters {
+case object FailureToNotify extends ControlListParameter {
   val configKey: String = "failure-to-notify"
   val ordinal: Int = FAILURE_TO_NOTIFY
   val errorMessage: String = failureToNotifyMessage
 }
 
-case object BankruptInsolvent extends ControlListParameters {
+case object BankruptInsolvent extends ControlListParameter {
   val configKey: String = "bankrupt-insolvent"
   val ordinal: Int = BANKRUPT_INSOLVENT
   val errorMessage: String = bankruptInsolvementMessage
 }
 
-case object BankruptVoluntaryArrangement extends ControlListParameters {
+case object BankruptVoluntaryArrangement extends ControlListParameter {
   val configKey: String = "bankrupt-voluntary-arrangement"
   val ordinal: Int = BANKRUPT_VOLUNTARY_ARRANGEMENT
   val errorMessage: String = bankruptVoluntaryArrangementMessage
 }
 
-case object MultipleSeflEmployed extends ControlListParameters {
+case object MultipleSeflEmployed extends ControlListParameter {
   val configKey: String = "multiple-self-employed"
   val ordinal: Int = MULTIPLE_SELF_EMPLOYED
   val errorMessage: String = multipleSelfEmployedMessage
 }
 
-case object NonResidents extends ControlListParameters {
+case object NonResidents extends ControlListParameter {
   val configKey: String = "non-residents"
   val ordinal: Int = NON_RESIDENTS
   val errorMessage: String = nonResidentsMessage
 }
 
-case object MinistersOfReligion extends ControlListParameters {
+case object MinistersOfReligion extends ControlListParameter {
   val configKey: String = "ministers-of-religion"
   val ordinal: Int = MINISTERS_OF_RELIGION
   val errorMessage: String = ministersOfReligionMessage
 }
 
-case object LloydsUnderwriter extends ControlListParameters {
+case object LloydsUnderwriter extends ControlListParameter {
   val configKey: String = "lloyds-underwriter"
   val ordinal: Int = LLOYDS_UNDERWRITER
   val errorMessage: String = lloydsUnderwriterMessage
 }
 
-case object ClassTwoNationalInsuranceContributionsVoluntary extends ControlListParameters {
+case object ClassTwoNationalInsuranceContributionsVoluntary extends ControlListParameter {
   val configKey: String = "class-two-national-insurance-contributions-voluntary"
   val ordinal: Int = CLASS_TWO_NATIONAL_INSURANCE_CONTRIBUTIONS_VOLUNTARY
   val errorMessage: String = classTwoNationalInsuranceContributionVoluntaryMessage
 }
 
-case object BanksAndBuildingSocietyInterestForeign extends ControlListParameters {
+case object BanksAndBuildingSocietyInterestForeign extends ControlListParameter {
   val configKey: String = "banks-and-building-society-interest-foreign"
   val ordinal: Int = BANKS_AND_BUILDING_SOCIETY_INTEREST_FOREIGN
   val errorMessage: String = banksAndBuildingSocietyInterestForeignMessage
 }
 
-case object DividendsForeign extends ControlListParameters {
+case object DividendsForeign extends ControlListParameter {
   val configKey: String = "dividends-foreign"
   val ordinal: Int = DIVIDENDS_FOREIGN
   val errorMessage: String = dividendsForeignMessage
 }
 
-case object PensionContributions extends ControlListParameters {
+case object PensionContributions extends ControlListParameter {
   val configKey: String = "pension-contributions"
   val ordinal: Int = PENSION_CONTRIBUTIONS
   val errorMessage: String = pensionContributionsMessage
 }
 
-case object PensionIncome extends ControlListParameters {
+case object PensionIncome extends ControlListParameter {
   val configKey: String = "pension-income"
   val ordinal: Int = PENSION_INCOME
   val errorMessage: String = pensionIncomeMessage
 }
 
-case object ConstructionInductionSchemeDeductions extends ControlListParameters {
+case object ConstructionInductionSchemeDeductions extends ControlListParameter {
   val configKey: String = "construction-industry-scheme-deductions"
   val ordinal: Int = CONSTRUCTION_INDUSTRY_SCHEME_DEDUCTIONS
   val errorMessage: String = constructionIndustrySchemeDeductionsMessage
 }
 
-case object Sa101AddionalInformation extends ControlListParameters {
+case object Sa101AddionalInformation extends ControlListParameter {
   val configKey: String = "sa101-additional-information"
   val ordinal: Int = SA101_ADDITIONAL_INFORMATION
   val errorMessage: String = sa101AdditionalInformationMessage
 }
 
-case object AveragingAdjustment extends ControlListParameters {
+case object AveragingAdjustment extends ControlListParameter {
   val configKey: String = "Averaging-adjustment"
   val ordinal: Int = AVERAGING_ADJUSTMENT
   val errorMessage: String = averagingAdjustmentMessage
 }
 
-case object CapitalGainsTax extends ControlListParameters {
+case object CapitalGainsTax extends ControlListParameter {
   val configKey: String = "capital-gains-tax"
   val ordinal: Int = CAPITAL_GAINS_TAX
   val errorMessage: String = capitalGainsTaxMessage
 }
 
-case object ForeignIncome extends ControlListParameters {
+case object ForeignIncome extends ControlListParameter {
   val configKey: String = "foreign-income"
   val ordinal: Int = FOREIGN_INCOME
   val errorMessage: String = foreignIncomeMessage
 }
 
-case object TrustIncome extends ControlListParameters {
+case object TrustIncome extends ControlListParameter {
   val configKey: String = "trust-income"
   val ordinal: Int = TRUST_INCOME
   val errorMessage: String = trustIncomeMessage
 }
 
-case object PartnershipIncome extends ControlListParameters {
+case object PartnershipIncome extends ControlListParameter {
   val configKey: String = "partnership-income"
   val ordinal: Int = PARTNERSHIP_INCOME
   val errorMessage: String = partnershipIncomeMessage
 }
 
-case object HighIncomeChildBenefit extends ControlListParameters {
+case object HighIncomeChildBenefit extends ControlListParameter {
   val configKey: String = "high-income-child-benefit"
   val ordinal: Int = HIGH_INCOME_CHILD_BENEFIT
   val errorMessage: String = highIncomeChildBenefitMessage
 }
 
-case object BlindPersonsAllowance extends ControlListParameters {
+case object BlindPersonsAllowance extends ControlListParameter {
   val configKey: String = "blind-persons-allowance"
   val ordinal: Int = BLIND_PERSONS_ALLOWANCE
   val errorMessage: String = blindPersonsAllowanceMessage
 }
 
-case object FosterCarers extends ControlListParameters {
+case object FosterCarers extends ControlListParameter {
   val configKey: String = "foster-carers"
   val ordinal: Int = FOSTER_CARERS
   val errorMessage: String = fosterCarersMessage
 }
 
-case object MarriedCouplesAllowance extends ControlListParameters {
+case object MarriedCouplesAllowance extends ControlListParameter {
   val configKey: String = "married-couples-allowance"
   val ordinal: Int = MARRIED_COUPLES_ALLOWANCE
   val errorMessage: String = marriedCouplesAllowanceMessage
 }
 
-case object Capacitor extends ControlListParameters {
+case object Capacitor extends ControlListParameter {
   val configKey: String = "capacitor"
   val ordinal: Int = CAPACITOR
   val errorMessage: String = capacitorMessage
 }
 
-case object DisguisedRenumerationInvolvement extends ControlListParameters {
+case object DisguisedRenumerationInvolvement extends ControlListParameter {
   val configKey: String = "disguised-renumeration-involvement"
   val ordinal: Int = DISGUISED_RENUMERATION_INVOLVEMENT
   val errorMessage: String = disguisedRenumerationInvlovementMessage
 }
 
-object ControlListParameters {
-  val getParameterMap: Map[Int, ControlListParameters] =
+object ControlListParameter {
+  val getParameterMap: Map[Int, ControlListParameter] =
     Map(
       NON_RESIDENT_COMPANY_LANDLORD -> NonResidentCompanyLandlord,
       STUDENT_LOANS -> StudentLoans,
