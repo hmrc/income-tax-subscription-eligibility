@@ -17,6 +17,7 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.config
 
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
@@ -36,4 +37,15 @@ class AppConfig @Inject()(servicesConfig: ServicesConfig) extends FeatureSwitchi
 
   lazy val desEnvironmentHeader: (String, String) = "Environment" -> loadConfig("microservice.services.des.environment")
 
+  def loadConfigFromEnv(key:String): Option[String] = {
+    sys.props.get(key) match{
+      case r@Some(result) if result.nonEmpty => r
+      case _ => Some(servicesConfig.getString(key))
+    }
+  }
+  def isEligible(param: ControlListParameter): Boolean =
+    loadConfigFromEnv(s"control-list.${param.configKey}.eligible") match {
+      case Some(bool) => bool.toBoolean
+      case _ => throw new Exception(s"Unknown eligibility config key: ${param.configKey}")
+    }
 }

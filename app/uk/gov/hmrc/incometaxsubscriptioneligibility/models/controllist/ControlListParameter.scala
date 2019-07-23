@@ -202,7 +202,7 @@ case object Sa101AddionalInformation extends ControlListParameter {
 }
 
 case object AveragingAdjustment extends ControlListParameter {
-  val configKey: String = "Averaging-adjustment"
+  val configKey: String = "averaging-adjustment"
   val ordinal: Int = AVERAGING_ADJUSTMENT
   val errorMessage: String = averagingAdjustmentMessage
 }
