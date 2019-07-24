@@ -30,12 +30,13 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSw
 trait ComponentSpecBase extends PlaySpec with GuiceOneServerPerSuite with CustomMatchers
   with WiremockHelper with BeforeAndAfterAll with BeforeAndAfterEach with FeatureSwitching {
 
-  lazy val ws: WSClient = app.injector.instanceOf[WSClient]
-
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+  override lazy val app: Application = new GuiceApplicationBuilder()
     .in(Environment.simple(mode = Mode.Dev))
     .configure(config)
     .build
+
+  lazy val ws: WSClient = app.injector.instanceOf[WSClient]
+
   val mockHost: String = WiremockHelper.wiremockHost
   val mockPort: String = WiremockHelper.wiremockPort.toString
   val mockUrl: String = s"http://$mockHost:$mockPort"
