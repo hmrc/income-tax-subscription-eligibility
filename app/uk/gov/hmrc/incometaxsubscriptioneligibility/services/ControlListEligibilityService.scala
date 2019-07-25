@@ -17,12 +17,34 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitching, StubControlListEligible}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.GetControlListConnector
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
+
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ControlListEligibilityService @Inject() extends FeatureSwitching {
+class ControlListEligibilityService @Inject()(convertConfigValuesService: ConvertConfigValuesService,
+                                              getControlListConnector: GetControlListConnector
+                                             ) extends FeatureSwitching {
 
-  def getEligibilityStatus(sautr: String): Boolean = isEnabled(StubControlListEligible)
+  def getEligibilityStatus(sautr: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] = {
+
+    if (isEnabled(StubControlListEligible)) {
+      Future.successful(true)
+    } else {
+      val eligibilityConfigParameters = convertConfigValuesService.convertConfigValues()
+      getControlListConnector.getControlList(sautr) map {
+        case Right(controlListParameters) =>
+          eligibilityConfigParameters.intersect(controlListParameters).toSeq match {
+            case Nil => true
+            case _ => false
+          }
+        case Left(ControlListDataNotFound) => false
+      }
+    }
+  }
 
 }
 
