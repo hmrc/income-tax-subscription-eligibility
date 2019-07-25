@@ -29,7 +29,7 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase {
 
   s"A GET request on '/eligibility/$testSautr' route" should {
     "return an OK with '{eligible: true}'" when {
-      "the feature switch is on" in {
+      "the feature switch is on" in new Server(defaultApp) {
         enable(StubControlListEligible)
 
         val result = get(s"/eligibility/$testSautr")
@@ -40,9 +40,8 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase {
         )
       }
     }
-
     "return an OK with '{eligible: false}'" when {
-      "the feature switch is off" in {
+      "the feature switch is off" in new Server(defaultApp) {
         // Don't need to disable feature switches as they are disabled by an overridden method in ComponentSpecBase
         val result = get(s"/eligibility/$testSautr")
 
