@@ -3,6 +3,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors
 
 import java.util.UUID
 
+import play.api.Application
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -16,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class GetControlListConnectorISpec extends ComponentSpecBase {
 
-  lazy val connector: GetControlListConnector = app.injector.instanceOf[GetControlListConnector]
+  def connector(implicit app: Application): GetControlListConnector = app.injector.instanceOf[GetControlListConnector]
 
   implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
 
@@ -24,7 +25,7 @@ class GetControlListConnectorISpec extends ComponentSpecBase {
 
   "getControlList" should {
     "return a Right(Set[ControlListParameters])" when {
-      "DES returns a valid control list string" in {
+      "DES returns a valid control list string" in new App(defaultApp) {
         val testControlListString: String = "1000000000000000000000000000000000000000"
         val testJson: JsObject = Json.obj(
           "nino" -> "AA123456A",
@@ -41,7 +42,7 @@ class GetControlListConnectorISpec extends ComponentSpecBase {
     }
 
     "return a Left(ControlListDataNotFound)" when {
-      "DES returns a NOT_FOUND" in {
+      "DES returns a NOT_FOUND" in new App(defaultApp) {
         stubGetControlList(testSautr)(status = NOT_FOUND)
 
         val res = connector.getControlList(testSautr)

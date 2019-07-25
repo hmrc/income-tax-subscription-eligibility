@@ -2,7 +2,7 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
 import com.github.tomakehurst.wiremock.client.WireMock.{findAll, postRequestedFor, urlMatching}
-import org.joda.time.DateTime
+import play.api.Application
 import play.api.http.Status
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, Request}
@@ -14,6 +14,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, 
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
+import org.joda.time.DateTime
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -30,50 +31,50 @@ class AuditServiceISpec extends ComponentSpecBase {
     "microservice.services.des.url" -> mockUrl,
     "auditing.consumer.baseUri.host" -> mockHost,
     "auditing.consumer.baseUri.port" -> mockPort,
-    "appName"                        -> IntegrationTestConstants.testAppName
+    "appName" -> IntegrationTestConstants.testAppName
   )
 
-  val testAuditModel = new AuditModel {
-    override val auditType = IntegrationTestConstants.Audit.testAuditType
-    override val transactionName = IntegrationTestConstants.Audit.testTransactionName
-    override val detail = IntegrationTestConstants.Audit.testDetail
+  val testAuditModel: AuditModel = new AuditModel {
+    override val auditType: String = IntegrationTestConstants.Audit.testAuditType
+    override val transactionName: String = IntegrationTestConstants.Audit.testTransactionName
+    override val detail: Map[String, String] = IntegrationTestConstants.Audit.testDetail
   }
 
-  class Setup {
-    implicit val testFormatsForJodaDateTime = new Reads[DateTime] {
-      override def reads(json: JsValue): JsResult[DateTime] = JsSuccess(DateTime.now)
-    }
-    val service = app.injector.instanceOf[AuditService]
-
-    def dataEventMatcher(testDataEvent: DataEvent, capturedDataEvent: DataEvent):Unit = {
-      testDataEvent.auditSource mustBe capturedDataEvent.auditSource
-      testDataEvent.auditType mustBe capturedDataEvent.auditType
-      capturedDataEvent.eventId.isEmpty mustBe false
-      testDataEvent.tags mustBe capturedDataEvent.tags
-      capturedDataEvent.generatedAt.toString().isEmpty mustBe false
-    }
+  implicit val testFormatsForJodaDateTime = new Reads[DateTime] {
+    override def reads(json: JsValue): JsResult[DateTime] = JsSuccess(DateTime.now)
   }
+
+  def auditService(implicit app: Application): AuditService = app.injector.instanceOf[AuditService]
+
+  def dataEventMatcher(testDataEvent: DataEvent, capturedDataEvent: DataEvent): Unit = {
+    testDataEvent.auditSource mustBe capturedDataEvent.auditSource
+    testDataEvent.auditType mustBe capturedDataEvent.auditType
+    capturedDataEvent.eventId.isEmpty mustBe false
+    testDataEvent.tags mustBe capturedDataEvent.tags
+    capturedDataEvent.generatedAt.toString().isEmpty mustBe false
+  }
+
   val testAuditDataEvent = DataEvent(
     auditSource = IntegrationTestConstants.testAppName,
     auditType = IntegrationTestConstants.Audit.testAuditType,
-    tags =  AuditExtensions.auditHeaderCarrier(hc).toAuditTags(IntegrationTestConstants.Audit.testTransactionName, IntegrationTestConstants.testUrl),
+    tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(IntegrationTestConstants.Audit.testTransactionName, IntegrationTestConstants.testUrl),
     detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(IntegrationTestConstants.Audit.testDetail.toSeq: _*)
   )
 
   "audit" should {
-    "audit a event successfully" in new Setup {
+    "audit a event successfully" in new App(defaultApp) {
       AuditStub.stubAudit(Status.NO_CONTENT)
-      await(service.audit(testAuditModel)) mustBe AuditResult.Success
+      await(auditService.audit(testAuditModel)) mustBe AuditResult.Success
 
-      val jsonSent = Json.parse(findAll(postRequestedFor(urlMatching(AuditStub.auditUri))).get(0).getBodyAsString)
-      val dataEventSent:DataEvent = jsonSent.as[DataEvent](Json.reads[DataEvent])
+      val jsonSent: JsValue = Json.parse(findAll(postRequestedFor(urlMatching(AuditStub.auditUri))).get(0).getBodyAsString)
+      val dataEventSent: DataEvent = jsonSent.as[DataEvent](Json.reads[DataEvent])
       dataEventMatcher(testAuditDataEvent, dataEventSent)
 
     }
-    "not throw an exception if the call via the connector fails" in new Setup {
+    "not throw an exception if the call via the connector fails" in new App(defaultApp) {
       AuditStub.stubAudit(Status.INTERNAL_SERVER_ERROR, Json.obj())
 
-      await(service.audit(testAuditModel)) mustBe AuditResult.Success
+      await(auditService.audit(testAuditModel)) mustBe AuditResult.Success
     }
   }
 }
