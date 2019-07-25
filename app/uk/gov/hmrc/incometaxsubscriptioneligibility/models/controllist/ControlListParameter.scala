@@ -135,7 +135,7 @@ case object BankruptVoluntaryArrangement extends ControlListParameter {
   val errorMessage: String = bankruptVoluntaryArrangementMessage
 }
 
-case object MultipleSeflEmployed extends ControlListParameter {
+case object MultipleSelfEmployed extends ControlListParameter {
   val configKey: String = "multiple-self-employed"
   val ordinal: Int = MULTIPLE_SELF_EMPLOYED
   val errorMessage: String = multipleSelfEmployedMessage
@@ -195,7 +195,7 @@ case object ConstructionInductionSchemeDeductions extends ControlListParameter {
   val errorMessage: String = constructionIndustrySchemeDeductionsMessage
 }
 
-case object Sa101AddionalInformation extends ControlListParameter {
+case object Sa101AdditionalInformation extends ControlListParameter {
   val configKey: String = "sa101-additional-information"
   val ordinal: Int = SA101_ADDITIONAL_INFORMATION
   val errorMessage: String = sa101AdditionalInformationMessage
@@ -288,7 +288,7 @@ object ControlListParameter {
       FAILURE_TO_NOTIFY -> FailureToNotify,
       BANKRUPT_INSOLVENT -> BankruptInsolvent,
       BANKRUPT_VOLUNTARY_ARRANGEMENT -> BankruptVoluntaryArrangement,
-      MULTIPLE_SELF_EMPLOYED -> MultipleSeflEmployed,
+      MULTIPLE_SELF_EMPLOYED -> MultipleSelfEmployed,
       NON_RESIDENTS -> NonResidents,
       MINISTERS_OF_RELIGION -> MinistersOfReligion,
       LLOYDS_UNDERWRITER -> LloydsUnderwriter,
@@ -298,7 +298,7 @@ object ControlListParameter {
       PENSION_CONTRIBUTIONS -> PensionContributions,
       PENSION_INCOME -> PensionIncome,
       CONSTRUCTION_INDUSTRY_SCHEME_DEDUCTIONS -> ConstructionInductionSchemeDeductions,
-      SA101_ADDITIONAL_INFORMATION -> Sa101AddionalInformation,
+      SA101_ADDITIONAL_INFORMATION -> Sa101AdditionalInformation,
       AVERAGING_ADJUSTMENT -> AveragingAdjustment,
       CAPITAL_GAINS_TAX -> CapitalGainsTax,
       FOREIGN_INCOME -> ForeignIncome,
@@ -311,4 +311,17 @@ object ControlListParameter {
       CAPACITOR -> Capacitor,
       DISGUISED_RENUMERATION_INVOLVEMENT -> DisguisedRenumerationInvolvement
     )
+
+  implicit class ControlListHelper(controlListParameters: Set[ControlListParameter]) {
+    private val CONTROL_LIST_FALSE = '0'
+    private val CONTROL_LIST_TRUE = '1'
+
+    val asBinaryString: String = getParameterMap.values.map {
+      case parameter if controlListParameters.contains(parameter) => CONTROL_LIST_TRUE
+      case _ => CONTROL_LIST_FALSE
+    }.mkString
+  }
+
+  val allControlListParameters: Set[ControlListParameter] = ControlListParameter.getParameterMap.values.toSet
+
 }
