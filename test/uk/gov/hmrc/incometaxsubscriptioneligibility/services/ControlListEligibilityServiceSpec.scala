@@ -16,10 +16,23 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.StubControlListEligible
+import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockGetControlListConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.FeatureSwitchingSpec
+import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockConvertConfigValuesService
+import play.api.test.Helpers._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
 
-class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec {
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
+
+class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec with MockGetControlListConnector with MockConvertConfigValuesService {
+
+  object TestControlListEligibilityService extends ControlListEligibilityService(mockConvertConfigValuesService, mockGetControlListConnector)
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val ec: ExecutionContextExecutor = ExecutionContext.global
 
   val testSautr: String = "1234567890"
 
@@ -28,19 +41,103 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec {
       "feature switch is enabled" in {
         enable(StubControlListEligible)
 
-        val testService = new ControlListEligibilityService
-        val result = testService.getEligibilityStatus(testSautr)
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
+
+        result mustBe true
+      }
+    }
+
+    "return true" when {
+      "feature switch is disabled and the user's control list data has no parameters set to true" in {
+        mockConvertConfigValues(Set())
+        mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set())))
+
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
+
+        result mustBe true
+      }
+    }
+
+    "return true" when {
+      "feature switch is disabled and the user's control list data has a parameter set to true" in {
+        mockConvertConfigValues(Set())
+        mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
+
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
+
+        result mustBe true
+      }
+    }
+
+    "return true" when {
+      "feature switch is disabled and the user's control list data has a parameter set to true but is different to the ineligible" in {
+        mockConvertConfigValues(Set(StudentLoans))
+        mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
+
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
+
+        result mustBe true
+      }
+    }
+
+    "return true" when {
+      "feature switch is disabled and the user's control list data has several parameters set to true" in {
+        mockConvertConfigValues(Set())
+        mockGetControlList(testSautr)(hc, ec)(
+          Future.successful(Right(Set(
+              NonResidentCompanyLandlord,
+              StudentLoans,
+              HighIncomeChildBenefit,
+              MarriageAllowance
+          )))
+        )
+
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
+
+        result mustBe true
+      }
+    }
+
+    "return true" when {
+      "feature switch is disabled and the user's control list data has several parameters set to true which are different to the ineligible config values" in {
+        mockConvertConfigValues(Set(
+          MinistersOfReligion,
+          FosterCarers,
+          ForeignIncome,
+          Deceased
+        ))
+        mockGetControlList(testSautr)(hc, ec)(
+          Future.successful(Right(Set(
+              NonResidentCompanyLandlord,
+              StudentLoans,
+              HighIncomeChildBenefit,
+              MarriageAllowance
+          )))
+        )
+
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
 
         result mustBe true
       }
     }
 
     "return false" when {
-      "feature switch is disabled" in {
-        // Don't need to disable feature switches as they are disabled by an overridden method in FeatureSwitchingSpec
+      "feature switch is disabled and the user's control list data is ineligible" in {
+        mockConvertConfigValues(Set(NonResidentCompanyLandlord))
+        mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
 
-        val testService = new ControlListEligibilityService
-        val result = testService.getEligibilityStatus(testSautr)
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
+
+        result mustBe false
+      }
+    }
+
+    "return false" when {
+      "feature switch is disabled and the user's control list data is not found" in {
+        mockConvertConfigValues(Set())
+        mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(ControlListDataNotFound)))
+
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
 
         result mustBe false
       }

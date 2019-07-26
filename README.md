@@ -11,7 +11,7 @@ This code is open source software licensed under the [Apache 2.0 License]("http:
 
 | Route               | Identifier                                         | Description                                 |
 | ------------------- | -------------------------------------------------- | ------------------------------------------- |
-| /eligibility/:sautr | SA UTR (Self Assessment Unique Taxpayer Reference) | Returns the control list for a given SA UTR |
+| /eligibility/:sautr | SA UTR (Self Assessment Unique Taxpayer Reference) | Returns OK and json containing eligibility status for a given SA UTR |
 
 ## Running the service
 

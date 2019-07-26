@@ -29,9 +29,11 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitch, Featu
 trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   with WiremockHelper with BeforeAndAfterAll with BeforeAndAfterEach with FeatureSwitching {
 
-  def defaultApp: Application = new GuiceApplicationBuilder()
+  def defaultApp: Application = app(Map.empty)
+
+  def app(extraConfig: Map[String, String]): Application = new GuiceApplicationBuilder()
     .in(Environment.simple(mode = Mode.Dev))
-    .configure(config)
+    .configure(config ++ extraConfig)
     .build
 
   implicit def ws(implicit app: Application): WSClient = app.injector.instanceOf[WSClient]

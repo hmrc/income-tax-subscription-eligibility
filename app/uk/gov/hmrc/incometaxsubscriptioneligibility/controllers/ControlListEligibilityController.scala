@@ -29,13 +29,15 @@ class ControlListEligibilityController @Inject()(cc: ControllerComponents,
                                                  controlListEligibilityService: ControlListEligibilityService
                                                 )(implicit ec: ExecutionContext) extends BackendController(cc) {
 
-  def getEligibilityStatus(sautr: String): Action[AnyContent] = Action {
-    implicit request =>
-
+  def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async {
+    implicit request => {
       val key: String = "eligible"
-      val eligible: Boolean = controlListEligibilityService.getEligibilityStatus(sautr)
 
-      Ok(Json.obj(key -> eligible))
+      controlListEligibilityService.getEligibilityStatus(sautr) map {
+        eligibilityStatus => Ok(Json.obj(key -> eligibilityStatus))
+      }
+
+    }
   }
 
 }

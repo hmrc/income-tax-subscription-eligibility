@@ -22,36 +22,39 @@ import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockControlListEligibilityService
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 
-class ControlListEligibilityControllerSpec extends PlaySpec
-  with MockControlListEligibilityService {
+class ControlListEligibilityControllerSpec extends PlaySpec with MockControlListEligibilityService {
+
+  object TestControlListEligibilityController extends ControlListEligibilityController(stubControllerComponents(), mockControlListEligibilityService)
 
   val testSautr = "1234567890"
   val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val ec: ExecutionContextExecutor = ExecutionContext.global
+  val eligibleKey: String = "eligible"
 
   "getEligibilityStatus" should {
     "return OK with body '{eligible: true}'" in {
-      mockIsEligible(testSautr)(isEligible = true)
+      mockIsEligible(testSautr)(hc, ec)(isEligible = Future.successful(true))
 
-      val controller = new ControlListEligibilityController(stubControllerComponents(), mockControlListEligibilityService)
-      val result = controller.getEligibilityStatus(testSautr)(fakeRequest)
+      val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
-      status(result) mustBe Status.OK
-      contentAsJson(result) mustBe Json.obj("eligible" -> true)
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.obj(eligibleKey -> true)
     }
 
     "return OK with body '{eligible: false}'" in {
-      mockIsEligible(testSautr)(isEligible = false)
+      mockIsEligible(testSautr)(hc, ec)(isEligible = Future.successful(false))
 
-      val controller = new ControlListEligibilityController(stubControllerComponents(), mockControlListEligibilityService)
-      val result = controller.getEligibilityStatus(testSautr)(fakeRequest)
+      val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
-      status(result) mustBe Status.OK
-      contentAsJson(result) mustBe Json.obj("eligible" -> false)
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.obj(eligibleKey -> false)
     }
   }
 
