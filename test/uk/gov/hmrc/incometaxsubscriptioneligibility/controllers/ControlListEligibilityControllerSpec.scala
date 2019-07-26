@@ -17,7 +17,6 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 
 import org.scalatestplus.play.PlaySpec
-import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
