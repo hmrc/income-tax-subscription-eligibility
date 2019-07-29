@@ -17,23 +17,24 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks
 
 import org.scalamock.handlers.CallHandler4
-import org.scalamock.scalatest.AsyncMockFactory
+import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibilityService
+import uk.gov.hmrc.incometaxsubscriptioneligibility.services.{AuditModel, AuditService}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait MockControlListEligibilityService extends AsyncMockFactory {
+trait MockAuditService extends MockFactory {
 
-  val mockControlListEligibilityService: ControlListEligibilityService = mock[ControlListEligibilityService]
+  val mockAuditService: AuditService = mock[AuditService]
 
-  def mockIsEligible(sautr: String)
-                    (hc: HeaderCarrier, ec: ExecutionContext, request: Request[_])
-                    (isEligible: Future[Boolean]): CallHandler4[String, HeaderCarrier, ExecutionContext, Request[_], Future[Boolean]] = {
-    (mockControlListEligibilityService.getEligibilityStatus(_: String)(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
-      .expects(sautr, hc, ec, request)
-      .returning(isEligible)
+  def mockAudit(audit: AuditModel)
+               (hc: HeaderCarrier, ec: ExecutionContext, request: Request[_])
+               (result: Future[AuditResult]): CallHandler4[AuditModel, HeaderCarrier, ExecutionContext, Request[_], Future[AuditResult]] = {
+    (mockAuditService.audit(_: AuditModel)(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
+      .expects(audit, hc, ec, request)
+      .returning(result)
   }
 
 }

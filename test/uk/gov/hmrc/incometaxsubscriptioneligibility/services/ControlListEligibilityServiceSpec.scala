@@ -16,23 +16,29 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
+import play.api.mvc.Request
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.StubControlListEligible
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockGetControlListConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.FeatureSwitchingSpec
-import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockConvertConfigValuesService
-import play.api.test.Helpers._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.{MockAuditService, MockConvertConfigValuesService}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
-class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec with MockGetControlListConnector with MockConvertConfigValuesService {
+class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
+  with MockGetControlListConnector with MockConvertConfigValuesService with MockAuditService {
 
-  object TestControlListEligibilityService extends ControlListEligibilityService(mockConvertConfigValuesService, mockGetControlListConnector)
+  object TestControlListEligibilityService extends ControlListEligibilityService(mockConvertConfigValuesService, mockGetControlListConnector, mockAuditService)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global
+  implicit val request: Request[_] = FakeRequest()
 
   val testSautr: String = "1234567890"
 
@@ -126,6 +132,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec with MockGe
         mockConvertConfigValues(Set(NonResidentCompanyLandlord))
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
 
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(testSautr, Seq(NonResidentCompanyLandlord.errorMessage))
+        mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
+
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
 
         result mustBe false
@@ -136,6 +145,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec with MockGe
       "feature switch is disabled and the user's control list data is not found" in {
         mockConvertConfigValues(Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(ControlListDataNotFound)))
+
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(testSautr, Seq("Control list data not found"))
+        mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
 
