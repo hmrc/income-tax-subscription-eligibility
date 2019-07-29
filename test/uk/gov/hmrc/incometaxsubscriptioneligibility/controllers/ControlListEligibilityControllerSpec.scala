@@ -39,7 +39,7 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
 
   "getEligibilityStatus" should {
     "return OK with body '{eligible: true}'" in {
-      mockIsEligible(testSautr)(hc, ec)(isEligible = Future.successful(true))
+      mockIsEligible(testSautr)(hc, ec, fakeRequest)(isEligible = Future.successful(true))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
@@ -48,7 +48,7 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
     }
 
     "return OK with body '{eligible: false}'" in {
-      mockIsEligible(testSautr)(hc, ec)(isEligible = Future.successful(false))
+      mockIsEligible(testSautr)(hc, ec, fakeRequest)(isEligible = Future.successful(false))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 

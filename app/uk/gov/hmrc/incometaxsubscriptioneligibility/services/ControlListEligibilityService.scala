@@ -17,34 +17,42 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
 import javax.inject.{Inject, Singleton}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.GetControlListConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ControlListEligibilityService @Inject()(convertConfigValuesService: ConvertConfigValuesService,
-                                              getControlListConnector: GetControlListConnector
+                                              getControlListConnector: GetControlListConnector,
+                                              auditService: AuditService
                                              ) extends FeatureSwitching {
 
-  def getEligibilityStatus(sautr: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] = {
+  def getEligibilityStatus(sautr: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[Boolean] = {
+
+    def auditEligibilityFailureReason(reasons: Seq[String]) : Future[AuditResult] = {
+      val audit: EligibilityAuditModel = EligibilityAuditModel(sautr, reasons)
+      auditService.audit(audit)
+    }
 
     if (isEnabled(StubControlListEligible)) {
       Future.successful(true)
     } else {
       val eligibilityConfigParameters = convertConfigValuesService.convertConfigValues()
-      getControlListConnector.getControlList(sautr) map {
+      getControlListConnector.getControlList(sautr) flatMap {
         case Right(controlListParameters) =>
           eligibilityConfigParameters.intersect(controlListParameters).toSeq match {
-            case Nil => true
-            case _ => false
+            case Nil => Future.successful(true)
+            case reasons => auditEligibilityFailureReason(reasons.map(_.errorMessage)).map(_ => false)
           }
-        case Left(ControlListDataNotFound) => false
+        case Left(ControlListDataNotFound) => auditEligibilityFailureReason(Seq("Control list data not found")).map(_ => false)
       }
     }
   }
 
 }
-
