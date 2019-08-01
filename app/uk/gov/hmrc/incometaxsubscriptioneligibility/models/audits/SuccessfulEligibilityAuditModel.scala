@@ -23,6 +23,6 @@ case class SuccessfulEligibilityAuditModel(sautr: String) extends AuditModel {
   val transactionName: String = "ITSAControlListRequest"
   val detail: Map[String, String] = Map(
     "sautr" -> sautr,
-    "message" -> "user is eligible"
+    "isSuccess" -> "true"
   )
 }
