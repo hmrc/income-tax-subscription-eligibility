@@ -24,7 +24,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.config.StubControlListEligib
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockGetControlListConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.FeatureSwitchingSpec
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.{EligibilityAuditModel, SuccessfulEligibilityAuditModel}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.{MockAuditService, MockConvertConfigValuesService}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
@@ -42,6 +42,8 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
 
   val testSautr: String = "1234567890"
 
+  val successfulAuditModel: SuccessfulEligibilityAuditModel = SuccessfulEligibilityAuditModel(testSautr)
+
   "getEligibilityStatus" should {
     "return true" when {
       "feature switch is enabled" in {
@@ -57,6 +59,8 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
       "feature switch is disabled and the user's control list data has no parameters set to true" in {
         mockConvertConfigValues(Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set())))
+        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
+
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
 
@@ -68,6 +72,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
       "feature switch is disabled and the user's control list data has a parameter set to true" in {
         mockConvertConfigValues(Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
+        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
 
@@ -79,6 +84,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
       "feature switch is disabled and the user's control list data has a parameter set to true but is different to the ineligible" in {
         mockConvertConfigValues(Set(StudentLoans))
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
+        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
 
@@ -97,6 +103,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
               MarriageAllowance
           )))
         )
+        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
 
@@ -120,6 +127,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
               MarriageAllowance
           )))
         )
+        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr))
 
