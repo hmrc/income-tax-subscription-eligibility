@@ -38,7 +38,7 @@ object GetControlListHttpParser {
           case JsSuccess(controlList, _) => parseControlList(controlList)
           case _ => throw new InternalServerException("Invalid Control List JSON from DES")
         }
-        case BAD_REQUEST => throw new InternalServerException("Invalid UTR submitted to DES")
+        case BAD_REQUEST => throw new InternalServerException(s"Invalid UTR submitted to DES, message: '${response.body}'")
         case NOT_FOUND => Left(ControlListDataNotFound)
         case _ => throw new InternalServerException(s"DES returned the following error code: '${response.status}' and message: '${response.body}'")
       }
