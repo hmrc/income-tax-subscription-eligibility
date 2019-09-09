@@ -45,6 +45,8 @@ trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   def config: Map[String, String] = Map(
     "auditing.enabled" -> "false",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
+    "microservice.services.auth.host" -> mockHost,
+    "microservice.services.auth.port" -> mockPort,
     "microservice.services.base.host" -> mockHost,
     "microservice.services.base.port" -> mockPort,
     "microservice.services.des.url" -> mockUrl
