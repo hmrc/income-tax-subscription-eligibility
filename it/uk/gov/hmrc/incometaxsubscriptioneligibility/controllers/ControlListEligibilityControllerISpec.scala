@@ -20,6 +20,7 @@ import play.api.http.Status._
 import play.api.libs.json.{JsObject, Json}
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.StubControlListEligible
+import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.AuthStub.stubAuth
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.DesControlListApiStub.stubGetControlList
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, ControlListConfigTestHelper}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter._
@@ -34,6 +35,7 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
   s"A GET request on '/eligibility/$testSautr' route" should {
     "return an OK with '{eligible: true}'" when {
       "the feature switch is enabled" in new Server(defaultApp) {
+        stubAuth(OK, Json.obj())
         enable(StubControlListEligible)
 
         val result: WSResponse = get(s"/eligibility/$testSautr")
@@ -52,9 +54,10 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
         val testDesJson: JsObject = Json.obj(
           "nino" -> "AA123456A",
           "year" -> "2019",
-        "controlListInformation" -> testControlListString
+          "controlListInformation" -> testControlListString
         )
 
+        stubAuth(OK, Json.obj())
         stubGetControlList(testSautr)(OK, testDesJson)
 
         val result: WSResponse = get(s"/eligibility/$testSautr")
@@ -70,84 +73,88 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
       "the feature switch is disabled and the returned control list has no parameters set to true and all config values are set to ineligible" in
         new Server(app(extraConfig = toConfigList(testAllFalse))) {
 
-        val testControlListString: String = ControlListHelper(Set()).asBinaryString
+          val testControlListString: String = ControlListHelper(Set()).asBinaryString
 
-        val testDesJson: JsObject = Json.obj(
-          "nino" -> "AA123456A",
-          "year" -> "2019",
-        "controlListInformation" -> testControlListString
-        )
+          val testDesJson: JsObject = Json.obj(
+            "nino" -> "AA123456A",
+            "year" -> "2019",
+            "controlListInformation" -> testControlListString
+          )
 
-        stubGetControlList(testSautr)(OK, testDesJson)
+          stubAuth(OK, Json.obj())
+          stubGetControlList(testSautr)(OK, testDesJson)
 
-        val result: WSResponse = get(s"/eligibility/$testSautr")
+          val result: WSResponse = get(s"/eligibility/$testSautr")
 
-        result must have(
-          httpStatus(OK),
-          jsonBodyAs(testJson(eligible = true))
-        )
-      }
+          result must have(
+            httpStatus(OK),
+            jsonBodyAs(testJson(eligible = true))
+          )
+        }
     }
 
     "return an OK with '{eligible: false}'" when {
       "the feature switch is disabled and the returned control list has one parameter set to true and one config values is ineligible" in
         new Server(app(extraConfig = toConfigList(Map(NonResidentCompanyLandlord -> false)))) {
 
-        val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
+          val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
 
-        val testDesJson: JsObject = Json.obj(
-          "nino" -> "AA123456A",
-          "year" -> "2019",
-        "controlListInformation" -> testControlListString
-        )
+          val testDesJson: JsObject = Json.obj(
+            "nino" -> "AA123456A",
+            "year" -> "2019",
+            "controlListInformation" -> testControlListString
+          )
 
-        stubGetControlList(testSautr)(OK, testDesJson)
+          stubAuth(OK, Json.obj())
+          stubGetControlList(testSautr)(OK, testDesJson)
 
-        val result: WSResponse = get(s"/eligibility/$testSautr")
+          val result: WSResponse = get(s"/eligibility/$testSautr")
 
-        result must have(
-          httpStatus(OK),
-          jsonBodyAs(testJson(eligible = false))
-        )
-      }
+          result must have(
+            httpStatus(OK),
+            jsonBodyAs(testJson(eligible = false))
+          )
+        }
     }
 
     "return an OK with '{eligible: false}'" when {
       "the feature switch is disabled and the returned control list has several parameters set to true and the matching config values are ineligible" in
         new Server(app(extraConfig = toConfigList(
-            Map(
-              NonResidentCompanyLandlord -> false,
-              StudentLoans -> false,
-              MinistersOfReligion -> false,
-              DividendsForeign -> false)
+          Map(
+            NonResidentCompanyLandlord -> false,
+            StudentLoans -> false,
+            MinistersOfReligion -> false,
+            DividendsForeign -> false)
         ))) {
 
-        val testControlListString: String = ControlListHelper(Set(
-          NonResidentCompanyLandlord,
-          StudentLoans,
-          MinistersOfReligion,
-          DividendsForeign
-        )).asBinaryString
+          val testControlListString: String = ControlListHelper(Set(
+            NonResidentCompanyLandlord,
+            StudentLoans,
+            MinistersOfReligion,
+            DividendsForeign
+          )).asBinaryString
 
-        val testDesJson: JsObject = Json.obj(
-          "nino" -> "AA123456A",
-          "year" -> "2019",
-        "controlListInformation" -> testControlListString
-        )
+          val testDesJson: JsObject = Json.obj(
+            "nino" -> "AA123456A",
+            "year" -> "2019",
+            "controlListInformation" -> testControlListString
+          )
 
-        stubGetControlList(testSautr)(OK, testDesJson)
+          stubAuth(OK, Json.obj())
+          stubGetControlList(testSautr)(OK, testDesJson)
 
-        val result: WSResponse = get(s"/eligibility/$testSautr")
+          val result: WSResponse = get(s"/eligibility/$testSautr")
 
-        result must have(
-          httpStatus(OK),
-          jsonBodyAs(testJson(eligible = false))
-        )
-      }
+          result must have(
+            httpStatus(OK),
+            jsonBodyAs(testJson(eligible = false))
+          )
+        }
     }
 
     "return an OK with '{eligible: false}'" when {
       "the feature switch is disabled and no control list was found" in new Server(defaultApp) {
+        stubAuth(OK, Json.obj())
         stubGetControlList(testSautr)(NOT_FOUND)
 
         val result: WSResponse = get(s"/eligibility/$testSautr")

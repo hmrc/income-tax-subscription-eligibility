@@ -29,8 +29,8 @@ trait MockControlListEligibilityService extends AsyncMockFactory {
   val mockControlListEligibilityService: ControlListEligibilityService = mock[ControlListEligibilityService]
 
   def mockIsEligible(sautr: String)
-                    (hc: HeaderCarrier, ec: ExecutionContext, request: Request[_])
-                    (isEligible: Future[Boolean]): CallHandler4[String, HeaderCarrier, ExecutionContext, Request[_], Future[Boolean]] = {
+                    (isEligible: Future[Boolean])
+                    (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): CallHandler4[String, HeaderCarrier, ExecutionContext, Request[_], Future[Boolean]] = {
     (mockControlListEligibilityService.getEligibilityStatus(_: String)(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
       .expects(sautr, hc, ec, request)
       .returning(isEligible)

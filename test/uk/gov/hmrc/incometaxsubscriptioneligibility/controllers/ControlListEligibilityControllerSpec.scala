@@ -21,25 +21,29 @@ import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockAuthConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockControlListEligibilityService
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 
-class ControlListEligibilityControllerSpec extends PlaySpec with MockControlListEligibilityService {
+class ControlListEligibilityControllerSpec extends PlaySpec with MockControlListEligibilityService with MockAuthConnector {
 
-  object TestControlListEligibilityController extends ControlListEligibilityController(stubControllerComponents(), mockControlListEligibilityService)
+  object TestControlListEligibilityController
+    extends ControlListEligibilityController(stubControllerComponents(), mockControlListEligibilityService, mockAuthConnector)
 
   val testSautr = "1234567890"
-  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
+  implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global
   val eligibleKey: String = "eligible"
 
   "getEligibilityStatus" should {
     "return OK with body '{eligible: true}'" in {
-      mockIsEligible(testSautr)(hc, ec, fakeRequest)(isEligible = Future.successful(true))
+      mockAuthorise(retrievals = EmptyRetrieval)(Future.successful(EmptyRetrieval))
+      mockIsEligible(testSautr)(isEligible = Future.successful(true))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
@@ -48,7 +52,8 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
     }
 
     "return OK with body '{eligible: false}'" in {
-      mockIsEligible(testSautr)(hc, ec, fakeRequest)(isEligible = Future.successful(false))
+      mockAuthorise(retrievals = EmptyRetrieval)(Future.successful(EmptyRetrieval))
+      mockIsEligible(testSautr)(isEligible = Future.successful(false))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 

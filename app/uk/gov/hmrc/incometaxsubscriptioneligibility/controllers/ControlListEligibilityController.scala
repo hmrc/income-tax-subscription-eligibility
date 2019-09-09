@@ -19,6 +19,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibilityService
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
@@ -26,18 +27,20 @@ import scala.concurrent.ExecutionContext
 
 @Singleton()
 class ControlListEligibilityController @Inject()(cc: ControllerComponents,
-                                                 controlListEligibilityService: ControlListEligibilityService
-                                                )(implicit ec: ExecutionContext) extends BackendController(cc) {
+                                                 controlListEligibilityService: ControlListEligibilityService,
+                                                 val authConnector: AuthConnector
+                                                )(implicit ec: ExecutionContext) extends BackendController(cc) with AuthorisedFunctions {
 
   def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async {
-    implicit request => {
-      val key: String = "eligible"
+    implicit request =>
+      authorised() {
+        val key: String = "eligible"
 
-      controlListEligibilityService.getEligibilityStatus(sautr) map {
-        eligibilityStatus => Ok(Json.obj(key -> eligibilityStatus))
+        controlListEligibilityService.getEligibilityStatus(sautr) map {
+          eligibilityStatus => Ok(Json.obj(key -> eligibilityStatus))
+        }
+
       }
-
-    }
   }
 
 }
