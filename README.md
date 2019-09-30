@@ -26,5 +26,5 @@ This code is open source software licensed under the [Apache 2.0 License]("http:
 You can either:
 * run all the income tax subscription services using `sm --start ITSA_SUBSC_ALL`
 * run this service on its own using `sm --start INCOME_TAX_SUBSCRIPTION_ELIGIBILITY`
-
+ 
 To stop the service(s), use either of the above commands with '--stop' in place of '--start'
