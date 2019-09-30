@@ -16,13 +16,18 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits
 
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.AuditModel
 
-case class EligibilityAuditModel(sautr: String, reasons: Seq[String]) extends AuditModel {
+case class EligibilityAuditModel(eligibilityResult: Boolean, sautr: String, reasons: Seq[ControlListParameter] = Seq.empty) extends AuditModel {
+
+  private val formattedReasons = if(reasons.isEmpty) Map() else Map("failureReasons" -> reasons.map(_.errorMessage).mkString(", "))
+
   val auditType: String = "mtdITSAControlList"
   val transactionName: String = "ITSAControlListRequest"
   val detail: Map[String, String] = Map(
-    "sautr" -> sautr,
-    "failureReasons" -> reasons.mkString(", ")
-  )
+    "isSuccess" -> eligibilityResult.toString,
+    "saUtr" -> sautr) ++
+    formattedReasons
+
 }
