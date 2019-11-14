@@ -41,8 +41,8 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
   val eligibleKey: String = "eligible"
 
   "getEligibilityStatus" should {
-    "return OK with body '{eligible: true}'" in {
-      mockAuthorise(retrievals = EmptyRetrieval)(Future.successful(EmptyRetrieval))
+    "return OK with body 'eligible: true'" in {
+      mockAuthorise(retrievals = EmptyRetrieval)(Future.successful({}))
       mockIsEligible(testSautr)(isEligible = Future.successful(true))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
@@ -51,8 +51,8 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
       contentAsJson(result) mustBe Json.obj(eligibleKey -> true)
     }
 
-    "return OK with body '{eligible: false}'" in {
-      mockAuthorise(retrievals = EmptyRetrieval)(Future.successful(EmptyRetrieval))
+    "return OK with body 'eligible: false'" in {
+      mockAuthorise(retrievals = EmptyRetrieval)(Future.successful({}))
       mockIsEligible(testSautr)(isEligible = Future.successful(false))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
@@ -61,5 +61,4 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
       contentAsJson(result) mustBe Json.obj(eligibleKey -> false)
     }
   }
-
 }

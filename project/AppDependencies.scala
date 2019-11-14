@@ -9,7 +9,7 @@ object AppDependencies {
 
   val test = Seq(
     "com.typesafe.play" %% "play-test" % current % "test",
-    "org.scalamock" %% "scalamock" % "4.3.0" % "test",
+    "org.scalamock" %% "scalamock" % "4.4.0" % "test",
     "org.pegdown" % "pegdown" % "1.6.0" % "test, it",
     "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test, it",
     "com.github.tomakehurst" % "wiremock-jre8" % "2.23.2" % "it"
