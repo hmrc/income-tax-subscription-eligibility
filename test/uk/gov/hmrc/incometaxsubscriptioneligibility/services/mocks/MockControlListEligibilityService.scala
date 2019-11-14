@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks
 
-import org.scalamock.handlers.CallHandler4
 import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
@@ -29,11 +28,13 @@ trait MockControlListEligibilityService extends MockFactory {
   val mockControlListEligibilityService: ControlListEligibilityService = mock[ControlListEligibilityService]
 
   def mockIsEligible(sautr: String)
-                    (isEligible: Future[Boolean])
-                    (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): CallHandler4[String, HeaderCarrier, ExecutionContext, Request[_], Future[Boolean]] = {
-    (mockControlListEligibilityService.getEligibilityStatus(_: String)(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
-      .expects(sautr, *, ec, request)
+                    (isEligible: Future[Boolean], isAgent: Boolean)
+                    (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]) = {
+    (mockControlListEligibilityService.getEligibilityStatus(_: String, _: Boolean)(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
+      .expects(sautr, isAgent, *, ec, request)
       .returning(isEligible)
   }
+
+
 
 }

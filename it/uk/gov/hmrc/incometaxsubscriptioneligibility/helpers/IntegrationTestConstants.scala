@@ -16,14 +16,20 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.helpers
 
+import uk.gov.hmrc.domain.Generator
+
 object IntegrationTestConstants {
 
   val testAppName = "testAppName"
   val testUrl = "/testUrl"
 
+
   object Audit {
     val testAuditType = "testAuditType"
     val testTransactionName = "testTransactionName"
     val testDetail = Map("foo" -> "bar")
+    val agentServiceIdentifierKey = "AgentReferenceNumber"
+    val agentServiceEnrolmentName = "HMRC-AS-AGENT"
+    lazy val testARN = new Generator().nextAtedUtr.utr //Not a valid ARN, for test purposes only
   }
 }

@@ -17,14 +17,31 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import play.api.libs.json.Writes
+import play.api.libs.json.{JsObject, Json, Writes}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.IntegrationTestConstants.Audit._
 
 object AuthStub extends WireMockMethods {
   val authority = "/auth/authorise"
 
   def stubAuth[T](status: Int, body: T)(implicit writes: Writes[T]): StubMapping = {
     when(method = POST, uri = authority)
-      .thenReturn(status = status, body = writes.writes(body))
+      .thenReturn(status = status, body = successfulAuthResponse(arnEnrolment))
   }
+
+  private val arnEnrolment = Json.obj(
+    "key" -> agentServiceEnrolmentName,
+    "identifiers" -> Json.arr(
+      Json.obj(
+        "key" -> agentServiceIdentifierKey,
+        "value" -> testARN
+      )
+    )
+  )
+
+  private def successfulAuthResponse(enrolments: JsObject*): JsObject =
+  //Written out manually as the json writer for Enrolment doesn't match the reader
+    Json.obj(
+      "allEnrolments" -> enrolments
+    )
 
 }

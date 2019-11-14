@@ -24,12 +24,13 @@ class EligibilityAuditModelSpec extends PlaySpec {
 
 
   "The Audit Eligibility model" should {
-    val expectedDetailSuccess = Map("isSuccess" -> "true", "saUtr" -> "1234567890")
-    val expectedDetailFailure = Map("isSuccess" -> "false", "saUtr" -> "1234567890", "failureReasons" -> "Non Resident Company Landlord, Student Loans, Transfers/receives Marriage Allowance")
+    val expectedDetailSuccess = Map("isSuccess" -> "true", "saUtr" -> "1234567890","isAgent" -> "false")
+    val expectedDetailFailure = Map("isSuccess" -> "false", "saUtr" -> "1234567890","isAgent" -> "false",
+      "failureReasons" -> "Non Resident Company Landlord, Student Loans, Transfers/receives Marriage Allowance")
 
     "Have detail with a utr and isSuccess set" when {
       "the audit event is for a success" in {
-        val result = EligibilityAuditModel(true, "1234567890")
+        val result = EligibilityAuditModel(true, "1234567890", false)
         result.auditType mustBe "mtdITSAControlList"
         result.detail mustBe expectedDetailSuccess
       }
@@ -40,7 +41,7 @@ class EligibilityAuditModelSpec extends PlaySpec {
           ControlListParameter.getParameterMap(STUDENT_LOANS),
           ControlListParameter.getParameterMap(MARRIAGE_ALLOWANCE))
 
-        val result = EligibilityAuditModel(false, "1234567890", seqOfErrors)
+        val result = EligibilityAuditModel(false, "1234567890", false, seqOfErrors)
         result.auditType mustBe "mtdITSAControlList"
         result.detail mustBe expectedDetailFailure
       }

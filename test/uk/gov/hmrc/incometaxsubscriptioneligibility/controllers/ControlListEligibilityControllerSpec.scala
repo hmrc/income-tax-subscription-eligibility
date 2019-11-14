@@ -21,7 +21,10 @@ import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.{Enrolment, Enrolments}
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockAuthConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockControlListEligibilityService
@@ -42,8 +45,8 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
 
   "getEligibilityStatus" should {
     "return OK with body 'eligible: true'" in {
-      mockAuthorise(retrievals = EmptyRetrieval)(Future.successful({}))
-      mockIsEligible(testSautr)(isEligible = Future.successful(true))
+      mockIsEligible(testSautr)(isEligible = Future.successful(true), isAgent = false)
+      mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
@@ -52,13 +55,23 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
     }
 
     "return OK with body 'eligible: false'" in {
-      mockAuthorise(retrievals = EmptyRetrieval)(Future.successful({}))
-      mockIsEligible(testSautr)(isEligible = Future.successful(false))
+      mockIsEligible(testSautr)(isEligible = Future.successful(false), isAgent = false)
+      mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
       status(result) mustBe OK
       contentAsJson(result) mustBe Json.obj(eligibleKey -> false)
+    }
+
+    "return OK with body 'eligible: true' with an Agent" in {
+      mockIsEligible(testSautr)(isEligible = Future.successful(true), isAgent = true)
+      mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set(Enrolment("HMRC-AS-AGENT")))))
+
+      val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.obj(eligibleKey -> true)
     }
   }
 }

@@ -33,7 +33,7 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
                                               auditService: AuditService
                                              ) extends FeatureSwitching {
 
-  def getEligibilityStatus(sautr: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[Boolean] = {
+  def getEligibilityStatus(sautr: String, isAgent: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[Boolean] = {
 
     if (isEnabled(StubControlListEligible)) {
       Future.successful(true)
@@ -43,14 +43,14 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
         case Right(controlListParameters) =>
           eligibilityConfigParameters.intersect(controlListParameters).toSeq match {
             case Nil =>
-              auditService.audit(EligibilityAuditModel(eligibilityResult = true, sautr))
+              auditService.audit(EligibilityAuditModel(eligibilityResult = true, sautr, isAgent))
                 .map(_ => true)
             case reasons =>
-              auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, reasons))
+              auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, isAgent, reasons))
                 .map(_ => false)
           }
         case Left(ControlListDataNotFound) =>
-          auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr))
+          auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, isAgent))
             .map(_ => false)
       }
     }
