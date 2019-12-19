@@ -17,8 +17,8 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, ControlListConfigTestHelper}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.{ControlListParameter, StudentLoans}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter.allControlListParameters
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.{ControlListParameter, StudentLoans}
 
 class ConvertConfigValuesServicesISpec extends ComponentSpecBase with ControlListConfigTestHelper {
 
@@ -57,24 +57,24 @@ class ConvertConfigValuesServicesISpec extends ComponentSpecBase with ControlLis
       "a control list parameter with all values as true and one an incorrect parameter" in
         new Server(app(extraConfig = toConfigList(testAllTrue).updated("control-list.some-incorrect-param.eligible", "false"))) {
 
-        val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
+          val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
 
-        val result: Set[ControlListParameter] = convertConfigValuesService.convertConfigValues()
+          val result: Set[ControlListParameter] = convertConfigValuesService.convertConfigValues()
 
-        result mustBe Set()
-      }
+          result mustBe Set()
+        }
     }
 
     "throws an exception for incorrect value" when {
       "a control list parameter are true but one has an incorrect value" in
         new Server(app(extraConfig = toConfigList(testAllTrue).updated(s"control-list.${StudentLoans.configKey}.eligible", "ineligible"))) {
 
-        val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
+          val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
 
-        intercept[IllegalArgumentException] {
-          convertConfigValuesService.convertConfigValues()
+          intercept[IllegalArgumentException] {
+            convertConfigValuesService.convertConfigValues()
+          }
         }
-      }
     }
   }
 

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
 import com.github.tomakehurst.wiremock.client.WireMock.{findAll, postRequestedFor, urlMatching}
+import org.joda.time.DateTime
 import play.api.Application
 import play.api.http.Status
 import play.api.libs.json._
@@ -29,7 +30,6 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, 
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
-import org.joda.time.DateTime
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

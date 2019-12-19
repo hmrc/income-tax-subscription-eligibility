@@ -25,10 +25,10 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockGetCont
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.FeatureSwitchingSpec
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices.NON_RESIDENT_COMPANY_LANDLORD
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.{MockAuditService, MockConvertConfigValuesService}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices.NON_RESIDENT_COMPANY_LANDLORD
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
@@ -98,10 +98,10 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockConvertConfigValues(Set())
         mockGetControlList(testSautr)(hc, ec)(
           Future.successful(Right(Set(
-              NonResidentCompanyLandlord,
-              StudentLoans,
-              HighIncomeChildBenefit,
-              MarriageAllowance
+            NonResidentCompanyLandlord,
+            StudentLoans,
+            HighIncomeChildBenefit,
+            MarriageAllowance
           )))
         )
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
@@ -122,10 +122,10 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         ))
         mockGetControlList(testSautr)(hc, ec)(
           Future.successful(Right(Set(
-              NonResidentCompanyLandlord,
-              StudentLoans,
-              HighIncomeChildBenefit,
-              MarriageAllowance
+            NonResidentCompanyLandlord,
+            StudentLoans,
+            HighIncomeChildBenefit,
+            MarriageAllowance
           )))
         )
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
@@ -141,7 +141,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockConvertConfigValues(Set(NonResidentCompanyLandlord))
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false,testSautr,false, Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD)))
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, false, Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD)))
         mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, false))

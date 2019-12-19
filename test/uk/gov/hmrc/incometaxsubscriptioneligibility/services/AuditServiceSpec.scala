@@ -40,7 +40,7 @@ class AuditServiceSpec extends FeatureSwitchingSpec with MockFactory with OneIns
   private implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val request = FakeRequest(POST, TestConstants.testUrl)
 
-  val testAuditModel = new AuditModel{
+  val testAuditModel = new AuditModel {
     override val auditType = TestConstants.Audit.testAuditType
     override val transactionName = TestConstants.Audit.testTransactionName
     override val detail = TestConstants.Audit.testDetail
@@ -48,20 +48,20 @@ class AuditServiceSpec extends FeatureSwitchingSpec with MockFactory with OneIns
   val testAuditDataEvent = DataEvent(
     auditSource = TestConstants.testAppName,
     auditType = TestConstants.Audit.testAuditType,
-    tags =  AuditExtensions.auditHeaderCarrier(hc).toAuditTags(TestConstants.Audit.testTransactionName, TestConstants.testUrl),
+    tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(TestConstants.Audit.testTransactionName, TestConstants.testUrl),
     detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(TestConstants.Audit.testDetail.toSeq: _*)
   )
 
   "audit" when {
     "given a AuditModel" should {
       s"extract the data and pass it into the AuditConnector and return ${AuditResult.Success} verifying audit event sent" in {
-        (mockConfiguration.get[String](_:String)(_:ConfigLoader[String]))
-          .expects(*,*)
+        (mockConfiguration.get[String](_: String)(_: ConfigLoader[String]))
+          .expects(*, *)
           .returns(TestConstants.testAppName).noMoreThanOnce()
         val captureOfAuditDataEvent = CaptureOne[DataEvent]()
 
-        (mockAuditConnector.sendEvent(_:DataEvent)(_:HeaderCarrier, _:ExecutionContext))
-          .expects(new CaptureMatcher(captureOfAuditDataEvent),*,*)
+        (mockAuditConnector.sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext))
+          .expects(new CaptureMatcher(captureOfAuditDataEvent), *, *)
           .returns(Future.successful(AuditResult.Success))
 
         val resOfAuditCall = await(testAuditService.audit(testAuditModel))
@@ -69,14 +69,14 @@ class AuditServiceSpec extends FeatureSwitchingSpec with MockFactory with OneIns
         resOfAuditCall mustBe AuditResult.Success
       }
       s"return a ${AuditResult.Failure} if the AuditConnector returns a ${AuditResult.Failure}" in {
-        val failure = AuditResult.Failure(TestConstants.randomStringWithNoMeaning,Some(new Exception()))
+        val failure = AuditResult.Failure(TestConstants.randomStringWithNoMeaning, Some(new Exception()))
 
-        (mockConfiguration.get[String](_:String)(_:ConfigLoader[String]))
-          .expects(*,*)
+        (mockConfiguration.get[String](_: String)(_: ConfigLoader[String]))
+          .expects(*, *)
           .returns(TestConstants.testAppName).noMoreThanOnce()
 
-        (mockAuditConnector.sendEvent(_:DataEvent)(_:HeaderCarrier, _:ExecutionContext))
-          .expects(*,*,*)
+        (mockAuditConnector.sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext))
+          .expects(*, *, *)
           .returns(
             Future.successful(failure)
           )
@@ -88,11 +88,11 @@ class AuditServiceSpec extends FeatureSwitchingSpec with MockFactory with OneIns
     }
   }
 
-  def dataEventMatcher(testDataEvent: DataEvent, capturedDataEvent: DataEvent):Unit = {
-      testDataEvent.auditSource mustBe capturedDataEvent.auditSource
-      testDataEvent.auditType mustBe capturedDataEvent.auditType
-      capturedDataEvent.eventId.isEmpty mustBe false
-      testDataEvent.tags mustBe capturedDataEvent.tags
-      capturedDataEvent.generatedAt.toString().isEmpty mustBe false
+  def dataEventMatcher(testDataEvent: DataEvent, capturedDataEvent: DataEvent): Unit = {
+    testDataEvent.auditSource mustBe capturedDataEvent.auditSource
+    testDataEvent.auditType mustBe capturedDataEvent.auditType
+    capturedDataEvent.eventId.isEmpty mustBe false
+    testDataEvent.tags mustBe capturedDataEvent.tags
+    capturedDataEvent.generatedAt.toString().isEmpty mustBe false
   }
 }

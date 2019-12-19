@@ -50,9 +50,9 @@ object GetControlListHttpParser {
     val CONTROL_LIST_TRUE = '1'
 
     if (controlList matches "[0,1]{40}") Right((controlList.zipWithIndex flatMap {
-        case (CONTROL_LIST_TRUE, index) => ControlListParameter.getParameterMap.get(index)
-        case (CONTROL_LIST_FALSE, _) => None
-      }).toSet)
+      case (CONTROL_LIST_TRUE, index) => ControlListParameter.getParameterMap.get(index)
+      case (CONTROL_LIST_FALSE, _) => None
+    }).toSet)
     else Left(InvalidControlListFormat)
   }
 

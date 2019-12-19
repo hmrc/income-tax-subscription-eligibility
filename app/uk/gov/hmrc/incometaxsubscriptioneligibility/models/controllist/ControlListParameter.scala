@@ -268,6 +268,7 @@ case object DisguisedRenumerationInvolvement extends ControlListParameter {
 }
 
 object ControlListParameter {
+
   val getParameterMap: Map[Int, ControlListParameter] =
     Map(
       NON_RESIDENT_COMPANY_LANDLORD -> NonResidentCompanyLandlord,

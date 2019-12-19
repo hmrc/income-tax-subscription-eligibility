@@ -22,10 +22,9 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlLi
 
 class EligibilityAuditModelSpec extends PlaySpec {
 
-
   "The Audit Eligibility model" should {
-    val expectedDetailSuccess = Map("isSuccess" -> "true", "saUtr" -> "1234567890","isAgent" -> "false")
-    val expectedDetailFailure = Map("isSuccess" -> "false", "saUtr" -> "1234567890","isAgent" -> "false",
+    val expectedDetailSuccess = Map("isSuccess" -> "true", "saUtr" -> "1234567890", "isAgent" -> "false")
+    val expectedDetailFailure = Map("isSuccess" -> "false", "saUtr" -> "1234567890", "isAgent" -> "false",
       "failureReasons" -> "Non Resident Company Landlord, Student Loans, Transfers/receives Marriage Allowance")
 
     "Have detail with a utr and isSuccess set" when {

@@ -27,4 +27,5 @@ object TestConstants {
     val testTransactionName = "testTransactionName"
     val testDetail = Map("foo" -> "bar")
   }
+
 }

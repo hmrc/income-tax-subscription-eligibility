@@ -34,14 +34,14 @@ trait CustomMatchers {
 
   def jsonBodyAs[T](expectedValue: T)(implicit reads: Reads[T]): HavePropertyMatcher[WSResponse, T] =
     new HavePropertyMatcher[WSResponse, T] {
-    def apply(response: WSResponse) =
-      HavePropertyMatchResult(
-        response.json.as[T] == expectedValue,
-        "jsonBodyAs",
-        expectedValue,
-        response.json.as[T]
-      )
-  }
+      def apply(response: WSResponse) =
+        HavePropertyMatchResult(
+          response.json.as[T] == expectedValue,
+          "jsonBodyAs",
+          expectedValue,
+          response.json.as[T]
+        )
+    }
 
   val emptyBody: HavePropertyMatcher[WSResponse, String] =
     new HavePropertyMatcher[WSResponse, String] {
