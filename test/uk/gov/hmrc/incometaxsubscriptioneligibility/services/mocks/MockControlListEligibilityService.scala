@@ -36,5 +36,4 @@ trait MockControlListEligibilityService extends MockFactory {
   }
 
 
-
 }

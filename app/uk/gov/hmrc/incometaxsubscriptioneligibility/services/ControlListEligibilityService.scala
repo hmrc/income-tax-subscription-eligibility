@@ -17,7 +17,6 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitching, StubControlListEligible}
@@ -49,7 +48,7 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
               auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, isAgent, reasons))
                 .map(_ => false)
           }
-        case Left(ControlListDataNotFound) =>
+        case Left(_) =>
           auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, isAgent))
             .map(_ => false)
       }

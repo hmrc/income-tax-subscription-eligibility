@@ -17,8 +17,8 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors
 
 import javax.inject.Inject
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.GetControlListResponse
 import uk.gov.hmrc.play.bootstrap.http.HttpClient

@@ -87,7 +87,9 @@ object WiremockHelper extends Eventually with IntegrationPatience {
 }
 
 trait WiremockHelper {
+
   import WiremockHelper._
+
   lazy val wmConfig = wireMockConfig().port(wiremockPort)
   lazy val wireMockServer = new WireMockServer(wmConfig)
 

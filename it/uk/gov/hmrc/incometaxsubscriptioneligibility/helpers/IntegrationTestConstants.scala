@@ -32,4 +32,5 @@ object IntegrationTestConstants {
     val agentServiceEnrolmentName = "HMRC-AS-AGENT"
     lazy val testARN = new Generator().nextAtedUtr.utr //Not a valid ARN, for test purposes only
   }
+
 }

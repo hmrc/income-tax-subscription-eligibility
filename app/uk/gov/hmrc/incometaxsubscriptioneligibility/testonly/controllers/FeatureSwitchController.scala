@@ -19,8 +19,8 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.testonly.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc._
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitch, FeatureSwitchSetting, FeatureSwitching}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.FeatureSwitch.switches
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitch, FeatureSwitchSetting, FeatureSwitching}
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 @Singleton

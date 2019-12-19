@@ -21,8 +21,8 @@ import play.api.libs.json.{JsObject, Json}
 
 object AuditStub extends WireMockMethods {
 
-    val auditResponse = Json.parse(
-      """
+  val auditResponse = Json.parse(
+    """
       |{
       |  "auditSource": "xxxx-xxxx",
       |  "auditType": "xxxx",
@@ -54,8 +54,8 @@ object AuditStub extends WireMockMethods {
     """.stripMargin).as[JsObject]
   val auditUri = "/write/audit"
 
- def stubAudit(statusReturnedFromAuth: Int, bodyFromAudit: JsObject = auditResponse): StubMapping = {
-   when(method = POST, uri = auditUri)
-     .thenReturn(status = statusReturnedFromAuth, body = bodyFromAudit)
- }
+  def stubAudit(statusReturnedFromAuth: Int, bodyFromAudit: JsObject = auditResponse): StubMapping = {
+    when(method = POST, uri = auditUri)
+      .thenReturn(status = statusReturnedFromAuth, body = bodyFromAudit)
+  }
 }

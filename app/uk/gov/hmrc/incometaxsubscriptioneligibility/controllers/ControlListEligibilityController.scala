@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.services.{AuthService, ControlListEligibilityService}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibilityService
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.ExecutionContext
@@ -29,19 +29,17 @@ import scala.concurrent.ExecutionContext
 @Singleton()
 class ControlListEligibilityController @Inject()(cc: ControllerComponents,
                                                  controlListEligibilityService: ControlListEligibilityService,
-                                                 val authConnector: AuthConnector
-                                                )(implicit ec: ExecutionContext) extends BackendController(cc) with AuthorisedFunctions {
+                                                 val authConnector: AuthConnector)
+                                                (implicit ec: ExecutionContext) extends BackendController(cc) with AuthorisedFunctions {
 
-  def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async {
-    implicit request =>
-      authorised().retrieve(Retrievals.allEnrolments) { enrolments =>
-        val key: String = "eligible"
+  def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async { implicit request =>
+    authorised().retrieve(Retrievals.allEnrolments) { enrolments =>
+      val key: String = "eligible"
 
-        controlListEligibilityService.getEligibilityStatus(sautr, enrolments.getEnrolment("HMRC-AS-AGENT").isDefined) map {
-          eligibilityStatus => Ok(Json.obj(key -> eligibilityStatus))
-        }
-
+      controlListEligibilityService.getEligibilityStatus(sautr, enrolments.getEnrolment("HMRC-AS-AGENT").isDefined) map {
+        eligibilityStatus => Ok(Json.obj(key -> eligibilityStatus))
       }
+    }
   }
 
 }

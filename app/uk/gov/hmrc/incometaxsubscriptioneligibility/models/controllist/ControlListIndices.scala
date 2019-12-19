@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist
 
-
 object ControlListIndices {
+
   val NON_RESIDENT_COMPANY_LANDLORD = 0
   val STUDENT_LOANS = 1
   val MARRIAGE_ALLOWANCE = 2
@@ -58,4 +58,5 @@ object ControlListIndices {
   val MARRIED_COUPLES_ALLOWANCE = 37
   val CAPACITOR = 38
   val DISGUISED_RENUMERATION_INVOLVEMENT = 39
+
 }

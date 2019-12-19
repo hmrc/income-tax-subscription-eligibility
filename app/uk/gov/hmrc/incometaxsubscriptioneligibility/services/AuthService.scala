@@ -26,9 +26,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthService @Inject()(val authConnector: AuthConnector) extends AuthorisedFunctions {
 
-  def eligibilityAuthorised(f: Boolean => Future[Result])(implicit hc: HeaderCarrier, ec: ExecutionContext) = {
+  def eligibilityAuthorised(f: Boolean => Future[Result])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
     authorised().retrieve(allEnrolments).apply { enrolments =>
       f(enrolments.getEnrolment("HMRC-AS-AGENT").isDefined)
     }
   }
+
 }
