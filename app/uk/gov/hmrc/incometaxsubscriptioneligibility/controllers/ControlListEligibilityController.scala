@@ -20,10 +20,11 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibilityService
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
+import scala.collection.immutable.::
 import scala.concurrent.ExecutionContext
 
 @Singleton()
@@ -35,11 +36,16 @@ class ControlListEligibilityController @Inject()(cc: ControllerComponents,
   def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async { implicit request =>
     authorised().retrieve(Retrievals.allEnrolments) { enrolments =>
       val key: String = "eligible"
+      val userType: String = if(enrolments.getEnrolment("HMRC-AS-AGENT").isDefined) "agent" else "individual"
 
-      controlListEligibilityService.getEligibilityStatus(sautr, enrolments.getEnrolment("HMRC-AS-AGENT").isDefined) map {
+      controlListEligibilityService.getEligibilityStatus(sautr, userType, getArnFromEnrolments(enrolments)) map {
         eligibilityStatus => Ok(Json.obj(key -> eligibilityStatus))
       }
     }
+  }
+
+  private def getArnFromEnrolments(enrolments: Enrolments): Option[String] = enrolments.enrolments.collectFirst {
+    case Enrolment("HMRC-AS-AGENT", EnrolmentIdentifier(_, value) :: _, _, _) => value
   }
 
 }

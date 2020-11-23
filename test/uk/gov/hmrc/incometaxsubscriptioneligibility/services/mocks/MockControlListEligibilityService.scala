@@ -27,11 +27,11 @@ trait MockControlListEligibilityService extends MockFactory {
 
   val mockControlListEligibilityService: ControlListEligibilityService = mock[ControlListEligibilityService]
 
-  def mockIsEligible(sautr: String)
-                    (isEligible: Future[Boolean], isAgent: Boolean)
+  def mockIsEligible(sautr: String, userType: String, agentReferenceNumber: Option[String])
+                    (isEligible: Future[Boolean])
                     (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]) = {
-    (mockControlListEligibilityService.getEligibilityStatus(_: String, _: Boolean)(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
-      .expects(sautr, isAgent, *, ec, request)
+    (mockControlListEligibilityService.getEligibilityStatus(_: String, _: String, _: Option[String])(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
+      .expects(sautr, userType, agentReferenceNumber, *, ec, request)
       .returning(isEligible)
   }
 
