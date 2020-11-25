@@ -42,15 +42,18 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
   implicit val request: Request[_] = FakeRequest()
 
   val testSautr: String = "1234567890"
+  val testUserTypeAgent: String = "Agent"
+  val testUserTypeIndiv: String = "Individual"
+  val testAgentReferenceNumber: Option[String] = Some("123456789")
 
-  val successfulAuditModel: EligibilityAuditModel = EligibilityAuditModel(true, testSautr, false)
+  val successfulAuditModel: EligibilityAuditModel = EligibilityAuditModel(true, testSautr, testUserTypeIndiv, None)
 
   "getEligibilityStatus" should {
     "return true" when {
       "feature switch is enabled" in {
         enable(StubControlListEligible)
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, false))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
         result mustBe true
       }
@@ -63,7 +66,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, false))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
         result mustBe true
       }
@@ -75,7 +78,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, false))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
         result mustBe true
       }
@@ -87,7 +90,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, false))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
         result mustBe true
       }
@@ -106,7 +109,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         )
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, false))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
         result mustBe true
       }
@@ -130,7 +133,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         )
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, false))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
         result mustBe true
       }
@@ -141,10 +144,10 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockConvertConfigValues(Set(NonResidentCompanyLandlord))
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, false, Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD)))
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeIndiv, None, Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD)))
         mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, false))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
         result mustBe false
       }
@@ -155,10 +158,10 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockConvertConfigValues(Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(ControlListDataNotFound)))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, true)
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeAgent, testAgentReferenceNumber)
         mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, true))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeAgent, testAgentReferenceNumber))
 
         result mustBe false
       }

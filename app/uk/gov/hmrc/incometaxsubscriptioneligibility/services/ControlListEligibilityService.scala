@@ -17,6 +17,7 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
 import javax.inject.{Inject, Singleton}
+import play.api.libs.json.Json
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitching, StubControlListEligible}
@@ -32,7 +33,8 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
                                               auditService: AuditService
                                              ) extends FeatureSwitching {
 
-  def getEligibilityStatus(sautr: String, isAgent: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[Boolean] = {
+  def getEligibilityStatus(sautr: String, userType: String, agentReferenceNumber: Option[String])
+                          (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[Boolean] = {
 
     if (isEnabled(StubControlListEligible)) {
       Future.successful(true)
@@ -42,14 +44,14 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
         case Right(controlListParameters) =>
           eligibilityConfigParameters.intersect(controlListParameters).toSeq match {
             case Nil =>
-              auditService.audit(EligibilityAuditModel(eligibilityResult = true, sautr, isAgent))
+              auditService.audit(EligibilityAuditModel(eligibilityResult = true, sautr, userType, agentReferenceNumber))
                 .map(_ => true)
             case reasons =>
-              auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, isAgent, reasons))
+              auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, userType, agentReferenceNumber, reasons))
                 .map(_ => false)
           }
         case Left(_) =>
-          auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, isAgent))
+          auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, userType, agentReferenceNumber))
             .map(_ => false)
       }
     }

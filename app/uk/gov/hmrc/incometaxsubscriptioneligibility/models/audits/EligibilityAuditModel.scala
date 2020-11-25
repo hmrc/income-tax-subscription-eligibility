@@ -21,7 +21,8 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.services.AuditModel
 
 case class EligibilityAuditModel(eligibilityResult: Boolean,
                                  sautr: String,
-                                 isAgent: Boolean,
+                                 userType: String,
+                                 agentReferenceNumber: Option[String],
                                  reasons: Seq[ControlListParameter] = Seq.empty) extends AuditModel {
 
   private val formattedReasons = if (reasons.isEmpty) Map() else Map("failureReasons" -> reasons.map(_.errorMessage).mkString(", "))
@@ -31,7 +32,9 @@ case class EligibilityAuditModel(eligibilityResult: Boolean,
   val detail: Map[String, String] = Map(
     "isSuccess" -> eligibilityResult.toString,
     "saUtr" -> sautr,
-    "isAgent" -> isAgent.toString) ++
-    formattedReasons
+    "userType" -> userType) ++
+    formattedReasons ++
+    agentReferenceNumber.map(arn => "agentReferenceNumber" -> arn)
+
 
 }
