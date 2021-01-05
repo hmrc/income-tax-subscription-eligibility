@@ -16,11 +16,14 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, LocalDateTime, ZoneOffset}
+
 import com.github.tomakehurst.wiremock.client.WireMock.{findAll, postRequestedFor, urlMatching}
 import org.joda.time.DateTime
 import play.api.Application
 import play.api.http.Status
-import play.api.libs.json._
+import play.api.libs.json.{Json, Reads, _}
 import play.api.mvc.{AnyContent, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -55,9 +58,7 @@ class AuditServiceISpec extends ComponentSpecBase {
     override val detail: Map[String, String] = IntegrationTestConstants.Audit.testDetail
   }
 
-  implicit val testFormatsForJodaDateTime = new Reads[DateTime] {
-    override def reads(json: JsValue): JsResult[DateTime] = JsSuccess(DateTime.now)
-  }
+  implicit val testFormatsForJodaDateTime: Reads[DateTime] = Reads[DateTime](_ => JsSuccess(DateTime.now))
 
   def auditService(implicit app: Application): AuditService = app.injector.instanceOf[AuditService]
 
@@ -66,14 +67,20 @@ class AuditServiceISpec extends ComponentSpecBase {
     testDataEvent.auditType mustBe capturedDataEvent.auditType
     capturedDataEvent.eventId.isEmpty mustBe false
     testDataEvent.tags mustBe capturedDataEvent.tags
-    capturedDataEvent.generatedAt.toString().isEmpty mustBe false
+    capturedDataEvent.generatedAt.toString.isEmpty mustBe false
   }
 
-  val testAuditDataEvent = DataEvent(
+  val testAuditDataEvent: DataEvent = DataEvent(
     auditSource = IntegrationTestConstants.testAppName,
     auditType = IntegrationTestConstants.Audit.testAuditType,
     tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(IntegrationTestConstants.Audit.testTransactionName, IntegrationTestConstants.testUrl),
     detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(IntegrationTestConstants.Audit.testDetail.toSeq: _*)
+  )
+
+  // Date format and implicit reads are required as audit connector serializes the generatedAt date into a different format we can't implicitly read by default
+  val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit def reads: Reads[Instant] = Reads[Instant](jsValue =>
+    JsSuccess(LocalDateTime.parse(jsValue.as[JsString].value, dateFormat).toInstant(ZoneOffset.UTC))
   )
 
   "audit" should {
@@ -83,8 +90,8 @@ class AuditServiceISpec extends ComponentSpecBase {
 
       val jsonSent: JsValue = Json.parse(findAll(postRequestedFor(urlMatching(AuditStub.auditUri))).get(0).getBodyAsString)
       val dataEventSent: DataEvent = jsonSent.as[DataEvent](Json.reads[DataEvent])
-      dataEventMatcher(testAuditDataEvent, dataEventSent)
 
+      dataEventMatcher(testAuditDataEvent, dataEventSent)
     }
     "not throw an exception if the call via the connector fails" in new App(defaultApp) {
       AuditStub.stubAudit(Status.INTERNAL_SERVER_ERROR, Json.obj())
