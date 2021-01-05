@@ -6,7 +6,7 @@ object AppDependencies {
   private val domainVersion = "5.10.0-play-26"
 
   val compile = Seq(
-    "uk.gov.hmrc" %% "bootstrap-play-26" % "0.41.0",
+    "uk.gov.hmrc" %% "bootstrap-backend-play-26" % "3.2.0",
     "uk.gov.hmrc" %% "domain" % domainVersion
   )
 
@@ -14,8 +14,8 @@ object AppDependencies {
     "com.typesafe.play" %% "play-test" % current % "test",
     "org.scalamock" %% "scalamock" % "4.4.0" % "test",
     "org.pegdown" % "pegdown" % "1.6.0" % "test, it",
-    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test, it",
-    "com.github.tomakehurst" % "wiremock-jre8" % "2.23.2" % "it"
+    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % "test, it",
+    "com.github.tomakehurst" % "wiremock-jre8" % "2.27.2" % "it"
   )
 
   val overrides: Set[ModuleID] = {
