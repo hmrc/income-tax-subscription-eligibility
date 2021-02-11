@@ -18,7 +18,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits
 
 import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices.{MARRIAGE_ALLOWANCE, NON_RESIDENT_COMPANY_LANDLORD, STUDENT_LOANS}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.{ControlListParameter, MarriageAllowance, NonResidentCompanyLandlord, StudentLoans}
 
 class EligibilityAuditModelSpec extends PlaySpec {
 
@@ -39,9 +39,9 @@ class EligibilityAuditModelSpec extends PlaySpec {
     }
     "Have detail with utr, isSuccess and failureReasons set" when {
       "the audit event is for a failure" in {
-        val seqOfErrors = Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD),
-          ControlListParameter.getParameterMap(STUDENT_LOANS),
-          ControlListParameter.getParameterMap(MARRIAGE_ALLOWANCE))
+        val seqOfErrors = Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString,
+          ControlListParameter.getParameterMap(STUDENT_LOANS).toString,
+          ControlListParameter.getParameterMap(MARRIAGE_ALLOWANCE).toString)
 
         val result = EligibilityAuditModel(false, "1234567890", "individual", None, seqOfErrors)
         result.auditType mustBe "mtdITSAControlList"
@@ -58,9 +58,9 @@ class EligibilityAuditModelSpec extends PlaySpec {
     }
     "Have detail with utr, isSuccess, agentReferenceNumber & failureReasons set for agent userType" when {
       "the audit event is for a failure" in {
-        val seqOfErrors = Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD),
-          ControlListParameter.getParameterMap(STUDENT_LOANS),
-          ControlListParameter.getParameterMap(MARRIAGE_ALLOWANCE))
+        val seqOfErrors = Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString,
+          ControlListParameter.getParameterMap(STUDENT_LOANS).toString,
+          ControlListParameter.getParameterMap(MARRIAGE_ALLOWANCE).toString)
 
         val result = EligibilityAuditModel(false, "1234567890", "agent", Some("123456789"), seqOfErrors)
         result.auditType mustBe "mtdITSAControlList"
