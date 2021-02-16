@@ -17,12 +17,11 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.Json
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.GetControlListConnector
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{ControlListDataNotFound, InvalidControlListFormat}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -47,12 +46,17 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
               auditService.audit(EligibilityAuditModel(eligibilityResult = true, sautr, userType, agentReferenceNumber))
                 .map(_ => true)
             case reasons =>
-              auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, userType, agentReferenceNumber, reasons))
+              auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, userType, agentReferenceNumber, reasons.map(_.errorMessage)))
                 .map(_ => false)
           }
-        case Left(_) =>
-          auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, userType, agentReferenceNumber))
+        case Left(ControlListDataNotFound) =>
+          auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, userType, agentReferenceNumber,
+            Seq(ControlListDataNotFound.errorMessage)))
             .map(_ => false)
+        case Left(InvalidControlListFormat) =>
+          auditService.audit(EligibilityAuditModel(eligibilityResult = false, sautr, userType, agentReferenceNumber,
+            Seq(InvalidControlListFormat.errorMessage)))
+          .map(_ => false)
       }
     }
   }

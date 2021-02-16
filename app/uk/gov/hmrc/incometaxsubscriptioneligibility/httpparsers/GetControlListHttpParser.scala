@@ -19,6 +19,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers
 import play.api.http.Status._
 import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.http.{HttpReads, HttpResponse, InternalServerException}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListMessages.nonResidentCompanyLandlordMessage
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 
 object GetControlListHttpParser {
@@ -27,9 +28,13 @@ object GetControlListHttpParser {
 
   sealed trait ControlListError
 
-  case object ControlListDataNotFound extends ControlListError
+  case object ControlListDataNotFound extends ControlListError{
+    val errorMessage: String = "No control list data for specified UTR"
+  }
 
-  case object InvalidControlListFormat extends ControlListError
+  case object InvalidControlListFormat extends ControlListError{
+    val errorMessage: String = "Incorrectly formatted control list"
+  }
 
   implicit object GetControlListReads extends HttpReads[GetControlListResponse] {
     override def read(method: String, url: String, response: HttpResponse): GetControlListResponse = {

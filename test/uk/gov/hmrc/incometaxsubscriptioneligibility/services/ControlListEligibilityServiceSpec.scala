@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.StubControlListEligible
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockGetControlListConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.FeatureSwitchingSpec
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{ControlListDataNotFound, InvalidControlListFormat}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices.NON_RESIDENT_COMPANY_LANDLORD
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
@@ -144,7 +144,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockConvertConfigValues(Set(NonResidentCompanyLandlord))
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeIndiv, None, Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD)))
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeIndiv, None, Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString))
         mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
@@ -158,7 +158,23 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockConvertConfigValues(Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(ControlListDataNotFound)))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeAgent, testAgentReferenceNumber)
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeAgent, testAgentReferenceNumber,
+          Seq("No control list data for specified UTR"))
+        mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
+
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeAgent, testAgentReferenceNumber))
+
+        result mustBe false
+      }
+    }
+
+    "return false" when {
+      "feature switch is disabled and the user's control list data is in an incorrect format" in {
+        mockConvertConfigValues(Set())
+        mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(InvalidControlListFormat)))
+
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeAgent, testAgentReferenceNumber,
+          Seq("Incorrectly formatted control list"))
         mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeAgent, testAgentReferenceNumber))
