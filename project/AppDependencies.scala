@@ -3,10 +3,10 @@ import sbt._
 
 object AppDependencies {
 
-  private val domainVersion = "5.10.0-play-26"
+  private val domainVersion = "5.11.0-play-26"
 
   val compile = Seq(
-    "uk.gov.hmrc" %% "bootstrap-backend-play-26" % "3.2.0",
+    "uk.gov.hmrc" %% "bootstrap-backend-play-26" % "5.3.0",
     "uk.gov.hmrc" %% "domain" % domainVersion
   )
 

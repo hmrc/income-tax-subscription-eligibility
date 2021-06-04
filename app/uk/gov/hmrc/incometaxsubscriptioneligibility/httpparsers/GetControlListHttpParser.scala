@@ -19,7 +19,6 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers
 import play.api.http.Status._
 import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.http.{HttpReads, HttpResponse, InternalServerException}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListMessages.nonResidentCompanyLandlordMessage
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 
 object GetControlListHttpParser {

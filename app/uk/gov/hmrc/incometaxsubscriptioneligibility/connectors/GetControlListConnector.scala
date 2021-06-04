@@ -16,26 +16,23 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors
 
-import javax.inject.Inject
-import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.GetControlListResponse
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GetControlListConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
   def getControlList(sautr: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[GetControlListResponse] = {
-    val headerCarrier = hc
-      .withExtraHeaders(appConfig.desEnvironmentHeader)
-      .copy(authorization = Some(Authorization(appConfig.desAuthorisationToken)))
 
-    http.GET(url = s"${appConfig.desUrl}/income-tax/controlList/$sautr")(
-      implicitly[HttpReads[GetControlListResponse]],
-      headerCarrier,
-      implicitly[ExecutionContext]
+    val desHeaders: Seq[(String, String)] = Seq(
+      HeaderNames.authorisation -> appConfig.desAuthorisationToken,
+      appConfig.desEnvironmentHeader
     )
+
+    http.GET[GetControlListResponse](url = s"${appConfig.desUrl}/income-tax/controlList/$sautr", headers = desHeaders)
+
   }
 }

@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 
-import scala.concurrent.ExecutionContext
+import javax.inject.{Inject, Singleton}
 
 
 @Singleton
-class ConvertConfigValuesService @Inject()(appConfig: AppConfig)(implicit ec: ExecutionContext) {
+class ConvertConfigValuesService @Inject()(appConfig: AppConfig) {
 
   def convertConfigValues(): Set[ControlListParameter] =
     ControlListParameter.getParameterMap.values.filterNot(appConfig.isEligible).toSet
