@@ -25,7 +25,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class ConvertConfigValuesService @Inject()(appConfig: AppConfig) {
 
-  def convertConfigValues(): Set[ControlListParameter] =
-    ControlListParameter.getParameterMap.values.filterNot(appConfig.isEligible).toSet
+  def convertConfigValues(year: String): Set[ControlListParameter] =
+    ControlListParameter.getParameterMap.values.filterNot(appConfig.isEligible(year, _)).toSet
 
 }

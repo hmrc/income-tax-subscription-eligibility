@@ -19,10 +19,13 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListMessages._
 
-sealed trait ControlListParameter {
+trait ControlListResult {
+  val errorMessage: String
+}
+
+sealed trait ControlListParameter extends ControlListResult {
   val configKey: String
   val ordinal: Int
-  val errorMessage: String
 
   override def toString: String = errorMessage
 }

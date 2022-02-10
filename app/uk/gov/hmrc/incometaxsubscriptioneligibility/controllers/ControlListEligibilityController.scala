@@ -33,13 +33,19 @@ class ControlListEligibilityController @Inject()(cc: ControllerComponents,
                                                  val authConnector: AuthConnector)
                                                 (implicit ec: ExecutionContext) extends BackendController(cc) with AuthorisedFunctions {
 
+  private val key: String = "eligible"
+  private val keyCurrent: String = "eligibleCurrentYear"
+  private val keyNext: String = "eligibleNextYear"
   def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async { implicit request =>
     authorised().retrieve(Retrievals.allEnrolments) { enrolments =>
-      val key: String = "eligible"
       val userType: String = if(enrolments.getEnrolment("HMRC-AS-AGENT").isDefined) "agent" else "individual"
 
       controlListEligibilityService.getEligibilityStatus(sautr, userType, getArnFromEnrolments(enrolments)) map {
-        eligibilityStatus => Ok(Json.obj(key -> eligibilityStatus))
+        eligibilityStatus => Ok(Json.obj(
+          key -> eligibilityStatus.current,
+          keyCurrent -> eligibilityStatus.current,
+          keyNext -> eligibilityStatus.next
+        ))
       }
     }
   }

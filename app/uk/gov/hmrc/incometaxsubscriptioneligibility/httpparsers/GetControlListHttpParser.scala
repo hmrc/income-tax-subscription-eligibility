@@ -19,13 +19,13 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers
 import play.api.http.Status._
 import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.http.{HttpReads, HttpResponse, InternalServerException}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.{ControlListParameter, ControlListResult}
 
 object GetControlListHttpParser {
 
   type GetControlListResponse = Either[ControlListError, Set[ControlListParameter]]
 
-  sealed trait ControlListError
+  sealed trait ControlListError extends ControlListResult
 
   case object ControlListDataNotFound extends ControlListError{
     val errorMessage: String = "No control list data for specified UTR"

@@ -21,10 +21,10 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlLi
 
 trait ControlListConfigTestHelper {
 
-  def toConfigList(configValues: Map[ControlListParameter, Boolean]): Map[String, String] = {
+  def toConfigList(configValues: Map[ControlListParameter, Boolean], year: String): Map[String, String] = {
     configValues.map {
       case (param, isEligible) =>
-        s"control-list.${param.configKey}.eligible" -> isEligible.toString
+        s"control-list.$year.${param.configKey}" -> isEligible.toString
     }
   }
 

@@ -44,8 +44,8 @@ class AppConfig @Inject()(servicesConfig: ServicesConfig) extends FeatureSwitchi
     }
   }
 
-  def isEligible(param: ControlListParameter): Boolean =
-    loadConfigFromEnv(s"control-list.${param.configKey}.eligible") match {
+  def isEligible(year: String, param: ControlListParameter): Boolean =
+    loadConfigFromEnv(s"control-list.${year}.${param.configKey}") match {
       case Some(bool) => bool.toBoolean
       case _ => throw new Exception(s"Unknown eligibility config key: ${param.configKey}")
     }

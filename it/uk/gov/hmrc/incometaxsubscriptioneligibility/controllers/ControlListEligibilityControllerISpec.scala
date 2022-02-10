@@ -29,11 +29,16 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
 class ControlListEligibilityControllerISpec extends ComponentSpecBase with ControlListConfigTestHelper {
 
   val testSautr = "1234567890"
+  private val year = "2021-2022"
 
-  def testJson(eligible: Boolean): JsObject = Json.obj("eligible" -> eligible)
+  def testJson(eligibleCurrent: Boolean, eligibleNext: Boolean): JsObject = Json.obj(
+    "eligible" -> eligibleCurrent,
+    "eligibleCurrentYear" -> eligibleCurrent,
+    "eligibleNextYear" -> eligibleNext
+  )
 
   s"A GET request on '/eligibility/$testSautr' route" should {
-    "return an OK with '{eligible: true}'" when {
+    "return an OK with '{eligibleCurrent: true}'" when {
       "the feature switch is enabled" in new Server(defaultApp) {
         stubAuth(OK, Json.obj())
         enable(StubControlListEligible)
@@ -42,12 +47,12 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
 
         result must have(
           httpStatus(OK),
-          jsonBodyAs(testJson(eligible = true))
+          jsonBodyAs(testJson(eligibleCurrent = true, eligibleNext = true))
         )
       }
     }
 
-    "return an OK with '{eligible: true}'" when {
+    "return an OK with '{eligibleCurrent: true}'" when {
       "the feature switch is disabled and the returned control list has no parameters set to true" in new Server(defaultApp) {
         val testControlListString: String = ControlListHelper(Set()).asBinaryString
 
@@ -64,14 +69,14 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
 
         result must have(
           httpStatus(OK),
-          jsonBodyAs(testJson(eligible = true))
+          jsonBodyAs(testJson(eligibleCurrent = true, eligibleNext = true))
         )
       }
     }
 
-    "return an OK with '{eligible: true}'" when {
+    "return an OK with '{eligibleCurrent: true}'" when {
       "the feature switch is disabled and the returned control list has no parameters set to true and all config values are set to ineligible" in
-        new Server(app(extraConfig = toConfigList(testAllFalse))) {
+        new Server(app(extraConfig = toConfigList(testAllFalse, year))) {
 
           val testControlListString: String = ControlListHelper(Set()).asBinaryString
 
@@ -88,14 +93,14 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
 
           result must have(
             httpStatus(OK),
-            jsonBodyAs(testJson(eligible = true))
+            jsonBodyAs(testJson(eligibleCurrent = true, eligibleNext = true))
           )
         }
     }
 
     "return an OK with '{eligible: false}'" when {
       "the feature switch is disabled and the returned control list has one parameter set to true and one config values is ineligible" in
-        new Server(app(extraConfig = toConfigList(Map(NonResidentCompanyLandlord -> false)))) {
+        new Server(app(extraConfig = toConfigList(Map(NonResidentCompanyLandlord -> false), year))) {
 
           val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
 
@@ -112,7 +117,7 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
 
           result must have(
             httpStatus(OK),
-            jsonBodyAs(testJson(eligible = false))
+            jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false))
           )
         }
     }
@@ -124,7 +129,8 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
             NonResidentCompanyLandlord -> false,
             StudentLoans -> false,
             MinistersOfReligion -> false,
-            DividendsForeign -> false)
+            DividendsForeign -> false),
+          year
         ))) {
 
           val testControlListString: String = ControlListHelper(Set(
@@ -147,7 +153,7 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
 
           result must have(
             httpStatus(OK),
-            jsonBodyAs(testJson(eligible = false))
+            jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false))
           )
         }
     }
@@ -161,7 +167,7 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
 
         result must have(
           httpStatus(OK),
-          jsonBodyAs(testJson(eligible = false))
+          jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false))
         )
       }
     }

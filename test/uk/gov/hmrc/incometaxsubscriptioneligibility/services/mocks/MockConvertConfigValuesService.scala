@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks
 
-import org.scalamock.handlers.CallHandler0
+import org.scalamock.handlers.CallHandler1
 import org.scalamock.scalatest.MockFactory
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ConvertConfigValuesService
 
@@ -25,10 +26,14 @@ trait MockConvertConfigValuesService extends MockFactory {
 
   val mockConvertConfigValuesService: ConvertConfigValuesService = mock[ConvertConfigValuesService]
 
-  def mockConvertConfigValues(controlListParameters: Set[ControlListParameter]): CallHandler0[Set[ControlListParameter]] = {
+  def mockConvertConfigValues(controlListParametersCurrentYear: Set[ControlListParameter],
+                              controlListParametersNextYear: Set[ControlListParameter]): Unit = {
     (mockConvertConfigValuesService.convertConfigValues _)
-      .expects()
-      .returning(controlListParameters)
+      .expects(TaxYear.getCurrentTaxYear())
+      .returning(controlListParametersCurrentYear)
+    (mockConvertConfigValuesService.convertConfigValues _)
+      .expects(TaxYear.getNextTaxYear())
+      .returning(controlListParametersNextYear)
   }
 
 }
