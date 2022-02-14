@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks
 
+import org.scalamock.handlers.CallHandler6
 import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibilityService
+import uk.gov.hmrc.incometaxsubscriptioneligibility.services.{ControlListEligibilityService, EligibilityByYear}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -28,8 +29,9 @@ trait MockControlListEligibilityService extends MockFactory {
   val mockControlListEligibilityService: ControlListEligibilityService = mock[ControlListEligibilityService]
 
   def mockIsEligible(sautr: String, userType: String, agentReferenceNumber: Option[String])
-                    (isEligible: Future[Boolean])
-                    (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]) = {
+                    (isEligible: Future[EligibilityByYear])
+                    (implicit ec: ExecutionContext, request: Request[_]):
+  CallHandler6[String, String, Option[String], HeaderCarrier, ExecutionContext, Request[_], Future[EligibilityByYear]] = {
     (mockControlListEligibilityService.getEligibilityStatus(_: String, _: String, _: Option[String])(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
       .expects(sautr, userType, agentReferenceNumber, *, ec, request)
       .returning(isEligible)

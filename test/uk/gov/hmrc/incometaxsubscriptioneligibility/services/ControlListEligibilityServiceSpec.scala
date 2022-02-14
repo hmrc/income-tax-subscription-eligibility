@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
   val testUserTypeIndiv: String = "Individual"
   val testAgentReferenceNumber: Option[String] = Some("123456789")
 
-  val successfulAuditModel: EligibilityAuditModel = EligibilityAuditModel(true, testSautr, testUserTypeIndiv, None)
+  val successfulAuditModel: EligibilityAuditModel = EligibilityAuditModel(eligibilityResult = true, testSautr, testUserTypeIndiv, None)
 
   "getEligibilityStatus" should {
     "return true" when {
@@ -55,50 +55,50 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
-        result mustBe true
+        result.current mustBe true
       }
     }
 
     "return true" when {
       "feature switch is disabled and the user's control list data has no parameters set to true" in {
-        mockConvertConfigValues(Set())
+        mockConvertConfigValues(Set(), Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set())))
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
-        result mustBe true
+        result.current mustBe true
       }
     }
 
     "return true" when {
       "feature switch is disabled and the user's control list data has a parameter set to true" in {
-        mockConvertConfigValues(Set())
+        mockConvertConfigValues(Set(), Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
-        result mustBe true
+        result.current mustBe true
       }
     }
 
     "return true" when {
       "feature switch is disabled and the user's control list data has a parameter set to true but is different to the ineligible" in {
-        mockConvertConfigValues(Set(StudentLoans))
+        mockConvertConfigValues(Set(StudentLoans), Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
         mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
-        result mustBe true
+        result.current mustBe true
       }
     }
 
     "return true" when {
       "feature switch is disabled and the user's control list data has several parameters set to true" in {
-        mockConvertConfigValues(Set())
+        mockConvertConfigValues(Set(), Set())
         mockGetControlList(testSautr)(hc, ec)(
           Future.successful(Right(Set(
             NonResidentCompanyLandlord,
@@ -111,18 +111,13 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
-        result mustBe true
+        result.current mustBe true
       }
     }
 
     "return true" when {
       "feature switch is disabled and the user's control list data has several parameters set to true which are different to the ineligible config values" in {
-        mockConvertConfigValues(Set(
-          MinistersOfReligion,
-          FosterCarers,
-          ForeignIncome,
-          Deceased
-        ))
+        mockConvertConfigValues(Set(MinistersOfReligion, FosterCarers, ForeignIncome, Deceased), Set())
         mockGetControlList(testSautr)(hc, ec)(
           Future.successful(Right(Set(
             NonResidentCompanyLandlord,
@@ -135,51 +130,49 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
-        result mustBe true
+        result.current mustBe true
       }
     }
 
     "return false" when {
       "feature switch is disabled and the user's control list data is ineligible" in {
-        mockConvertConfigValues(Set(NonResidentCompanyLandlord))
+        mockConvertConfigValues(Set(NonResidentCompanyLandlord), Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(Set(NonResidentCompanyLandlord))))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeIndiv, None, Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString))
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(eligibilityResult = false, testSautr, testUserTypeIndiv, None, Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString))
         mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
 
-        result mustBe false
+        result.current mustBe false
       }
     }
 
     "return false" when {
       "feature switch is disabled and the user's control list data is not found" in {
-        mockConvertConfigValues(Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(ControlListDataNotFound)))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeAgent, testAgentReferenceNumber,
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(eligibilityResult = false, testSautr, testUserTypeAgent, testAgentReferenceNumber,
           Seq("No control list data for specified UTR"))
         mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeAgent, testAgentReferenceNumber))
 
-        result mustBe false
+        result.current mustBe false
       }
     }
 
     "return false" when {
       "feature switch is disabled and the user's control list data is in an incorrect format" in {
-        mockConvertConfigValues(Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(InvalidControlListFormat)))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(false, testSautr, testUserTypeAgent, testAgentReferenceNumber,
+        val auditModel: EligibilityAuditModel = EligibilityAuditModel(eligibilityResult = false, testSautr, testUserTypeAgent, testAgentReferenceNumber,
           Seq("Incorrectly formatted control list"))
         mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
 
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeAgent, testAgentReferenceNumber))
 
-        result mustBe false
+        result.current mustBe false
       }
     }
   }

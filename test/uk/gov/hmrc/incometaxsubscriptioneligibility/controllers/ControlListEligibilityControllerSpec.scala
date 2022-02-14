@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockAuthConnector
+import uk.gov.hmrc.incometaxsubscriptioneligibility.services.EligibilityByYear
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockControlListEligibilityService
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
@@ -43,38 +44,42 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
   implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global
-  val eligibleKey: String = "eligible"
+  val eligible: String = "eligible"
+  val eligibleCurrent: String = "eligibleCurrentYear"
+  val eligibleNext: String = "eligibleNextYear"
 
   "getEligibilityStatus" should {
+    val eligibleBoth = Future.successful(EligibilityByYear(current = true, next = true))
     "return OK with body 'eligible: true'" in {
-      mockIsEligible(testSautr, testUserTypeIndiv, None)(isEligible = Future.successful(true))
+      mockIsEligible(testSautr, testUserTypeIndiv, None)(isEligible = eligibleBoth)
       mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
       status(result) mustBe OK
-      contentAsJson(result) mustBe Json.obj(eligibleKey -> true)
+      contentAsJson(result) mustBe Json.obj(eligible -> true, eligibleCurrent -> true, eligibleNext -> true)
     }
 
     "return OK with body 'eligible: false'" in {
-      mockIsEligible(testSautr, testUserTypeIndiv, None)(isEligible = Future.successful(false))
+      val notEligibleCurrentYear = Future.successful(EligibilityByYear(current = false, next = true))
+      mockIsEligible(testSautr, testUserTypeIndiv, None)(isEligible = notEligibleCurrentYear)
       mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
       status(result) mustBe OK
-      contentAsJson(result) mustBe Json.obj(eligibleKey -> false)
+      contentAsJson(result) mustBe Json.obj(eligible -> false, eligibleCurrent -> false, eligibleNext -> true)
     }
 
     "return OK with body 'eligible: true' with an Agent" in {
-      mockIsEligible(testSautr, testUserTypeAgent, testAgentReferenceNumber)(isEligible = Future.successful(true))
+      mockIsEligible(testSautr, testUserTypeAgent, testAgentReferenceNumber)(isEligible = eligibleBoth)
       mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set(
         Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "123456789")), "Activated")))))
 
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
       status(result) mustBe OK
-      contentAsJson(result) mustBe Json.obj(eligibleKey -> true)
+      contentAsJson(result) mustBe Json.obj(eligible -> true, eligibleCurrent -> true, eligibleNext -> true)
     }
   }
 }

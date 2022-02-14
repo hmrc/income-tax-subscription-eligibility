@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class ConvertConfigValuesService @Inject()(appConfig: AppConfig) {
 
-  def convertConfigValues(): Set[ControlListParameter] =
-    ControlListParameter.getParameterMap.values.filterNot(appConfig.isEligible).toSet
+  def convertConfigValues(year: String): Set[ControlListParameter] =
+    ControlListParameter.getParameterMap.values.filterNot(appConfig.isEligible(year, _)).toSet
 
 }

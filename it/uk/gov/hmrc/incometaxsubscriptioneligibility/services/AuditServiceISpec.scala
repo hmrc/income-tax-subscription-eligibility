@@ -20,7 +20,6 @@ import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import com.github.tomakehurst.wiremock.client.WireMock.{findAll, postRequestedFor, urlMatching}
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
-import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import org.joda.time.DateTime
 import play.api.Application
 import play.api.http.Status
@@ -35,7 +34,7 @@ import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
 
-import java.util
+import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuditServiceISpec extends ComponentSpecBase {
@@ -91,10 +90,10 @@ class AuditServiceISpec extends ComponentSpecBase {
       await(auditService.audit(testAuditModel)) mustBe AuditResult.Success
 
       private val builder: RequestPatternBuilder = postRequestedFor(urlMatching(AuditStub.auditUri))
-      val requests: util.List[LoggedRequest] = findAll(builder)
+      val requests = findAll(builder).asScala
       requests.isEmpty mustBe false
 
-      val jsonSent: JsValue = Json.parse(requests.get(0).getBodyAsString)
+      val jsonSent: JsValue = Json.parse(requests(0).getBodyAsString)
       val dataEventSent: DataEvent = jsonSent.as[DataEvent](Json.reads[DataEvent])
 
       dataEventMatcher(testAuditDataEvent, dataEventSent)

@@ -14,17 +14,29 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.incometaxsubscriptioneligibility.helpers
+package uk.gov.hmrc.incometaxsubscriptioneligibility.models
 
-import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.play.PlaySpec
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitch, FeatureSwitching}
+import java.time.LocalDate.now
+import java.time.{LocalDate, Month}
 
-trait FeatureSwitchingSpec extends PlaySpec with FeatureSwitching with BeforeAndAfterEach {
+case object TaxYear {
+  private val START_DAY = 6
+  private val START_MONTH = Month.APRIL
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    FeatureSwitch.switches foreach disable
+  def getCurrentTaxYear(): String = {
+    val endYear = taxYearEnd()
+    s"${endYear - 1}-$endYear"
   }
 
+  def getNextTaxYear(): String = {
+    val endYear = taxYearEnd()
+    s"${endYear}-${endYear + 1}"
+  }
+
+  private def taxYearEnd() = {
+    val date = now()
+    if (date.isBefore(LocalDate.of(date.getYear, TaxYear.START_MONTH, TaxYear.START_DAY))) date.getYear
+    else date.getYear + 1
+  }
 }
+
