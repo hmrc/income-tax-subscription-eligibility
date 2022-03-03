@@ -23,11 +23,14 @@ import uk.gov.hmrc.http.{HttpResponse, InternalServerException}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.GetControlListReads.read
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.NonResidentCompanyLandlord
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.{Accruals, Date, OverseasProperty, PrepopData, SelfEmploymentData, UkProperty}
 
 class GetControlListHttpParserSpec extends PlaySpec {
 
+  val testDate = "01012018"
+
   "GetControlListHttpReads" should {
-    "return Right(Set[ControlListParameters]))" when {
+    "parse ControlListParameters" when {
       "the controlList string in the correct format" in {
         val testControlListString = "1000000000000000000000000000000000000000"
         val testJson = Json.obj(
@@ -35,14 +38,111 @@ class GetControlListHttpParserSpec extends PlaySpec {
           "year" -> "2019",
           "controlListInformation" -> testControlListString
         )
-        val testHttpResponse = HttpResponse(responseStatus = OK, responseJson = Some(testJson))
+        val testHttpResponse = HttpResponse(status = OK, json = testJson, headers = Map.empty)
 
         val res = read(method = "GET", url = "/", response = testHttpResponse)
 
-        res mustBe Right(Set(NonResidentCompanyLandlord))
+        res mustBe Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord)))
       }
     }
-    "return Left(InvalidControlListFormat)" when {
+
+    "parse prepopData" when {
+      "the prepopData contains a UK property" in {
+        val testControlListString = "1000000000000000000000000000000000000000"
+        val testJson = Json.obj(
+          "nino" -> "AA123456A",
+          "year" -> "2019",
+          "controlListInformation" -> testControlListString,
+          "prepopData" -> Json.obj(
+            "ukPropertyStartDate" -> testDate,
+            "ukPropertyAccountingMethod" -> "Y"
+          )
+        )
+        val testHttpResponse = HttpResponse(status = OK, json = testJson, headers = Map.empty)
+
+        val res = read(method = "GET", url = "/", response = testHttpResponse)
+
+        res mustBe Right(
+          GetControlListSuccessResponse(
+            controlList = Set(NonResidentCompanyLandlord),
+            prepopData = Some(PrepopData(
+              ukProperty = Some(UkProperty(
+                ukPropertyStartDate = Some(Date("1", "1", "2018")),
+                ukPropertyAccountingMethod = Some(Accruals)
+              ))
+            ))
+          )
+        )
+      }
+
+      "the prepopData contains an overseas property" in {
+        val testControlListString = "1000000000000000000000000000000000000000"
+        val testJson = Json.obj(
+          "nino" -> "AA123456A",
+          "year" -> "2019",
+          "controlListInformation" -> testControlListString,
+          "prepopData" -> Json.obj(
+            "overseasPropertyStartDate" -> testDate,
+            "overseasPropertyAccountingMethod" -> "Y"
+          )
+        )
+        val testHttpResponse = HttpResponse(status = OK, json = testJson, headers = Map.empty)
+
+        val res = read(method = "GET", url = "/", response = testHttpResponse)
+
+        res mustBe Right(
+          GetControlListSuccessResponse(
+            controlList = Set(NonResidentCompanyLandlord),
+            prepopData = Some(PrepopData(
+              overseasProperty = Some(OverseasProperty(
+                overseasPropertyStartDate = Some(Date("1", "1", "2018")),
+                overseasPropertyAccountingMethod = Some(Accruals)
+              ))
+            ))
+          )
+        )
+      }
+
+      "the prepopData contains a self employments" in {
+        val testControlListString = "1000000000000000000000000000000000000000"
+        val testJson = Json.obj(
+          "nino" -> "AA123456A",
+          "year" -> "2019",
+          "controlListInformation" -> testControlListString,
+          "prepopData" -> Json.obj(
+            "selfEmployments" -> Json.arr(
+              Json.obj(
+                "businessName" -> "Test business name",
+                "businessTradeName" -> "Test business trade name",
+                "businessStartDate" -> testDate,
+                "businessAccountingMethod" -> "Y"
+              )
+            )
+          )
+        )
+        val testHttpResponse = HttpResponse(status = OK, json = testJson, headers = Map.empty)
+
+        val res = read(method = "GET", url = "/", response = testHttpResponse)
+
+        res mustBe Right(
+          GetControlListSuccessResponse(
+            controlList = Set(NonResidentCompanyLandlord),
+            prepopData = Some(PrepopData(
+              selfEmployments = Some(Vector(
+                SelfEmploymentData(
+                  businessName = Some("Test business name"),
+                  businessTradeName = Some("Test business trade name"),
+                  businessStartDate = Some(Date("1", "1", "2018")),
+                  businessAccountingMethod = Some(Accruals)
+                )
+              ))
+            ))
+          )
+        )
+      }
+    }
+
+    "fail" when {
       "the controlList string in an incorrect format" in {
         val testControlListString = "100000000000000000000000000000000000000"
         val testJson = Json.obj(
@@ -50,25 +150,25 @@ class GetControlListHttpParserSpec extends PlaySpec {
           "year" -> "2019",
           "controlListInformation" -> testControlListString
         )
-        val testHttpResponse = HttpResponse(responseStatus = OK, responseJson = Some(testJson))
+        val testHttpResponse = HttpResponse(status = OK, json = testJson, headers = Map.empty)
 
         val res = read(method = "GET", url = "/", response = testHttpResponse)
 
         res mustBe Left(InvalidControlListFormat)
       }
-    }
-    "return Left(ControlListDataNotFound)" when {
+
       "NOT_FOUND is returned" in {
-        val testHttpResponse = HttpResponse(responseStatus = NOT_FOUND, responseJson = Some(Json.obj()))
+        val testHttpResponse = HttpResponse(status = NOT_FOUND, json = Json.obj(), headers = Map.empty)
 
         val res = read(method = "GET", url = "/", response = testHttpResponse)
 
         res mustBe Left(ControlListDataNotFound)
       }
     }
+
     "throw exceptions" when {
       "invalid json is returned" in {
-        val testHttpResponse = HttpResponse(responseStatus = OK, responseJson = Some(Json.obj()))
+        val testHttpResponse = HttpResponse(status = OK, json = Json.obj(), headers = Map.empty)
 
         intercept[InternalServerException] {
           read(method = "GET", url = "/", response = testHttpResponse)
@@ -76,21 +176,23 @@ class GetControlListHttpParserSpec extends PlaySpec {
       }
       "BAD_REQUEST is returned" in {
 
-        val testHttpResponse = HttpResponse(responseStatus = BAD_REQUEST, responseJson = Some(Json.obj()))
+        val testHttpResponse = HttpResponse(status = BAD_REQUEST, json = Json.obj(), headers = Map.empty)
 
         intercept[InternalServerException] {
           read(method = "GET", url = "/", response = testHttpResponse)
         }
       }
+
       "INTERNAL_SERVER_ERROR is returned" in {
-        val testHttpResponse = HttpResponse(responseStatus = INTERNAL_SERVER_ERROR, responseJson = Some(Json.obj()))
+        val testHttpResponse = HttpResponse(status = INTERNAL_SERVER_ERROR, json = Json.obj(), headers = Map.empty)
 
         intercept[InternalServerException] {
           read(method = "GET", url = "/", response = testHttpResponse)
         }
       }
+
       "SERVICE_UNAVAILABLE is returned" in {
-        val testHttpResponse = HttpResponse(responseStatus = SERVICE_UNAVAILABLE, responseJson = Some(Json.obj()))
+        val testHttpResponse = HttpResponse(status = SERVICE_UNAVAILABLE, json = Json.obj(), headers = Map.empty)
 
         intercept[InternalServerException] {
           read(method = "GET", url = "/", response = testHttpResponse)
@@ -98,5 +200,4 @@ class GetControlListHttpParserSpec extends PlaySpec {
       }
     }
   }
-
 }

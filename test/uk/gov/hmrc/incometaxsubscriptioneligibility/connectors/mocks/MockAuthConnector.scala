@@ -30,7 +30,7 @@ trait MockAuthConnector extends MockFactory {
 
   def mockAuthorise[A](predicate: Predicate = EmptyPredicate, retrievals: Retrieval[A])
                       (response: Future[A])
-                      (implicit hc: HeaderCarrier, ec: ExecutionContext): Unit =
+                      (implicit ec: ExecutionContext): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[A])(_: HeaderCarrier, _: ExecutionContext))
       .expects(predicate, retrievals, *, ec)
       .returning(response)

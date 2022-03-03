@@ -37,10 +37,56 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
     "eligibleNextYear" -> eligibleNext
   )
 
+  def testJsonWithPrepopData(eligibleCurrent: Boolean, eligibleNext: Boolean): JsObject = Json.obj(
+    "eligible" -> eligibleCurrent,
+    "eligibleCurrentYear" -> eligibleCurrent,
+    "eligibleNextYear" -> eligibleNext,
+    "prepopData" -> Json.obj(
+      "ukProperty" -> Json.obj(
+        "ukPropertyStartDate" -> Json.obj(
+          "day" -> "1",
+          "month" -> "1",
+          "year" -> "2018"
+        ),
+        "ukPropertyAccountingMethod" -> "Accruals"
+      ),
+      "overseasProperty" -> Json.obj(
+        "overseasPropertyStartDate" -> Json.obj(
+          "day" -> "1",
+          "month" -> "1",
+          "year" -> "2018"
+        )
+      ),
+      "selfEmployments" -> Json.arr(
+        Json.obj(
+          "businessName" -> "Test business name",
+          "businessTradeName" -> "Test business trade name",
+          "businessAddressFirstLine" -> "Buckingham Palace",
+          "businessAddressPostCode" -> "SW1A 1AA",
+          "businessStartDate" -> Json.obj(
+            "day" -> "1",
+            "month" -> "1",
+            "year" -> "2018"
+          ),
+          "businessAccountingMethod" -> "Accruals"
+        )
+      )
+    )
+  )
+
   s"A GET request on '/eligibility/$testSautr' route" should {
     "return an OK with '{eligibleCurrent: true}'" when {
       "the feature switch is enabled" in new Server(defaultApp) {
+        val testControlListString: String = ControlListHelper(Set()).asBinaryString
+
+        val testDesJson: JsObject = Json.obj(
+          "nino" -> "AA123456A",
+          "year" -> "2019",
+          "controlListInformation" -> testControlListString
+        )
+
         stubAuth(OK, Json.obj())
+        stubGetControlList(testSautr)(OK, testDesJson)
         enable(StubControlListEligible)
 
         val result: WSResponse = get(s"/eligibility/$testSautr")
@@ -172,6 +218,47 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
       }
     }
 
-  }
+    "return an OK with '{eligible: true}' and pre-pop data" in new Server(defaultApp) {
+      val testControlListString: String = ControlListHelper(Set()).asBinaryString
 
+      val testDesJson: JsObject = Json.obj(
+        "nino" -> "AA123456A",
+        "year" -> "2019",
+        "controlListInformation" -> testControlListString,
+        "prepopData" -> Json.obj(
+          "ukPropertyStartDate" -> "01012018",
+          "ukPropertyAccountingMethod" -> "Y",
+          "overseasPropertyStartDate" -> "01012018",
+          "selfEmployments" -> Json.arr(
+            Json.obj(
+              "businessName" -> "Test business name",
+              "businessTradeName" -> "Test business trade name",
+              "businessAddressFirstLine" -> "Buckingham Palace",
+              "businessAddressPostCode" -> "SW1A 1AA",
+              "businessStartDate" -> "01012018",
+              "businessAccountingMethod" -> "Y"
+            ),
+            Json.obj(
+              "businessName" -> "Test business name",
+              "businessTradeName" -> "Test business trade name",
+              "businessStartDate" -> "01012018",
+              "businessAccountingMethod" -> "Y",
+              "businessCeasedDate" -> "20180101"
+            )
+          )
+        )
+      )
+
+      stubAuth(OK, Json.obj())
+      stubGetControlList(testSautr)(OK, testDesJson)
+      enable(StubControlListEligible)
+
+      val result: WSResponse = get(s"/eligibility/$testSautr")
+
+      result must have(
+        httpStatus(OK),
+        jsonBodyAs(testJsonWithPrepopData(eligibleCurrent = true, eligibleNext = true))
+      )
+    }
+  }
 }
