@@ -20,9 +20,11 @@ import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.GetControlListConnector
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.GetControlListResponse
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{GetControlListResponse, GetControlListSuccessResponse}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.{EligibilityByYear, EligibilityStatus, PrepopData, TaxYear}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,36 +34,49 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
                                               getControlListConnector: GetControlListConnector,
                                               auditService: AuditService
                                              ) extends FeatureSwitching {
-
-  private def eligibilityConfigParameters(year: String) = convertConfigValuesService.convertConfigValues(year)
-
   def getEligibilityStatus(sautr: String, userType: String, agentReferenceNumber: Option[String])
-                          (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[EligibilityByYear] =
-    if (isEnabled(StubControlListEligible)) {
-      Future.successful(EligibilityByYear(current = true, next = true))
-    } else {
-      getEligibilityStatusForReal(sautr, userType, agentReferenceNumber)
-    }
-
-  private def getEligibilityStatusForReal(sautr: String, userType: String, agentReferenceNumber: Option[String])
-                                         (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[EligibilityByYear] = for {
+                                         (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[EligibilityStatus] = for {
     controlResponse <- getControlListConnector.getControlList(sautr)
-    errorReasonsCurrent = checkReasons(TaxYear.getCurrentTaxYear(), controlResponse)
-    errorReasonsNext = checkReasons(TaxYear.getNextTaxYear(), controlResponse)
+    (eligibilityStatus, prepopData) = handleResponse(controlResponse)
+    eligibleCurrentYear = isEligible(eligibilityStatus.current)
+    eligibleNextYear = isEligible(eligibilityStatus.next)
     // Alex Rimmer:
     // We will keep audit model the same for now until we have talked to the TxM / CIP team
     // about the audit requirements now it’s changing
     // Success value should just relate to the current year check
-    auditModel = EligibilityAuditModel(eligibilityResult = errorReasonsCurrent.isEmpty, sautr, userType, agentReferenceNumber, errorReasonsCurrent.toSeq)
-    _ <- auditService.audit(auditModel)
-  } yield EligibilityByYear(errorReasonsCurrent.isEmpty, errorReasonsNext.isEmpty)
+    auditModel = EligibilityAuditModel(
+      eligibilityResult = eligibleCurrentYear,
+      sautr,
+      userType,
+      agentReferenceNumber,
+      eligibilityStatus.current.toSeq
+    )
+    _ <- sendAuditEvent(auditModel)
+  } yield EligibilityStatus(eligible = eligibleCurrentYear, eligibleCurrentYear, eligibleNextYear, prepopData)
 
-  private def checkReasons(year: String, controlResponse: GetControlListResponse)
-                          (implicit hc: HeaderCarrier, ec: ExecutionContext) = (controlResponse match {
-    case Right(controlListParameters) => eligibilityConfigParameters(year).intersect(controlListParameters) // empty == OK
-    case Left(error) => Set(error)
-  }).map(_.errorMessage)
+  private def handleResponse(controlResponse: GetControlListResponse): (EligibilityByYear, Option[PrepopData]) = (controlResponse match {
+    case Right(GetControlListSuccessResponse(controlList, prepopData)) => (EligibilityByYear(
+      checkReasons(TaxYear.getCurrentTaxYear(), controlList),
+      checkReasons(TaxYear.getNextTaxYear(), controlList)
+    ), PrepopData.filterCeasedBusinesses(prepopData))
+    case Left(error) => (
+      EligibilityByYear(Set(error.errorMessage), Set(error.errorMessage)), None
+    )
+  })
 
+  private def checkReasons(year: String, controlList: Set[ControlListParameter]): Set[String] =
+    eligibilityConfigParameters(year).intersect(controlList).map(_.errorMessage)
+
+  private def eligibilityConfigParameters(year: String) = convertConfigValuesService.convertConfigValues(year)
+
+  private def isEligible(controlListResults: Set[String]) =
+    isEnabled(StubControlListEligible) || controlListResults.isEmpty
+
+  private def sendAuditEvent(auditModel: EligibilityAuditModel)
+                            (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]) =
+  if (isEnabled(StubControlListEligible)) {
+    Future.successful(AuditResult.Disabled)
+  } else {
+    auditService.audit(auditModel)
+  }
 }
-case class EligibilityByYear(current: Boolean, next: Boolean)
-

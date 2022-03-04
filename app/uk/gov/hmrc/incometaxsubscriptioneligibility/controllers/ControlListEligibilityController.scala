@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 
-import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, Enrolment, EnrolmentIdentifier, Enrolments}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibilityService
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
 import scala.collection.immutable.::
 import scala.concurrent.ExecutionContext
 
@@ -32,20 +32,12 @@ class ControlListEligibilityController @Inject()(cc: ControllerComponents,
                                                  controlListEligibilityService: ControlListEligibilityService,
                                                  val authConnector: AuthConnector)
                                                 (implicit ec: ExecutionContext) extends BackendController(cc) with AuthorisedFunctions {
-
-  private val key: String = "eligible"
-  private val keyCurrent: String = "eligibleCurrentYear"
-  private val keyNext: String = "eligibleNextYear"
   def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async { implicit request =>
     authorised().retrieve(Retrievals.allEnrolments) { enrolments =>
       val userType: String = if(enrolments.getEnrolment("HMRC-AS-AGENT").isDefined) "agent" else "individual"
 
       controlListEligibilityService.getEligibilityStatus(sautr, userType, getArnFromEnrolments(enrolments)) map {
-        eligibilityStatus => Ok(Json.obj(
-          key -> eligibilityStatus.current,
-          keyCurrent -> eligibilityStatus.current,
-          keyNext -> eligibilityStatus.next
-        ))
+        eligibilityStatus => Ok(Json.toJson(eligibilityStatus))
       }
     }
   }

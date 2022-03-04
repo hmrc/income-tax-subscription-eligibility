@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors
 
-import java.util.UUID
-
 import play.api.Application
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.ComponentSpecBase
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.DesControlListApiStub.stubGetControlList
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{ControlListDataNotFound, GetControlListSuccessResponse}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.NonResidentCompanyLandlord
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.{Accruals, Date, OverseasProperty, PrepopData, SelfEmploymentData, UkProperty}
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -41,7 +41,7 @@ class GetControlListConnectorISpec extends ComponentSpecBase {
 
   "getControlList" should {
     "return a Right(Set[ControlListParameters])" when {
-      "DES returns a valid control list string" in new App(defaultApp) {
+      "DES returns a valid control list string without pre-pop data" in new App(defaultApp) {
         val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
         val testJson: JsObject = Json.obj(
           "nino" -> "AA123456A",
@@ -53,7 +53,54 @@ class GetControlListConnectorISpec extends ComponentSpecBase {
 
         val res = connector.getControlList(testSautr)
 
-        await(res) mustBe Right(Set(NonResidentCompanyLandlord))
+        await(res) mustBe Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord), None))
+      }
+
+      "DES returns a valid control list string with pre-pop data" in new App(defaultApp) {
+        val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
+        val testJson: JsObject = Json.obj(
+          "nino" -> "AA123456A",
+          "year" -> "2019",
+          "controlListInformation" -> testControlListString,
+          "prepopData" -> Json.obj(
+            "ukPropertyStartDate" -> "01012018",
+            "ukPropertyAccountingMethod" -> "Y",
+            "overseasPropertyStartDate" -> "01012018",
+            "selfEmployments" -> Json.arr(
+              Json.obj(
+                "businessName" -> "Test business name",
+                "businessTradeName" -> "Test business trade name",
+                "businessStartDate" -> "01012018",
+                "businessAccountingMethod" -> "Y"
+              )
+            )
+          )
+        )
+
+        stubGetControlList(testSautr)(status = OK, body = testJson)
+
+        val res = connector.getControlList(testSautr)
+
+        await(res) mustBe Right(GetControlListSuccessResponse(
+          controlList = Set(NonResidentCompanyLandlord),
+          prepopData = Some(PrepopData(
+            selfEmployments = Some(Vector(
+              SelfEmploymentData(
+                businessName = Some("Test business name"),
+                businessTradeName = Some("Test business trade name"),
+                businessStartDate = Some(Date("1", "1", "2018")),
+                businessAccountingMethod = Some(Accruals)
+              )
+            )),
+            ukProperty = Some(UkProperty(
+              ukPropertyStartDate = Some(Date("1", "1", "2018")),
+              ukPropertyAccountingMethod = Some(Accruals)
+            )),
+            overseasProperty = Some(OverseasProperty(
+              overseasPropertyStartDate = Some(Date("1", "1", "2018"))
+            ))
+          ))
+        ))
       }
     }
 
@@ -67,5 +114,4 @@ class GetControlListConnectorISpec extends ComponentSpecBase {
       }
     }
   }
-
 }

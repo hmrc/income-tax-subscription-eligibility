@@ -26,7 +26,7 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockAuthConnector
-import uk.gov.hmrc.incometaxsubscriptioneligibility.services.EligibilityByYear
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.{Accruals, Date, EligibilityStatus, OverseasProperty, PrepopData, SelfEmploymentData, UkProperty}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockControlListEligibilityService
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
@@ -47,9 +47,10 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
   val eligible: String = "eligible"
   val eligibleCurrent: String = "eligibleCurrentYear"
   val eligibleNext: String = "eligibleNextYear"
+  val prepopData: String = "prepopData"
 
   "getEligibilityStatus" should {
-    val eligibleBoth = Future.successful(EligibilityByYear(current = true, next = true))
+    val eligibleBoth = Future.successful(EligibilityStatus(eligible = true, eligibleCurrentYear = true, eligibleNextYear = true))
     "return OK with body 'eligible: true'" in {
       mockIsEligible(testSautr, testUserTypeIndiv, None)(isEligible = eligibleBoth)
       mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
@@ -61,7 +62,7 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
     }
 
     "return OK with body 'eligible: false'" in {
-      val notEligibleCurrentYear = Future.successful(EligibilityByYear(current = false, next = true))
+      val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, eligibleNextYear = true))
       mockIsEligible(testSautr, testUserTypeIndiv, None)(isEligible = notEligibleCurrentYear)
       mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
 
@@ -80,6 +81,75 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
 
       status(result) mustBe OK
       contentAsJson(result) mustBe Json.obj(eligible -> true, eligibleCurrent -> true, eligibleNext -> true)
+    }
+
+    "return OK with body 'eligible: true' with pre-pop data" in {
+      val notEligibleCurrentYear = Future.successful(
+        EligibilityStatus(
+          eligible = false,
+          eligibleCurrentYear = false,
+          eligibleNextYear = true,
+          prepopData = Some(PrepopData(
+            selfEmployments = Some(Seq(
+              SelfEmploymentData(
+                businessName = Some("Test business name"),
+                businessTradeName = Some("Test business trade name"),
+                businessStartDate = Some(Date("01", "01", "2018")),
+                businessAccountingMethod = Some(Accruals)
+              )
+            )),
+            ukProperty = Some(UkProperty(
+              ukPropertyStartDate = Some(Date("01", "01", "2018")),
+              ukPropertyAccountingMethod = Some(Accruals)
+            )),
+            overseasProperty = Some(OverseasProperty(
+              overseasPropertyStartDate = Some(Date("01", "01", "2018")),
+              overseasPropertyAccountingMethod = Some(Accruals)
+            ))
+          ))
+        )
+      )
+      mockIsEligible(testSautr, testUserTypeIndiv, None)(isEligible = notEligibleCurrentYear)
+      mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+      val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.obj(
+        eligible -> false,
+        eligibleCurrent -> false,
+        eligibleNext -> true,
+        prepopData -> Json.obj(
+          "ukProperty" -> Json.obj(
+            "ukPropertyStartDate" -> Json.obj(
+              "day" -> "01",
+              "month" -> "01",
+              "year" -> "2018"
+            ),
+            "ukPropertyAccountingMethod" -> "Accruals"
+          ),
+          "overseasProperty" -> Json.obj(
+            "overseasPropertyStartDate" -> Json.obj(
+              "day" -> "01",
+              "month" -> "01",
+              "year" -> "2018"
+            ),
+            "overseasPropertyAccountingMethod" -> "Accruals",
+          ),
+          "selfEmployments" -> Json.arr(
+            Json.obj(
+              "businessName" -> "Test business name",
+              "businessTradeName" -> "Test business trade name",
+              "businessStartDate" -> Json.obj(
+                "day" -> "01",
+                "month" -> "01",
+                "year" -> "2018"
+              ),
+              "businessAccountingMethod" -> "Accruals"
+            )
+          )
+        )
+      )
     }
   }
 }

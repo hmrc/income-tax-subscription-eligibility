@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks
 
-import org.scalamock.handlers.CallHandler1
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter

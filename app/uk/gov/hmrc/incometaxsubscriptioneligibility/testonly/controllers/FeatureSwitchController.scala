@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.FeatureSwitch.switches
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitch, FeatureSwitchSetting, FeatureSwitching}
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 @Singleton
 class FeatureSwitchController @Inject()(override val controllerComponents: ControllerComponents)

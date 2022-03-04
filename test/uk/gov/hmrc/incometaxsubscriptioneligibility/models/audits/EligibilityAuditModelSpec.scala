@@ -18,7 +18,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits
 
 import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices.{MARRIAGE_ALLOWANCE, NON_RESIDENT_COMPANY_LANDLORD, STUDENT_LOANS}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.{ControlListParameter, MarriageAllowance, NonResidentCompanyLandlord, StudentLoans}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 
 class EligibilityAuditModelSpec extends PlaySpec {
 
