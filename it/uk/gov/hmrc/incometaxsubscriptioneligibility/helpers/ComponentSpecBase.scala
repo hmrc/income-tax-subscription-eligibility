@@ -20,11 +20,10 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.play.{MixedPlaySpec, PortNumber}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Writes
-import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.test.Helpers._
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitch, FeatureSwitching}
-
 
 trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   with WiremockHelper with BeforeAndAfterAll with BeforeAndAfterEach with FeatureSwitching {
@@ -69,28 +68,32 @@ trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   }
 
   def get[T](uri: String)(implicit ws: WSClient, portNumber: PortNumber): WSResponse = {
-    await(buildClient(uri).get)
+    await(authorisedClient(uri).get)
   }
 
   def post[T](uri: String)(body: T)(implicit writes: Writes[T], ws: WSClient, portNumber: PortNumber): WSResponse = {
     await(
-      buildClient(uri)
-        .withHttpHeaders("Content-Type" -> "application/json")
+      authorisedClient(uri, "Content-Type" -> "application/json")
         .post(writes.writes(body).toString())
     )
   }
 
   def put[T](uri: String)(body: T)(implicit writes: Writes[T], ws: WSClient, portNumber: PortNumber): WSResponse = {
     await(
-      buildClient(uri)
-        .withHttpHeaders("Content-Type" -> "application/json")
+      authorisedClient(uri, "Content-Type" -> "application/json")
         .put(writes.writes(body).toString())
     )
   }
 
   val baseUrl: String = "/income-tax-subscription-eligibility"
 
-  private def buildClient(path: String)(implicit ws: WSClient, portNumber: PortNumber): WSRequest =
-    ws.url(s"http://localhost:${portNumber.value}$baseUrl$path").withFollowRedirects(false)
+  private def authorisedClient(path: String, extraHeaders: (String, String)*)(implicit ws: WSClient, portNumber: PortNumber) = {
+    val sessionId = "X-Session-ID" -> "testSessionId"
+    val authorisation = "Authorization" -> "Bearer 123"
+    val headers = extraHeaders.toList :+ sessionId :+ authorisation
+    ws.url(s"http://localhost:${portNumber.value}$baseUrl$path")
+      .withFollowRedirects(false)
+      .withHttpHeaders(headers: _*)
+  }
 
 }
