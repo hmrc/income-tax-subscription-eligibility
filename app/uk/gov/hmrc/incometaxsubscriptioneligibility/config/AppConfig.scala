@@ -16,12 +16,17 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.config
 
+import play.api.Logging
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import scala.util.Try
+
 @Singleton
-class AppConfig @Inject()(servicesConfig: ServicesConfig) extends FeatureSwitching {
+class AppConfig @Inject()(servicesConfig: ServicesConfig) extends FeatureSwitching with Logging {
 
   private def loadConfig(key: String) = servicesConfig.getString(key) //throws RuntimeException(s"Could not find config key '$key'") if key not found
 
@@ -49,4 +54,29 @@ class AppConfig @Inject()(servicesConfig: ServicesConfig) extends FeatureSwitchi
       case Some(bool) => bool.toBoolean
       case _ => throw new Exception(s"Unknown eligibility config key: ${param.configKey}")
     }
+
+  def isControlListConfigurationValid(): Boolean = {
+    val currentYear = TaxYear.getCurrentTaxYear()
+    val nextYear = TaxYear.getNextTaxYear()
+
+    ControlListParameter.getParameterMap.values.foldLeft(true)((accumulator, param) => {
+      // False in the config means "do the check", true means "don't do the check"
+      val doCheck = false
+      val dontCheck = true
+
+      // We choose to make "missing" mean "don't check"
+      // If a missing control list item is later requested, we will throw an request specific error (see above).
+
+      val checkCurrentYear = Try(isEligible(currentYear, param)).toOption.getOrElse(dontCheck) == doCheck
+      val checkNextYear = Try(isEligible(nextYear, param)).toOption.getOrElse(dontCheck) == doCheck
+      if (!checkCurrentYear && checkNextYear) {
+        logger.info(s"Control list param $param is not checked in the current year and checked in the following year")
+        false
+      } else
+        accumulator
+    })
+  }
+
+  if (!isControlListConfigurationValid())
+    logger.error(s"Control list params are not valid")
 }
