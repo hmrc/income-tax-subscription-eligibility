@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class FeatureSwitchSetting(feature: String, enable: Boolean)
 
-object FeatureSwitchSetting extends FeatureSwitching {
+object FeatureSwitchSetting {
 
   implicit val format: OFormat[FeatureSwitchSetting] = Json.format[FeatureSwitchSetting]
 

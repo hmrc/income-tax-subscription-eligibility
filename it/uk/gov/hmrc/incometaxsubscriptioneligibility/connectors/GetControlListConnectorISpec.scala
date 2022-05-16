@@ -20,12 +20,13 @@ import play.api.Application
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.ComponentSpecBase
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.DesControlListApiStub.stubGetControlList
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{ControlListDataNotFound, GetControlListSuccessResponse}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.NonResidentCompanyLandlord
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.{Accruals, Date, OverseasProperty, PrepopData, SelfEmploymentData, UkProperty}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models._
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,6 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class GetControlListConnectorISpec extends ComponentSpecBase {
 
+  override val appConfig: AppConfig = appConfig
   def connector(implicit app: Application): GetControlListConnector = app.injector.instanceOf[GetControlListConnector]
 
   implicit val headerCarrier: HeaderCarrier = HeaderCarrier()

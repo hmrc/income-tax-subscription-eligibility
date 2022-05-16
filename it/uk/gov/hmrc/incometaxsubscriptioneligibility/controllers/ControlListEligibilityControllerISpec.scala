@@ -19,7 +19,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Json}
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.StubControlListEligible
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.AuthStub.stubAuth
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.DesControlListApiStub.stubGetControlList
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, ControlListConfigTestHelper}
@@ -28,6 +28,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
 
 class ControlListEligibilityControllerISpec extends ComponentSpecBase with ControlListConfigTestHelper {
 
+  override val appConfig: AppConfig = appConfig
   val testSautr = "1234567890"
   private val year = "2021-2022"
 

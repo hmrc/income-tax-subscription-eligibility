@@ -16,29 +16,31 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
-import java.time.format.DateTimeFormatter
-import java.time.{Instant, LocalDateTime, ZoneOffset}
 import com.github.tomakehurst.wiremock.client.WireMock.{findAll, postRequestedFor, urlMatching}
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
 import org.joda.time.DateTime
 import play.api.Application
 import play.api.http.Status
-import play.api.libs.json.{Json, Reads, _}
+import play.api.libs.json._
 import play.api.mvc.{AnyContent, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.AuditStub
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, IntegrationTestConstants}
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
 
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuditServiceISpec extends ComponentSpecBase {
 
+  override val appConfig: AppConfig = appConfig
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val fr: Request[AnyContent] = FakeRequest(POST, IntegrationTestConstants.testUrl)
 

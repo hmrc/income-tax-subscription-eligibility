@@ -18,7 +18,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitching, StubControlListEligible}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.GetControlListConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{GetControlListResponse, GetControlListSuccessResponse}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
@@ -32,7 +32,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ControlListEligibilityService @Inject()(convertConfigValuesService: ConvertConfigValuesService,
                                               getControlListConnector: GetControlListConnector,
-                                              auditService: AuditService
+                                              auditService: AuditService,
+                                              val appConfig: AppConfig
                                              ) extends FeatureSwitching {
   def getEligibilityStatus(sautr: String, userType: String, agentReferenceNumber: Option[String])
                                          (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[EligibilityStatus] = for {

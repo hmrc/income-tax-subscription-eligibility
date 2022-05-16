@@ -20,6 +20,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import play.api.Configuration
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -27,7 +28,8 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class AppConfigSpec extends PlaySpec with MockitoSugar {
 
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
-  val appConfig = new AppConfig(mockServicesConfig)
+  val mockConfiguration: Configuration = mock[Configuration]
+  val appConfig = new AppConfig(mockServicesConfig, mockConfiguration)
 
   val currentYear = TaxYear.getCurrentTaxYear()
   val nextYear = TaxYear.getNextTaxYear()
