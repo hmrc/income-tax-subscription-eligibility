@@ -16,23 +16,22 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.config
 
-import play.api.Logging
+import play.api.{Configuration, Logging}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
-
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import javax.inject.{Inject, Singleton}
 import scala.util.Try
 
 @Singleton
-class AppConfig @Inject()(servicesConfig: ServicesConfig) extends FeatureSwitching with Logging {
+class AppConfig @Inject()(servicesConfig: ServicesConfig, val configuration: Configuration) extends Logging {
 
   private def loadConfig(key: String) = servicesConfig.getString(key) //throws RuntimeException(s"Could not find config key '$key'") if key not found
 
-  def desUrl: String =
+  def desUrl(stubDesConnection: Boolean): String =
     loadConfig(
-      if (isEnabled(UseStubForDesConnection))
+      if (stubDesConnection)
         "microservice.services.des.stub-url"
       else
         "microservice.services.des.url"

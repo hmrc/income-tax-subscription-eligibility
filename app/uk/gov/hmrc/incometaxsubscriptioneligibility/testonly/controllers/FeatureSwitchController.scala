@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.testonly.controllers
 
-import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.FeatureSwitch.switches
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitch, FeatureSwitchSetting, FeatureSwitching}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitch, FeatureSwitchSetting, FeatureSwitching}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
+
 @Singleton
-class FeatureSwitchController @Inject()(override val controllerComponents: ControllerComponents)
+class FeatureSwitchController @Inject()(override val controllerComponents: ControllerComponents, val appConfig: AppConfig)
   extends BackendController(controllerComponents) with FeatureSwitching {
 
   private def getCurrentSettings: Result = {

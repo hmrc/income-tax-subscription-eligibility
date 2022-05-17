@@ -23,17 +23,21 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{FeatureSwitchingSpec, TestConstants}
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuditServiceSpec extends FeatureSwitchingSpec with MockFactory with OneInstancePerTest {
+  val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
+  val mockConfiguration: Configuration = mock[Configuration]
+  val appConfig = new AppConfig(mockServicesConfig, mockConfiguration)
   val mockAuditConnector = mock[AuditConnector]
-  val mockConfiguration = mock[Configuration]
 
   lazy val testAuditService = new AuditService(mockConfiguration, mockAuditConnector)
 

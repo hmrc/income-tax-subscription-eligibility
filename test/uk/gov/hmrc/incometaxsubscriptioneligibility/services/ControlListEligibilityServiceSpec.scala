@@ -16,27 +16,32 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
+import play.api.Configuration
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.StubControlListEligible
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockGetControlListConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.FeatureSwitchingSpec
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{ControlListDataNotFound, GetControlListSuccessResponse, InvalidControlListFormat}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.{Accruals, Date, EligibilityStatus, PrepopData, SelfEmploymentData}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices.NON_RESIDENT_COMPANY_LANDLORD
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.{MockAuditService, MockConvertConfigValuesService}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
   with MockGetControlListConnector with MockConvertConfigValuesService with MockAuditService {
 
-  object TestControlListEligibilityService extends ControlListEligibilityService(mockConvertConfigValuesService, mockGetControlListConnector, mockAuditService)
+  val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
+  val mockConfiguration: Configuration = mock[Configuration]
+  val appConfig = new AppConfig(mockServicesConfig, mockConfiguration)
+  object TestControlListEligibilityService extends ControlListEligibilityService(mockConvertConfigValuesService, mockGetControlListConnector, mockAuditService, appConfig)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global

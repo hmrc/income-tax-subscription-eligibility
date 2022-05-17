@@ -23,7 +23,7 @@ import play.api.libs.json.Writes
 import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.test.Helpers._
 import play.api.{Application, Environment, Mode}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{FeatureSwitch, FeatureSwitching}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitch, FeatureSwitching}
 
 trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   with WiremockHelper with BeforeAndAfterAll with BeforeAndAfterEach with FeatureSwitching {
@@ -35,6 +35,7 @@ trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
     .configure(config ++ extraConfig)
     .build
 
+  implicit def appConfig(implicit app: Application): AppConfig = app.injector.instanceOf[AppConfig]
   implicit def ws(implicit app: Application): WSClient = app.injector.instanceOf[WSClient]
 
   val mockHost: String = WiremockHelper.wiremockHost
