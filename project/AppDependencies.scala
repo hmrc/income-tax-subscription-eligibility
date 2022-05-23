@@ -4,10 +4,10 @@ object AppDependencies {
 
   private val domainVersion = "8.0.0-play-28"
   private val scalaTestVersion = "3.2.11"
-  private val playCurrent = "2.8.14"
+  private val playCurrent = "2.8.15"
 
   val compile = Seq(
-    "uk.gov.hmrc" %% "bootstrap-backend-play-28" % "5.21.0",
+    "uk.gov.hmrc" %% "bootstrap-backend-play-28" % "5.24.0",
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2",
     "uk.gov.hmrc" %% "domain" % domainVersion
   )
