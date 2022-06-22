@@ -35,27 +35,36 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
                                               auditService: AuditService,
                                               val appConfig: AppConfig
                                              ) extends FeatureSwitching {
-  def getEligibilityStatus(sautr: String, userType: String, agentReferenceNumber: Option[String])
-                                         (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[EligibilityStatus] = for {
+  def getEligibilityStatus(sautr: String, agentReferenceNumber: Option[String])
+                          (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[EligibilityStatus] = for {
     controlResponse <- getControlListConnector.getControlList(sautr)
     (eligibilityStatus, prepopData) = handleResponse(controlResponse)
     eligibleCurrentYear = isEligible(eligibilityStatus.current)
     eligibleNextYear = isEligible(eligibilityStatus.next)
-    // Alex Rimmer:
-    // We will keep audit model the same for now until we have talked to the TxM / CIP team
-    // about the audit requirements now it’s changing
-    // Success value should just relate to the current year check
-    auditModel = EligibilityAuditModel(
-      eligibilityResult = eligibleCurrentYear,
-      sautr,
-      userType,
-      agentReferenceNumber,
-      eligibilityStatus.current.toSeq
-    )
-    _ <- sendAuditEvent(auditModel)
-  } yield EligibilityStatus(eligible = eligibleCurrentYear, eligibleCurrentYear, eligibleNextYear, prepopData)
+    _ = auditControlListResults(eligibilityStatus, sautr, agentReferenceNumber)
+  } yield {
+    EligibilityStatus(eligible = eligibleCurrentYear, eligibleCurrentYear, eligibleNextYear, prepopData)
+  }
 
-  private def handleResponse(controlResponse: GetControlListResponse): (EligibilityByYear, Option[PrepopData]) = (controlResponse match {
+  def auditControlListResults(eligibilityStatus: EligibilityByYear, sautr: String, agentReferenceNumber: Option[String])
+                             (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Unit = {
+    val currentYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
+      sautr = sautr,
+      agentReferenceNumber = agentReferenceNumber,
+      controlListCheck = "currentYear",
+      reasons = eligibilityStatus.current
+    )
+    val nextYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
+      sautr = sautr,
+      agentReferenceNumber = agentReferenceNumber,
+      controlListCheck = "nextYear",
+      reasons = eligibilityStatus.next
+    )
+    sendAuditEvent(currentYearAuditModel)
+    sendAuditEvent(nextYearAuditModel)
+  }
+
+  private def handleResponse(controlResponse: GetControlListResponse): (EligibilityByYear, Option[PrepopData]) = controlResponse match {
     case Right(GetControlListSuccessResponse(controlList, prepopData)) => (EligibilityByYear(
       checkReasons(TaxYear.getCurrentTaxYear(), controlList),
       checkReasons(TaxYear.getNextTaxYear(), controlList)
@@ -63,7 +72,7 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
     case Left(error) => (
       EligibilityByYear(Set(error.errorMessage), Set(error.errorMessage)), None
     )
-  })
+  }
 
   private def checkReasons(year: String, controlList: Set[ControlListParameter]): Set[String] =
     eligibilityConfigParameters(year).intersect(controlList).map(_.errorMessage)
@@ -75,9 +84,9 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
 
   private def sendAuditEvent(auditModel: EligibilityAuditModel)
                             (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]) =
-  if (isEnabled(StubControlListEligible)) {
-    Future.successful(AuditResult.Disabled)
-  } else {
-    auditService.audit(auditModel)
-  }
+    if (isEnabled(StubControlListEligible)) {
+      Future.successful(AuditResult.Disabled)
+    } else {
+      auditService.audit(auditModel)
+    }
 }

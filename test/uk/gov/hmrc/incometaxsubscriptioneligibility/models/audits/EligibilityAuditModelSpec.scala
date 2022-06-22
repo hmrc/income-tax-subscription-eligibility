@@ -17,55 +17,41 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits
 
 import org.scalatestplus.play.PlaySpec
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices.{MARRIAGE_ALLOWANCE, NON_RESIDENT_COMPANY_LANDLORD, STUDENT_LOANS}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 
 class EligibilityAuditModelSpec extends PlaySpec {
 
-  "The Audit Eligibility model" should {
-    val expectedDetailSuccess = Map("isSuccess" -> "true", "saUtr" -> "1234567890", "userType" -> "individual")
-    val expectedDetailFailure = Map("isSuccess" -> "false", "saUtr" -> "1234567890", "userType" -> "individual",
-      "failureReasons" -> "Non Resident Company Landlord, Student Loans, Transfers/receives Marriage Allowance")
-    val expectedDetailAgentSuccess = Map("isSuccess" -> "true", "saUtr" -> "1234567890", "userType" -> "agent", "agentReferenceNumber" -> "123456789")
-    val expectedDetailAgentFailure = Map("isSuccess" -> "false", "saUtr" -> "1234567890", "userType" -> "agent", "agentReferenceNumber" -> "123456789",
-      "failureReasons" -> "Non Resident Company Landlord, Student Loans, Transfers/receives Marriage Allowance")
+  val sautr: String = "test-sautr"
+  val controlListCheck: String = "test-control-list-check"
+  val agentReferenceNumber: String = "test-agent-reference-number"
+  val testReasons: Set[String] = Set("reason one", "reason two")
 
-    "Have detail with a utr and isSuccess set" when {
-      "the audit event is for a success" in {
-        val result = EligibilityAuditModel(true, "1234567890", "individual", None)
-        result.auditType mustBe "mtdITSAControlList"
-        result.detail mustBe expectedDetailSuccess
+  "EligibilityAuditModel" must {
+    "produce the correct auditType and detail" when {
+      "no agent reference number or reasons are provided" in {
+        val model = EligibilityAuditModel(sautr, None, controlListCheck)
+        model.auditType mustBe "mtdITSAControlList"
+        model.transactionName mustBe "ITSAControlListRequest"
+        model.detail mustBe Map(
+          "saUtr" -> sautr,
+          "userType" -> "individual",
+          "controlListCheck" -> controlListCheck,
+          "isSuccess" -> "true"
+        )
       }
-    }
-    "Have detail with utr, isSuccess and failureReasons set" when {
-      "the audit event is for a failure" in {
-        val seqOfErrors = Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString,
-          ControlListParameter.getParameterMap(STUDENT_LOANS).toString,
-          ControlListParameter.getParameterMap(MARRIAGE_ALLOWANCE).toString)
-
-        val result = EligibilityAuditModel(false, "1234567890", "individual", None, seqOfErrors)
-        result.auditType mustBe "mtdITSAControlList"
-        result.detail mustBe expectedDetailFailure
-      }
-    }
-
-    "Have detail with utr, isSuccess & agentReferenceNumber set for agent userType" when {
-      "the audit event is for a success" in {
-        val result = EligibilityAuditModel(true, "1234567890", "agent", Some("123456789"))
-        result.auditType mustBe "mtdITSAControlList"
-        result.detail mustBe expectedDetailAgentSuccess
-      }
-    }
-    "Have detail with utr, isSuccess, agentReferenceNumber & failureReasons set for agent userType" when {
-      "the audit event is for a failure" in {
-        val seqOfErrors = Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString,
-          ControlListParameter.getParameterMap(STUDENT_LOANS).toString,
-          ControlListParameter.getParameterMap(MARRIAGE_ALLOWANCE).toString)
-
-        val result = EligibilityAuditModel(false, "1234567890", "agent", Some("123456789"), seqOfErrors)
-        result.auditType mustBe "mtdITSAControlList"
-        result.detail mustBe expectedDetailAgentFailure
+      "an agent reference number and reasons are provided" in {
+        val model = EligibilityAuditModel(sautr, Some(agentReferenceNumber), controlListCheck, testReasons)
+        model.auditType mustBe "mtdITSAControlList"
+        model.transactionName mustBe "ITSAControlListRequest"
+        model.detail mustBe Map(
+          "agentReferenceNumber" -> agentReferenceNumber,
+          "saUtr" -> sautr,
+          "userType" -> "agent",
+          "controlListCheck" -> controlListCheck,
+          "isSuccess" -> "false",
+          "failureReasons" -> testReasons.mkString(", ")
+        )
       }
     }
   }
+
 }
