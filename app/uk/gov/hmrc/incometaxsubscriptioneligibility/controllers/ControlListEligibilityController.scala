@@ -34,9 +34,7 @@ class ControlListEligibilityController @Inject()(cc: ControllerComponents,
                                                 (implicit ec: ExecutionContext) extends BackendController(cc) with AuthorisedFunctions {
   def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async { implicit request =>
     authorised().retrieve(Retrievals.allEnrolments) { enrolments =>
-      val userType: String = if(enrolments.getEnrolment("HMRC-AS-AGENT").isDefined) "agent" else "individual"
-
-      controlListEligibilityService.getEligibilityStatus(sautr, userType, getArnFromEnrolments(enrolments)) map {
+      controlListEligibilityService.getEligibilityStatus(sautr, getArnFromEnrolments(enrolments)) map {
         eligibilityStatus => Ok(Json.toJson(eligibilityStatus))
       }
     }

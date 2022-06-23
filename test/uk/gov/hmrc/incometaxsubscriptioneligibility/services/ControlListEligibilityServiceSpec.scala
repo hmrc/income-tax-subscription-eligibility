@@ -41,6 +41,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
   val mockConfiguration: Configuration = mock[Configuration]
   val appConfig = new AppConfig(mockServicesConfig, mockConfiguration)
+
   object TestControlListEligibilityService extends ControlListEligibilityService(mockConvertConfigValuesService, mockGetControlListConnector, mockAuditService, appConfig)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -52,7 +53,8 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
   val testUserTypeIndiv: String = "Individual"
   val testAgentReferenceNumber: Option[String] = Some("123456789")
 
-  val successfulAuditModel: EligibilityAuditModel = EligibilityAuditModel(eligibilityResult = true, testSautr, testUserTypeIndiv, None)
+  val successfulCurrentYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(testSautr, None, "currentYear")
+  val successfulNextYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(testSautr, None, "nextYear")
 
   "getEligibilityStatus" should {
     "return eligible as true" when {
@@ -62,7 +64,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockConvertConfigValues(Set(NonResidentCompanyLandlord), Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord)))))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
       }
@@ -70,9 +72,10 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
       "the user's control list data has no parameters set to true" in {
         mockConvertConfigValues(Set(), Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(GetControlListSuccessResponse(Set()))))
-        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(successfulCurrentYearAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(successfulNextYearAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
       }
@@ -80,9 +83,10 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
       "the user's control list data has a parameter set to true" in {
         mockConvertConfigValues(Set(), Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord)))))
-        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(successfulCurrentYearAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(successfulNextYearAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
       }
@@ -90,9 +94,10 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
       "the user's control list data has a parameter set to true but is different to the ineligible" in {
         mockConvertConfigValues(Set(StudentLoans), Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord)))))
-        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(successfulCurrentYearAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(successfulNextYearAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
       }
@@ -107,9 +112,11 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
             MarriageAllowance
           ))))
         )
-        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
+        mockAudit(successfulCurrentYearAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(successfulNextYearAuditModel)(hc, ec, request)(Future.successful(Success))
+
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
       }
@@ -124,9 +131,10 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
             MarriageAllowance
           ))))
         )
-        mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(successfulCurrentYearAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(successfulNextYearAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
       }
@@ -137,16 +145,23 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockConvertConfigValues(Set(NonResidentCompanyLandlord), Set())
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord)))))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(
-          eligibilityResult = false,
+        val currentYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
           testSautr,
-          testUserTypeIndiv,
           None,
-          Seq(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString)
+          "currentYear",
+          Set(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString)
         )
-        mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
+        val nextYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
+          testSautr,
+          None,
+          "nextYear",
+          Set.empty[String]
+        )
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
+        mockAudit(currentYearAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(nextYearAuditModel)(hc, ec, request)(Future.successful(Success))
+
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe false
       }
@@ -154,11 +169,22 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
       "the user's control list data is not found" in {
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(ControlListDataNotFound)))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(eligibilityResult = false, testSautr, testUserTypeAgent, testAgentReferenceNumber,
-          Seq("No control list data for specified UTR"))
-        mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
+        val currentYearAuditModel = EligibilityAuditModel(
+          testSautr,
+          testAgentReferenceNumber,
+          "currentYear",
+          Set("No control list data for specified UTR")
+        )
+        val nextYearAuditModel = EligibilityAuditModel(
+          testSautr,
+          testAgentReferenceNumber,
+          "nextYear",
+          Set("No control list data for specified UTR")
+        )
+        mockAudit(currentYearAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(nextYearAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeAgent, testAgentReferenceNumber))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testAgentReferenceNumber))
 
         result.eligibleCurrentYear mustBe false
       }
@@ -166,11 +192,22 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
       "the user's control list data is in an incorrect format" in {
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(InvalidControlListFormat)))
 
-        val auditModel: EligibilityAuditModel = EligibilityAuditModel(eligibilityResult = false, testSautr, testUserTypeAgent, testAgentReferenceNumber,
-          Seq("Incorrectly formatted control list"))
-        mockAudit(auditModel)(hc, ec, request)(Future.successful(Success))
+        val currentYearAuditModel = EligibilityAuditModel(
+          testSautr,
+          testAgentReferenceNumber,
+          "currentYear",
+          Set("Incorrectly formatted control list")
+        )
+        val nextYearAuditModel = EligibilityAuditModel(
+          testSautr,
+          testAgentReferenceNumber,
+          "nextYear",
+          Set("Incorrectly formatted control list")
+        )
+        mockAudit(currentYearAuditModel)(hc, ec, request)(Future.successful(Success))
+        mockAudit(nextYearAuditModel)(hc, ec, request)(Future.successful(Success))
 
-        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeAgent, testAgentReferenceNumber))
+        val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testAgentReferenceNumber))
 
         result.eligibleCurrentYear mustBe false
       }
@@ -200,9 +237,11 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
           ))
         )
       )))
-      mockAudit(successfulAuditModel)(hc, ec, request)(Future.successful(Success))
 
-      val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testUserTypeIndiv, None))
+      mockAudit(successfulCurrentYearAuditModel)(hc, ec, request)(Future.successful(Success))
+      mockAudit(successfulNextYearAuditModel)(hc, ec, request)(Future.successful(Success))
+
+      val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
       result mustBe EligibilityStatus(
         eligible = true,
