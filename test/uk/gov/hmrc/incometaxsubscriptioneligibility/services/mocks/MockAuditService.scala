@@ -27,14 +27,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait MockAuditService extends MockFactory {
 
-  val mockAuditService: AuditService = mock[AuditService]
+  val mockAuditService: AuditService = stub[AuditService]
 
   def mockAudit(audit: AuditModel)
                (hc: HeaderCarrier, ec: ExecutionContext, request: Request[_])
                (result: Future[AuditResult]): CallHandler4[AuditModel, HeaderCarrier, ExecutionContext, Request[_], Future[AuditResult]] = {
     (mockAuditService.audit(_: AuditModel)(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
-      .expects(audit, hc, ec, request)
-      .returning(result)
+      .when(audit, hc, ec, request)
+      .returns(result)
+  }
+
+  def verifyAudit(audit: AuditModel): Unit = {
+    (mockAuditService.audit(_: AuditModel)(_: HeaderCarrier, _: ExecutionContext, _: Request[_]))
+      .verify(audit, *, *, *)
   }
 
 }
