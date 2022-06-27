@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.incometaxsubscriptioneligibility.services
-
-import javax.inject.Inject
-import play.api.mvc.Result
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
-import uk.gov.hmrc.http.HeaderCarrier
+package uk.gov.hmrc.incometaxsubscriptioneligibility.common
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.incometaxsubscriptioneligibility.common.Constants.hmrcAsAgent
 
-import scala.concurrent.{ExecutionContext, Future}
+trait Extractors {
 
-class AuthService @Inject()(val authConnector: AuthConnector) extends AuthorisedFunctions {
-
-  def eligibilityAuthorised(f: Boolean => Future[Result])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
-    authorised().retrieve(allEnrolments).apply { enrolments =>
-      f(enrolments.getEnrolment(hmrcAsAgent).isDefined)
-    }
-  }
+  def getArnFromEnrolments(enrolments: Enrolments, key: String = hmrcAsAgent): Option[String] = enrolments.getEnrolment(key).flatMap
+    { enrolment => enrolment.identifiers.headOption map { identifier => identifier.value } }
 
 }

@@ -18,20 +18,21 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 
 import play.api.libs.json.Json
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.incometaxsubscriptioneligibility.common.Constants.hmrcAsAgent
+import uk.gov.hmrc.incometaxsubscriptioneligibility.common.Extractors
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibilityService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
-import scala.collection.immutable.::
 import scala.concurrent.ExecutionContext
 
 @Singleton()
 class ControlListEligibilityController @Inject()(cc: ControllerComponents,
                                                  controlListEligibilityService: ControlListEligibilityService,
                                                  val authConnector: AuthConnector)
-                                                (implicit ec: ExecutionContext) extends BackendController(cc) with AuthorisedFunctions {
+                                                (implicit ec: ExecutionContext) extends BackendController(cc) with AuthorisedFunctions with Extractors {
   def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async { implicit request =>
     authorised().retrieve(Retrievals.allEnrolments) { enrolments =>
       controlListEligibilityService.getEligibilityStatus(sautr, getArnFromEnrolments(enrolments)) map {
@@ -39,9 +40,4 @@ class ControlListEligibilityController @Inject()(cc: ControllerComponents,
       }
     }
   }
-
-  private def getArnFromEnrolments(enrolments: Enrolments): Option[String] = enrolments.enrolments.collectFirst {
-    case Enrolment("HMRC-AS-AGENT", EnrolmentIdentifier(_, value) :: _, _, _) => value
-  }
-
 }
