@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
+import play.api.Logging
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
@@ -34,20 +35,31 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
                                               getControlListConnector: GetControlListConnector,
                                               auditService: AuditService,
                                               val appConfig: AppConfig
-                                             ) extends FeatureSwitching {
+                                             ) extends FeatureSwitching with Logging {
   def getEligibilityStatus(sautr: String, agentReferenceNumber: Option[String])
                           (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[EligibilityStatus] = for {
     controlResponse <- getControlListConnector.getControlList(sautr)
     (eligibilityStatus, prepopData) = handleResponse(controlResponse)
+    (currentYearAuditResult, nextYearAuditResult) <- auditControlListResults(eligibilityStatus, sautr, agentReferenceNumber)
     eligibleCurrentYear = isEligible(eligibilityStatus.current)
     eligibleNextYear = isEligible(eligibilityStatus.next)
-    _ = auditControlListResults(eligibilityStatus, sautr, agentReferenceNumber)
   } yield {
+    //TODO: Remove temporary logging once environment testing complete
+    currentYearAuditResult match {
+      case AuditResult.Success => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Current year audit successful")
+      case AuditResult.Disabled => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Current year audit disabled")
+      case AuditResult.Failure(_, _) => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Current year audit failure")
+    }
+    nextYearAuditResult match {
+      case AuditResult.Success => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Next year audit successful")
+      case AuditResult.Disabled => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Next year audit disabled")
+      case AuditResult.Failure(_, _) => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Next year audit failure")
+    }
     EligibilityStatus(eligible = eligibleCurrentYear, eligibleCurrentYear, eligibleNextYear, prepopData)
   }
 
   def auditControlListResults(eligibilityStatus: EligibilityByYear, sautr: String, agentReferenceNumber: Option[String])
-                             (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Unit = {
+                             (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[(AuditResult, AuditResult)] = {
     val currentYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
       sautr = sautr,
       agentReferenceNumber = agentReferenceNumber,
@@ -60,8 +72,10 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
       controlListCheck = "nextYear",
       reasons = eligibilityStatus.next
     )
-    sendAuditEvent(currentYearAuditModel)
-    sendAuditEvent(nextYearAuditModel)
+    for {
+      currentYearAuditResult <- sendAuditEvent(currentYearAuditModel)
+      nextYearAuditResult <- sendAuditEvent(nextYearAuditModel)
+    } yield (currentYearAuditResult, nextYearAuditResult)
   }
 
   private def handleResponse(controlResponse: GetControlListResponse): (EligibilityByYear, Option[PrepopData]) = controlResponse match {

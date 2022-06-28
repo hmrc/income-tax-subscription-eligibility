@@ -78,6 +78,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
+
+        verifyAudit(successfulCurrentYearAuditModel)
+        verifyAudit(successfulNextYearAuditModel)
       }
 
       "the user's control list data has a parameter set to true" in {
@@ -89,6 +92,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
+
+        verifyAudit(successfulCurrentYearAuditModel)
+        verifyAudit(successfulNextYearAuditModel)
       }
 
       "the user's control list data has a parameter set to true but is different to the ineligible" in {
@@ -100,6 +106,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
+
+        verifyAudit(successfulCurrentYearAuditModel)
+        verifyAudit(successfulNextYearAuditModel)
       }
 
       "the user's control list data has several parameters set to true" in {
@@ -119,6 +128,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
+
+        verifyAudit(successfulCurrentYearAuditModel)
+        verifyAudit(successfulNextYearAuditModel)
       }
 
       "the user's control list data has several parameters set to true which are different to the ineligible config values" in {
@@ -137,6 +149,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe true
+
+        verifyAudit(successfulCurrentYearAuditModel)
+        verifyAudit(successfulNextYearAuditModel)
       }
     }
 
@@ -164,6 +179,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, None))
 
         result.eligibleCurrentYear mustBe false
+
+        verifyAudit(currentYearAuditModel)
+        verifyAudit(nextYearAuditModel)
       }
 
       "the user's control list data is not found" in {
@@ -187,6 +205,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testAgentReferenceNumber))
 
         result.eligibleCurrentYear mustBe false
+
+        verifyAudit(currentYearAuditModel)
+        verifyAudit(nextYearAuditModel)
       }
 
       "the user's control list data is in an incorrect format" in {
@@ -210,6 +231,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         val result = await(TestControlListEligibilityService.getEligibilityStatus(testSautr, testAgentReferenceNumber))
 
         result.eligibleCurrentYear mustBe false
+
+        verifyAudit(currentYearAuditModel)
+        verifyAudit(nextYearAuditModel)
       }
     }
 
@@ -258,6 +282,9 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
           )),
         ))
       )
+
+      verifyAudit(successfulCurrentYearAuditModel)
+      verifyAudit(successfulNextYearAuditModel)
     }
   }
 }
