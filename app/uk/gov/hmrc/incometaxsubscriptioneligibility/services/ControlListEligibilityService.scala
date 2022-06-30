@@ -40,21 +40,10 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
                           (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[EligibilityStatus] = for {
     controlResponse <- getControlListConnector.getControlList(sautr)
     (eligibilityStatus, prepopData) = handleResponse(controlResponse)
-    (currentYearAuditResult, nextYearAuditResult) <- auditControlListResults(eligibilityStatus, sautr, agentReferenceNumber)
+    _ <- auditControlListResults(eligibilityStatus, sautr, agentReferenceNumber)
     eligibleCurrentYear = isEligible(eligibilityStatus.current)
     eligibleNextYear = isEligible(eligibilityStatus.next)
   } yield {
-    //TODO: Remove temporary logging once environment testing complete
-    currentYearAuditResult match {
-      case AuditResult.Success => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Current year audit successful")
-      case AuditResult.Disabled => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Current year audit disabled")
-      case AuditResult.Failure(_, _) => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Current year audit failure")
-    }
-    nextYearAuditResult match {
-      case AuditResult.Success => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Next year audit successful")
-      case AuditResult.Disabled => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Next year audit disabled")
-      case AuditResult.Failure(_, _) => logger.info(s"[ControlListEligibility][getEligibilityStatus] - Next year audit failure")
-    }
     EligibilityStatus(eligible = eligibleCurrentYear, eligibleCurrentYear, eligibleNextYear, prepopData)
   }
 
