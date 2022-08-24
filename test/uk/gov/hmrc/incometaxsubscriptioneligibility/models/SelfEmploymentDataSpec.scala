@@ -56,6 +56,41 @@ class SelfEmploymentDataSpec extends PlaySpec {
       actual mustBe JsSuccess(expected)
     }
 
+    "deserialize self employment data which contains characters that are not allowed" in {
+      val actual = Json.fromJson[PrepopData](
+        Json.parse("""
+        {
+          "selfEmployments" : [
+            {
+               "businessName": "Test busine$s name",
+               "businessTradeName": "Test business trade name",
+               "businessAddressFirstLine" : "Buckingham Palace",
+               "businessAddressPostCode": "SW1A 1AA",
+               "businessStartDate": "01012018",
+               "businessAccountingMethod": "Y",
+               "businessCeasedDate": "20180101"
+            }
+          ]
+        }
+        """))
+
+      val expected = PrepopData(
+        selfEmployments = Some(Seq(
+          SelfEmploymentData(
+            businessName = Some("Test busine s name"),
+            businessTradeName = Some("Test business trade name"),
+            businessAddressFirstLine = Some("Buckingham Palace"),
+            businessAddressPostCode = Some("SW1A 1AA"),
+            businessStartDate = Some(Date("1", "1", "2018")),
+            businessAccountingMethod = Some(Accruals),
+            businessCeasedDate = Some("20180101"),
+          )
+        ))
+      )
+
+      actual mustBe JsSuccess(expected)
+    }
+
     "deserialize self employment with missing business address information" in {
       val actual = Json.fromJson[PrepopData](
         Json.parse("""

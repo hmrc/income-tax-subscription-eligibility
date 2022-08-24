@@ -20,6 +20,8 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 
+import scala.util.matching.Regex
+
 case class SelfEmploymentData(
                                businessName: Option[String] = None,
                                businessTradeName: Option[String] = None,
@@ -32,7 +34,7 @@ case class SelfEmploymentData(
 
 object SelfEmploymentData {
   implicit val reads: Reads[SelfEmploymentData] = (
-    (JsPath \ "businessName").readNullable[String] and
+    (JsPath \ "businessName").readNullable[String].map (excludeCharacters("""[A-Za-z0-9 ,.&'\\/-]+"""r, _)) and
       (JsPath \ "businessTradeName").readNullable[String] and
       (JsPath \ "businessAddressFirstLine").readNullable[String] and
       (JsPath \ "businessAddressPostCode").readNullable[String] and
@@ -45,4 +47,8 @@ object SelfEmploymentData {
   implicit val writes: Writes[SelfEmploymentData] = Json.writes[SelfEmploymentData]
 
   implicit val format: Format[SelfEmploymentData] = Format[SelfEmploymentData](reads, writes)
+
+  private def excludeCharacters(pattern: Regex, value: Option[String]) = {
+    value.map(businessName => pattern.findAllIn(businessName).matchData.mkString(" "))
+  }
 }
