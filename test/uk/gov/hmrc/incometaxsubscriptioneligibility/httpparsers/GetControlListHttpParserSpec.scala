@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.{HttpResponse, InternalServerException}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.GetControlListReads.read
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.NonResidentCompanyLandlord
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.{Accruals, Date, OverseasProperty, PrepopData, SelfEmploymentData, UkProperty}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models._
 
 class GetControlListHttpParserSpec extends PlaySpec {
 
@@ -131,6 +131,44 @@ class GetControlListHttpParserSpec extends PlaySpec {
               selfEmployments = Some(Vector(
                 SelfEmploymentData(
                   businessName = Some("Test business name"),
+                  businessTradeName = Some("Test business trade name"),
+                  businessStartDate = Some(Date("1", "1", "2018")),
+                  businessAccountingMethod = Some(Accruals)
+                )
+              ))
+            ))
+          )
+        )
+      }
+
+      "the prepopData contains a self employments with characters not allowed" in {
+        val testControlListString = "1000000000000000000000000000000000000000"
+        val testJson = Json.obj(
+          "nino" -> "AA123456A",
+          "year" -> "2019",
+          "controlListInformation" -> testControlListString,
+          "prepopData" -> Json.obj(
+            "selfEmployments" -> Json.arr(
+              Json.obj(
+                "businessName" -> "Test busine$s name",
+                "businessTradeName" -> "Test business trade name",
+                "businessStartDate" -> testDate,
+                "businessAccountingMethod" -> "Y"
+              )
+            )
+          )
+        )
+        val testHttpResponse = HttpResponse(status = OK, json = testJson, headers = Map.empty)
+
+        val res = read(method = "GET", url = "/", response = testHttpResponse)
+
+        res mustBe Right(
+          GetControlListSuccessResponse(
+            controlList = Set(NonResidentCompanyLandlord),
+            prepopData = Some(PrepopData(
+              selfEmployments = Some(Vector(
+                SelfEmploymentData(
+                  businessName = Some("Test busine s name"),
                   businessTradeName = Some("Test business trade name"),
                   businessStartDate = Some(Date("1", "1", "2018")),
                   businessAccountingMethod = Some(Accruals)
