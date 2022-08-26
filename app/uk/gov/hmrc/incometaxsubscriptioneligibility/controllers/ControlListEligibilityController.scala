@@ -20,6 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.incometaxsubscriptioneligibility.common.Constants.hmrcAsAgent
 import uk.gov.hmrc.incometaxsubscriptioneligibility.common.Extractors
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibilityService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
