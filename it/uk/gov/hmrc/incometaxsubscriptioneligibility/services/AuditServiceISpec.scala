@@ -19,6 +19,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 import com.github.tomakehurst.wiremock.client.WireMock.{findAll, postRequestedFor, urlMatching}
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
 import org.joda.time.DateTime
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.Application
 import play.api.http.Status
 import play.api.libs.json._
@@ -35,12 +36,12 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDateTime, ZoneOffset}
-import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuditServiceISpec extends ComponentSpecBase {
 
-  override val appConfig: AppConfig = appConfig
+  override val appConfig: AppConfig = mock[AppConfig]
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val fr: Request[AnyContent] = FakeRequest(POST, IntegrationTestConstants.testUrl)
 

@@ -32,6 +32,6 @@ trait ControlListConfigTestHelper {
     param => param -> true
   ).toMap
 
-  val testAllFalse: Map[ControlListParameter, Boolean] = testAllTrue.mapValues(_ => false)
+  val testAllFalse: Map[ControlListParameter, Boolean] = testAllTrue.view.mapValues(_ => false).toMap
 
 }

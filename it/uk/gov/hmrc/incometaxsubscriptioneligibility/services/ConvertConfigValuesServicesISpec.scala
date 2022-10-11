@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
+import org.scalatestplus.mockito.MockitoSugar.mock
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, ControlListConfigTestHelper}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter.allControlListParameters
@@ -23,7 +24,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.{ControlL
 
 class ConvertConfigValuesServicesISpec extends ComponentSpecBase with ControlListConfigTestHelper {
 
-  override val appConfig: AppConfig = appConfig
+  override val appConfig: AppConfig = mock[AppConfig]
   private val year = "2021-2022"
 
   "convertConfigValues" should {
