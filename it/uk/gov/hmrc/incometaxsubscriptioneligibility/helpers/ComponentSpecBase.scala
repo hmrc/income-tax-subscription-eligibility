@@ -33,7 +33,7 @@ trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   def app(extraConfig: Map[String, String]): Application = new GuiceApplicationBuilder()
     .in(Environment.simple(mode = Mode.Dev))
     .configure(config ++ extraConfig)
-    .build
+    .build()
 
   implicit def appConfig(implicit app: Application): AppConfig = app.injector.instanceOf[AppConfig]
   implicit def ws(implicit app: Application): WSClient = app.injector.instanceOf[WSClient]
@@ -69,7 +69,7 @@ trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   }
 
   def get[T](uri: String)(implicit ws: WSClient, portNumber: PortNumber): WSResponse = {
-    await(authorisedClient(uri).get)
+    await(authorisedClient(uri).get())
   }
 
   def post[T](uri: String)(body: T)(implicit writes: Writes[T], ws: WSClient, portNumber: PortNumber): WSResponse = {

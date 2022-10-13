@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors
 
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.Application
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
@@ -34,7 +35,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class GetControlListConnectorISpec extends ComponentSpecBase {
 
-  override val appConfig: AppConfig = appConfig
+  override val appConfig: AppConfig = mock[AppConfig]
   def connector(implicit app: Application): GetControlListConnector = app.injector.instanceOf[GetControlListConnector]
 
   implicit val headerCarrier: HeaderCarrier = HeaderCarrier()

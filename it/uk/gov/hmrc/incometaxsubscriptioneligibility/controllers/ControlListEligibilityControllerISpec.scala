@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Json}
 import play.api.libs.ws.WSResponse
@@ -28,7 +29,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
 
 class ControlListEligibilityControllerISpec extends ComponentSpecBase with ControlListConfigTestHelper {
 
-  override val appConfig: AppConfig = appConfig
+  override val appConfig: AppConfig = mock[AppConfig]
   val testSautr = "1234567890"
   private val year = "2021-2022"
 
