@@ -150,7 +150,7 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
       "the feature switch is disabled and the returned control list has one parameter set to true and one config values is ineligible" in
         new Server(app(extraConfig = toConfigList(Map(NonResidentCompanyLandlord -> false), year))) {
 
-          val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
+          val testControlListString: String = ControlListHelper(Set(StudentLoans)).asBinaryString
 
           val testDesJson: JsObject = Json.obj(
             "nino" -> "AA123456A",
