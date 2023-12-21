@@ -1,5 +1,4 @@
-import uk.gov.hmrc.DefaultBuildSettings.addTestReportOption
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import uk.gov.hmrc.DefaultBuildSettings
 
 val appName = "income-tax-subscription-eligibility"
 
@@ -28,31 +27,28 @@ lazy val scoverageSettings = {
   )
 }
 
+ThisBuild / majorVersion := 1
+ThisBuild / scalaVersion := "2.13.12"
+
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .settings(scalaVersion := "2.13.8")
   .settings(
-    majorVersion := 0,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     scoverageSettings
   )
-  .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-  .settings(resolvers += Resolver.jcenterRepo)
   .settings(PlayKeys.playDefaultPort := 9588)
   .settings(
     scalacOptions += "-Wconf:src=routes/.*:s",
     scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s",
   )
 
-
 Test / Keys.fork := true
 Test / javaOptions += "-Dlogger.resource=logback-test.xml"
 Test / parallelExecution := true
 
-IntegrationTest / Keys.fork := true
-IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory) (base => Seq(base / "it")).value
-IntegrationTest / javaOptions += "-Dlogger.resource=logback-test.xml"
-addTestReportOption(IntegrationTest, "int-test-reports")
-IntegrationTest / parallelExecution := false
-majorVersion := 1
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
+  .settings(DefaultBuildSettings.itSettings)
+  .settings(libraryDependencies ++= AppDependencies.itTest)
+  .settings(javaOptions += "-Dlogger.resource=logback-test.xml")
