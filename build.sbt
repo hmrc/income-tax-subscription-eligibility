@@ -49,6 +49,6 @@ Test / parallelExecution := true
 lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
-  .settings(DefaultBuildSettings.itSettings)
+  .settings(DefaultBuildSettings.itSettings())
   .settings(libraryDependencies ++= AppDependencies.itTest)
   .settings(javaOptions += "-Dlogger.resource=logback-test.xml")
