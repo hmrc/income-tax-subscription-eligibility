@@ -17,6 +17,7 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks
 
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.TestSuite
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.EligibilityStatus
@@ -25,6 +26,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ControlListEligibil
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MockControlListEligibilityService extends MockFactory {
+  suite: TestSuite =>
 
   val mockControlListEligibilityService: ControlListEligibilityService = mock[ControlListEligibilityService]
 
@@ -35,5 +37,5 @@ trait MockControlListEligibilityService extends MockFactory {
       .expects(sautr, agentReferenceNumber, *, ec, request)
       .returning(isEligible)
   }
-  
+
 }

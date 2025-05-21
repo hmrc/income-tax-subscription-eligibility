@@ -18,6 +18,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks
 
 import org.scalamock.handlers.CallHandler3
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.TestSuite
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.GetControlListConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.GetControlListResponse
@@ -25,6 +26,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHt
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MockGetControlListConnector extends MockFactory {
+  suite: TestSuite =>
 
   val mockGetControlListConnector: GetControlListConnector = mock[GetControlListConnector]
 

@@ -17,11 +17,13 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks
 
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.TestSuite
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.ConvertConfigValuesService
 
 trait MockConvertConfigValuesService extends MockFactory {
+  suite: TestSuite =>
 
   val mockConvertConfigValuesService: ConvertConfigValuesService = mock[ConvertConfigValuesService]
 

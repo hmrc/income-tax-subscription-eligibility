@@ -18,6 +18,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks
 
 import org.scalamock.handlers.CallHandler4
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.TestSuite
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.{AuditModel, AuditService}
@@ -26,6 +27,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MockAuditService extends MockFactory {
+  suite: TestSuite =>
 
   val mockAuditService: AuditService = stub[AuditService]
 
