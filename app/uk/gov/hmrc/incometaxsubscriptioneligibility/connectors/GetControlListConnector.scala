@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors
 
-import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, StringContextOps}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, UseStubForDesConnection}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.GetControlListResponse
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class GetControlListConnector @Inject()(http: HttpClient, val appConfig: AppConfig) extends FeatureSwitching {
+class GetControlListConnector @Inject()(http: HttpClientV2, val appConfig: AppConfig) extends FeatureSwitching {
 
   def getControlList(sautr: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[GetControlListResponse] = {
 
@@ -32,7 +33,10 @@ class GetControlListConnector @Inject()(http: HttpClient, val appConfig: AppConf
       appConfig.desEnvironmentHeader
     )
 
-    http.GET[GetControlListResponse](url = s"${appConfig.desUrl(isEnabled(UseStubForDesConnection))}/income-tax/controlList/$sautr", headers = desHeaders)
+    http
+      .get(url"${appConfig.desUrl(isEnabled(UseStubForDesConnection))}/income-tax/controlList/$sautr")
+      .setHeader(desHeaders: _*)
+      .execute[GetControlListResponse]
 
   }
 }

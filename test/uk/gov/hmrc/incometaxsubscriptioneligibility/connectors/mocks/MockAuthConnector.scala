@@ -17,6 +17,7 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks
 
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.TestSuite
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
@@ -25,6 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MockAuthConnector extends MockFactory {
+  suite: TestSuite =>
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
