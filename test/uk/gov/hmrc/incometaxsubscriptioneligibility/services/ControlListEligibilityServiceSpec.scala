@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockGetControlListConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.FeatureSwitchingSpec
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{ControlListDataNotFound, GetControlListSuccessResponse, InvalidControlListFormat}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListIndices.NON_RESIDENT_COMPANY_LANDLORD
@@ -42,7 +42,12 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
   val mockConfiguration: Configuration = mock[Configuration]
   val appConfig = new AppConfig(mockServicesConfig, mockConfiguration)
 
-  object TestControlListEligibilityService extends ControlListEligibilityService(mockConvertConfigValuesService, mockGetControlListConnector, mockAuditService, appConfig)
+  object TestControlListEligibilityService extends ControlListEligibilityService(
+    mockConvertConfigValuesService,
+    mockGetControlListConnector,
+    mockAuditService,
+    appConfig
+  )
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global
@@ -53,8 +58,16 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
   val testUserTypeIndiv: String = "Individual"
   val testAgentReferenceNumber: Option[String] = Some("123456789")
 
-  val successfulCurrentYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(testSautr, None, "currentYear")
-  val successfulNextYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(testSautr, None, "nextYear")
+  val successfulCurrentYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
+    utr = testSautr,
+    agentReferenceNumber = None,
+    controlListCheck = "currentYear"
+  )
+  val successfulNextYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
+    utr = testSautr,
+    agentReferenceNumber = None,
+    controlListCheck = "nextYear"
+  )
 
   "getEligibilityStatus" should {
     "return eligible as true" when {
@@ -161,16 +174,16 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord)))))
 
         val currentYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
-          testSautr,
-          None,
-          "currentYear",
-          Set(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString)
+          utr = testSautr,
+          agentReferenceNumber = None,
+          controlListCheck = "currentYear",
+          reasons = Set(ControlListParameter.getParameterMap(NON_RESIDENT_COMPANY_LANDLORD).toString)
         )
         val nextYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
-          testSautr,
-          None,
-          "nextYear",
-          Set.empty[String]
+          utr = testSautr,
+          agentReferenceNumber = None,
+          controlListCheck = "nextYear",
+          reasons = Set.empty[String]
         )
 
         mockAudit(currentYearAuditModel)(hc, ec, request)(Future.successful(Success))
@@ -188,16 +201,16 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(ControlListDataNotFound)))
 
         val currentYearAuditModel = EligibilityAuditModel(
-          testSautr,
-          testAgentReferenceNumber,
-          "currentYear",
-          Set("No control list data for specified UTR")
+          utr = testSautr,
+          agentReferenceNumber = testAgentReferenceNumber,
+          controlListCheck = "currentYear",
+          reasons = Set("No control list data for specified UTR")
         )
         val nextYearAuditModel = EligibilityAuditModel(
-          testSautr,
-          testAgentReferenceNumber,
-          "nextYear",
-          Set("No control list data for specified UTR")
+          utr = testSautr,
+          agentReferenceNumber = testAgentReferenceNumber,
+          controlListCheck = "nextYear",
+          reasons = Set("No control list data for specified UTR")
         )
         mockAudit(currentYearAuditModel)(hc, ec, request)(Future.successful(Success))
         mockAudit(nextYearAuditModel)(hc, ec, request)(Future.successful(Success))
@@ -214,16 +227,16 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         mockGetControlList(testSautr)(hc, ec)(Future.successful(Left(InvalidControlListFormat)))
 
         val currentYearAuditModel = EligibilityAuditModel(
-          testSautr,
-          testAgentReferenceNumber,
-          "currentYear",
-          Set("Incorrectly formatted control list")
+          utr = testSautr,
+          agentReferenceNumber = testAgentReferenceNumber,
+          controlListCheck = "currentYear",
+          reasons = Set("Incorrectly formatted control list")
         )
         val nextYearAuditModel = EligibilityAuditModel(
-          testSautr,
-          testAgentReferenceNumber,
-          "nextYear",
-          Set("Incorrectly formatted control list")
+          utr = testSautr,
+          agentReferenceNumber = testAgentReferenceNumber,
+          controlListCheck = "nextYear",
+          reasons = Set("Incorrectly formatted control list")
         )
         mockAudit(currentYearAuditModel)(hc, ec, request)(Future.successful(Success))
         mockAudit(nextYearAuditModel)(hc, ec, request)(Future.successful(Success))

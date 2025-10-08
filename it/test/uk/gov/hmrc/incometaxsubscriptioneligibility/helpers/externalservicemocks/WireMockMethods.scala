@@ -81,14 +81,10 @@ trait WireMockMethods {
     }
   }
 
-  def verify(method: HTTPMethod, uri: String): Unit = verifyInternal(method, uri, None)
-  def verify[T](method: HTTPMethod, uri: String, body: T)(implicit writes: Writes[T]): Unit = {
-    val stringBody = writes.writes(body).toString()
-    verifyInternal(method, uri, Some(stringBody))
-  }
+  def verify(method: HTTPMethod, uri: String, count: Int = 1): Unit = verifyInternal(method, uri, None, count)
 
-  private def verifyInternal(method: HTTPMethod, uri: String, bodyString: Option[String]): Unit = method match {
-    case GET => WiremockHelper.verifyGet(uri)
+  private def verifyInternal(method: HTTPMethod, uri: String, bodyString: Option[String], count: Int): Unit = method match {
+    case GET => WiremockHelper.verifyGet(uri, count)
     case POST => WiremockHelper.verifyPost(uri, bodyString)
     case _ => ()
   }
@@ -104,9 +100,4 @@ trait WireMockMethods {
   case object POST extends HTTPMethod {
     override val wireMockMapping: UrlPattern => MappingBuilder = post
   }
-
-  case object PUT extends HTTPMethod {
-    override val wireMockMapping: UrlPattern => MappingBuilder = put
-  }
-
 }

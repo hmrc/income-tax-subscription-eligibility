@@ -20,16 +20,22 @@ import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Json}
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, StubControlListEligible}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.AuthStub.stubAuth
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.DesControlListApiStub.stubGetControlList
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, ControlListConfigTestHelper}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist._
 
-class ControlListEligibilityControllerISpec extends ComponentSpecBase with ControlListConfigTestHelper {
+class ControlListEligibilityControllerISpec extends ComponentSpecBase with ControlListConfigTestHelper with FeatureSwitching {
 
-  override val appConfig: AppConfig = mock[AppConfig]
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    disable(StubControlListEligible)
+  }
+
+  val appConfig: AppConfig = mock[AppConfig]
+
   val testSautr = "1234567890"
   private val year = "2021-2022"
 

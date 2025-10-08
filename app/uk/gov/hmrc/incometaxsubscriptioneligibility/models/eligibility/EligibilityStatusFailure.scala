@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.incometaxsubscriptioneligibility.common
+package uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility
 
-import uk.gov.hmrc.auth.core.Enrolments
-import uk.gov.hmrc.incometaxsubscriptioneligibility.common.Constants.hmrcAsAgent
+sealed trait EligibilityStatusFailure
 
-trait Extractors {
+object EligibilityStatusFailure {
 
-  def getArnFromEnrolments(enrolments: Enrolments, key: String = hmrcAsAgent): Option[String] = {
-    enrolments.getEnrolment(key).flatMap { enrolment =>
-      enrolment.identifiers.headOption map { identifier =>
-        identifier.value
-      }
-    }
-  }
+  case object InvalidJson extends EligibilityStatusFailure
+
+  case object UnexpectedStatus extends EligibilityStatusFailure
 
 }

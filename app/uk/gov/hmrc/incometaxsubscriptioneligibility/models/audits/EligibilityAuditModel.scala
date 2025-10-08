@@ -18,7 +18,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits
 
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.AuditModel
 
-case class EligibilityAuditModel(sautr: String,
+case class EligibilityAuditModel(utr: String,
                                  agentReferenceNumber: Option[String],
                                  controlListCheck: String,
                                  reasons: Set[String] = Set.empty) extends AuditModel {
@@ -31,10 +31,9 @@ case class EligibilityAuditModel(sautr: String,
   val detail: Map[String, String] = Map(
     "controlListCheck" -> controlListCheck,
     "isSuccess" -> reasons.isEmpty.toString,
-    "saUtr" -> sautr,
+    "saUtr" -> utr,
     "userType" -> userType) ++
     formattedReasons ++
     agentReferenceNumber.map(arn => "agentReferenceNumber" -> arn)
-
 
 }
