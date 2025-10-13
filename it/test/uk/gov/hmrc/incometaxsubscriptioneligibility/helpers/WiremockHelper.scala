@@ -36,8 +36,8 @@ object WiremockHelper extends Eventually with IntegrationPatience {
     verify(postRequest)
   }
 
-  def verifyGet(uri: String): Unit = {
-    verify(getRequestedFor(urlEqualTo(uri)))
+  def verifyGet(uri: String, count: Int): Unit = {
+    verify(count, getRequestedFor(urlEqualTo(uri)))
   }
 
   def stubGet(url: String, status: Integer, body: String): StubMapping =

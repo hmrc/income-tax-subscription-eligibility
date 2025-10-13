@@ -21,6 +21,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.util.Base64
 import javax.inject.{Inject, Singleton}
 import scala.util.Try
 
@@ -40,6 +41,17 @@ class AppConfig @Inject()(servicesConfig: ServicesConfig, val configuration: Con
   lazy val desAuthorisationToken: String = s"Bearer ${loadConfig("microservice.services.des.authorisation-token")}"
 
   lazy val desEnvironmentHeader: (String, String) = "Environment" -> loadConfig("microservice.services.des.environment")
+
+  lazy val hipBaseUrl: String = servicesConfig.baseUrl("hip")
+
+  lazy val hipAuthorizationToken: String = {
+    val clientId = loadConfig(s"microservice.services.hip.clientId")
+    val clientSecret = loadConfig(s"microservice.services.hip.clientSecret")
+
+    val encoded: String = Base64.getEncoder.encodeToString(s"$clientId:$clientSecret".getBytes("UTF-8"))
+
+    s"Basic $encoded"
+  }
 
   def loadConfigFromEnv(key: String): Option[String] = {
     sys.props.get(key) match {

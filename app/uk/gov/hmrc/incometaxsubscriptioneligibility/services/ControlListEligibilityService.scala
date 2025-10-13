@@ -47,16 +47,16 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
     EligibilityStatus(eligible = eligibleCurrentYear, eligibleCurrentYear, eligibleNextYear, prepopData)
   }
 
-  def auditControlListResults(eligibilityStatus: EligibilityByYear, sautr: String, agentReferenceNumber: Option[String])
-                             (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[(AuditResult, AuditResult)] = {
+  private def auditControlListResults(eligibilityStatus: EligibilityByYear, sautr: String, agentReferenceNumber: Option[String])
+                                     (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[(AuditResult, AuditResult)] = {
     val currentYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
-      sautr = sautr,
+      utr = sautr,
       agentReferenceNumber = agentReferenceNumber,
       controlListCheck = "currentYear",
       reasons = eligibilityStatus.current
     )
     val nextYearAuditModel: EligibilityAuditModel = EligibilityAuditModel(
-      sautr = sautr,
+      utr = sautr,
       agentReferenceNumber = agentReferenceNumber,
       controlListCheck = "nextYear",
       reasons = eligibilityStatus.next

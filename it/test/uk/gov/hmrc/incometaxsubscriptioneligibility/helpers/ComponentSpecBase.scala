@@ -23,10 +23,10 @@ import play.api.libs.json.Writes
 import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.test.Helpers._
 import play.api.{Application, Environment, Mode}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitch, FeatureSwitching}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 
 trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
-  with WiremockHelper with BeforeAndAfterAll with BeforeAndAfterEach with FeatureSwitching {
+  with WiremockHelper with BeforeAndAfterAll with BeforeAndAfterEach {
 
   def defaultApp: Application = app(Map.empty)
 
@@ -36,6 +36,7 @@ trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
     .build()
 
   implicit def appConfig(implicit app: Application): AppConfig = app.injector.instanceOf[AppConfig]
+
   implicit def ws(implicit app: Application): WSClient = app.injector.instanceOf[WSClient]
 
   val mockHost: String = WiremockHelper.wiremockHost
@@ -49,7 +50,9 @@ trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
     "microservice.services.auth.port" -> mockPort,
     "microservice.services.base.host" -> mockHost,
     "microservice.services.base.port" -> mockPort,
-    "microservice.services.des.url" -> mockUrl
+    "microservice.services.des.url" -> mockUrl,
+    "microservice.services.hip.host" -> mockHost,
+    "microservice.services.hip.port" -> mockPort
   )
 
   override def beforeAll(): Unit = {
@@ -63,12 +66,11 @@ trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   }
 
   override def beforeEach(): Unit = {
-    FeatureSwitch.switches foreach disable
     resetWiremock()
     super.beforeEach()
   }
 
-  def get[T](uri: String)(implicit ws: WSClient, portNumber: PortNumber): WSResponse = {
+  def get(uri: String)(implicit ws: WSClient, portNumber: PortNumber): WSResponse = {
     await(authorisedClient(uri).get())
   }
 

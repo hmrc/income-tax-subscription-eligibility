@@ -1,3 +1,6 @@
 # microservice specific routes
 
-GET        /eligibility/:sautr        uk.gov.hmrc.incometaxsubscriptioneligibility.controllers.ControlListEligibilityController.getEligibilityStatus(sautr: String)
+GET        /eligibility/utr/:sautr              uk.gov.hmrc.incometaxsubscriptioneligibility.controllers.ControlListEligibilityController.getEligibilityStatus(sautr: String)
+GET        /eligibility/:sautr                  uk.gov.hmrc.incometaxsubscriptioneligibility.controllers.ControlListEligibilityController.getEligibilityStatus(sautr: String)
+
+GET        /eligibility/nino/:nino/utr/:utr     uk.gov.hmrc.incometaxsubscriptioneligibility.controllers.EligibilityStatusController.getEligibilityStatus(nino: String, utr: String)

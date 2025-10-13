@@ -16,26 +16,23 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors
 
-import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.Application
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.ComponentSpecBase
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.DesControlListApiStub.stubGetControlList
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{ControlListDataNotFound, GetControlListSuccessResponse}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.{ControlListDataNotFound, GetControlListResponse, GetControlListSuccessResponse}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.NonResidentCompanyLandlord
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models._
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import scala.concurrent.Future
 
 class GetControlListConnectorISpec extends ComponentSpecBase {
 
-  override val appConfig: AppConfig = mock[AppConfig]
   def connector(implicit app: Application): GetControlListConnector = app.injector.instanceOf[GetControlListConnector]
 
   implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
@@ -54,7 +51,7 @@ class GetControlListConnectorISpec extends ComponentSpecBase {
 
         stubGetControlList(testSautr)(status = OK, body = testJson)
 
-        val res = connector.getControlList(testSautr)
+        val res: Future[GetControlListResponse] = connector.getControlList(testSautr)
 
         await(res) mustBe Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord), None))
       }
@@ -82,7 +79,7 @@ class GetControlListConnectorISpec extends ComponentSpecBase {
 
         stubGetControlList(testSautr)(status = OK, body = testJson)
 
-        val res = connector.getControlList(testSautr)
+        val res: Future[GetControlListResponse] = connector.getControlList(testSautr)
 
         await(res) mustBe Right(GetControlListSuccessResponse(
           controlList = Set(NonResidentCompanyLandlord),
@@ -111,7 +108,7 @@ class GetControlListConnectorISpec extends ComponentSpecBase {
       "DES returns a NOT_FOUND" in new App(defaultApp) {
         stubGetControlList(testSautr)(status = NOT_FOUND)
 
-        val res = connector.getControlList(testSautr)
+        val res: Future[GetControlListResponse] = connector.getControlList(testSautr)
 
         await(res) mustBe Left(ControlListDataNotFound)
       }
