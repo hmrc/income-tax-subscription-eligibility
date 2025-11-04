@@ -17,7 +17,8 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{Json, OWrites, Reads, __}
+import play.api.libs.json._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
 
 case class EligibilityStatusSuccessResponse(currentTaxYear: EligibilityStatus,
                                             nextTaxYear: EligibilityStatus,
@@ -33,9 +34,23 @@ object EligibilityStatusSuccessResponse {
     )(EligibilityStatusSuccessResponse.apply _)
 
   implicit val writes: OWrites[EligibilityStatusSuccessResponse] = OWrites[EligibilityStatusSuccessResponse] { eligibility =>
-    Json.obj(
+
+    val eligibilityStatusJson: JsObject = Json.obj(
       "eligibleCurrentYear" -> eligibility.currentTaxYear,
       "eligibleNextYear" -> eligibility.nextTaxYear
     )
+
+    val exemptionReasons: Seq[EligibilityStatusFailureReason] = Seq(
+      DigitallyExempt, MTDExemptEnduring, MTDExempt27To28, MTDExempt26To27
+    )
+
+    val firstExceptionReason: Option[EligibilityStatusFailureReason] = exemptionReasons.find(eligibility.nextTaxYearFailureReasons.contains)
+
+    val exemptionReasonJson: JsObject = firstExceptionReason
+      .map(reason => Json.obj("exemptionReason" -> reason.key))
+      .getOrElse(Json.obj())
+
+    eligibilityStatusJson ++ exemptionReasonJson
+
   }
 }

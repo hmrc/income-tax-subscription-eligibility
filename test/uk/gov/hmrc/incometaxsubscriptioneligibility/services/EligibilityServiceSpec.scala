@@ -149,9 +149,9 @@ class EligibilityServiceSpec extends PlaySpec
     BankruptInsolvent,
     BankruptVoluntaryArrangement,
     DigitallyExempt,
-    MTDExceptEnduring,
-    MTDExcept26To27,
-    MTDExcept27To28,
+    MTDExemptEnduring,
+    MTDExempt26To27,
+    MTDExempt27To28,
     MandationInhibit26To27,
     MandationInhibit27To28
   )
@@ -181,12 +181,12 @@ class EligibilityServiceSpec extends PlaySpec
     ControlListMessages.collectionPriorityMessage,
     ControlListMessages.bankruptInsolvementMessage,
     ControlListMessages.bankruptVoluntaryArrangementMessage,
-    "Digitally Exempt",
-    "MTD Except Enduring",
-    "MTD Except 26-27",
-    "MTD Except 27-28",
-    "Mandation Inhibit 26-27",
-    "Mandation Inhibit 27-28"
+    DigitallyExempt.key,
+    MTDExemptEnduring.key,
+    MTDExempt26To27.key,
+    MTDExempt27To28.key,
+    MandationInhibit26To27.key,
+    MandationInhibit27To28.key
   )
 
   lazy val currentYearEligibleAuditModel = EligibilityAuditModel(

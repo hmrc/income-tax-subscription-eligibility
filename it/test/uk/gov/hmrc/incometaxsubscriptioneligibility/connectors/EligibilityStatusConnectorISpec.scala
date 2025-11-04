@@ -69,7 +69,7 @@ class EligibilityStatusConnectorISpec extends ComponentSpecBase {
             AveragingAdjustment, TrustIncome, PartnershipIncome, BlindPersonsAllowance, FosterCarers, MarriedCouplesAllowance,
             ComplianceActivity, BudgetPaymentPlan, Death, TimeToPay, TimeToPaySelfServe, DisguisedRemunerationInvolvement,
             NoRepaymentSignal, OutstandingReturns, EnforcementSignal, CollectionPrioritySignal, BankruptInsolvent,
-            BankruptVoluntaryArrangement, DigitallyExempt, MTDExceptEnduring, MTDExcept26To27, MTDExcept27To28,
+            BankruptVoluntaryArrangement, DigitallyExempt, MTDExemptEnduring, MTDExempt26To27, MTDExempt27To28,
             MandationInhibit26To27, MandationInhibit27To28
           ),
           nextTaxYearFailureReasons = Seq()

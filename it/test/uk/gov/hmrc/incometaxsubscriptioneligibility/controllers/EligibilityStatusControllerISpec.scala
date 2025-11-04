@@ -24,6 +24,8 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSw
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.AuthStub.stubAuth
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.EligibilityStatusAPIStub.{stubGetEligibilityStatus, verifyGetEligibilityStatus}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, ControlListConfigTestHelper}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
 
 class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlListConfigTestHelper with FeatureSwitching {
 
@@ -44,9 +46,22 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
     "ReasonKeyCY1" -> Json.arr()
   )
 
+  def eligibilityStatusSuccessfulBothYearReasons(reason: EligibilityStatusFailureReason): JsObject = Json.obj(
+    "CY" -> "No",
+    "CY1" -> "No",
+    "ReasonKeyCY" -> Json.arr(reason.key),
+    "ReasonKeyCY1" -> Json.arr(reason.key)
+  )
+
   val eligibilityStatusSuccessfulControllerJson: JsObject = Json.obj(
     "eligibleCurrentYear" -> false,
     "eligibleNextYear" -> true
+  )
+
+  def eligibilityStatusSuccessfulWithReasonJson(reason: EligibilityStatusFailureReason): JsObject = Json.obj(
+    "eligibleCurrentYear" -> false,
+    "eligibleNextYear" -> false,
+    "exemptionReason" -> reason.key
   )
 
   s"GET ${routes.EligibilityStatusController.getEligibilityStatus(nino = testNino, utr = testUtr).url}" must {
@@ -67,6 +82,49 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
           )
 
           verifyGetEligibilityStatus(testNino)
+        }
+        "the connector returns failure reasons in the next year" which {
+          "have non exception reasons" in new Server(defaultApp) {
+            stubAuth(OK, Json.obj())
+            stubGetEligibilityStatus(testNino)(
+              status = OK,
+              body = eligibilityStatusSuccessfulBothYearReasons(NonResidentCompanyLandlord)
+            )
+
+            val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
+
+            result must have(
+              httpStatus(OK),
+              jsonBodyAs(
+                Json.obj(
+                  "eligibleCurrentYear" -> false,
+                  "eligibleNextYear" -> false
+                )
+              )
+            )
+
+            verifyGetEligibilityStatus(testNino)
+          }
+          "have an exception reason" which {
+            Seq(DigitallyExempt, MTDExemptEnduring, MTDExempt26To27, MTDExempt27To28) foreach { reason =>
+              s"is the $reason reason" in new Server(defaultApp) {
+                stubAuth(OK, Json.obj())
+                stubGetEligibilityStatus(testNino)(
+                  status = OK,
+                  body = eligibilityStatusSuccessfulBothYearReasons(reason)
+                )
+
+                val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
+
+                result must have(
+                  httpStatus(OK),
+                  jsonBodyAs(eligibilityStatusSuccessfulWithReasonJson(reason))
+                )
+
+                verifyGetEligibilityStatus(testNino)
+              }
+            }
+          }
         }
       }
       "the stub eligibility feature switch is enabled" in new Server(defaultApp) {
