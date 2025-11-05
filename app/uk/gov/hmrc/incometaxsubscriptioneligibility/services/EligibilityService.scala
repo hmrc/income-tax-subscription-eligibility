@@ -97,12 +97,12 @@ class EligibilityService @Inject()(auditService: AuditService,
     case CollectionPrioritySignal => ControlListMessages.collectionPriorityMessage
     case BankruptInsolvent => ControlListMessages.bankruptInsolvementMessage
     case BankruptVoluntaryArrangement => ControlListMessages.bankruptVoluntaryArrangementMessage
-    case DigitallyExempt => "Digitally Exempt"
-    case MTDExceptEnduring => "MTD Except Enduring"
-    case MTDExcept26To27 => "MTD Except 26-27"
-    case MTDExcept27To28 => "MTD Except 27-28"
-    case MandationInhibit26To27 => "Mandation Inhibit 26-27"
-    case MandationInhibit27To28 => "Mandation Inhibit 27-28"
+    case DigitallyExempt => DigitallyExempt.key
+    case MTDExemptEnduring => MTDExemptEnduring.key
+    case MTDExempt26To27 => MTDExempt26To27.key
+    case MTDExempt27To28 => MTDExempt27To28.key
+    case MandationInhibit26To27 => MandationInhibit26To27.key
+    case MandationInhibit27To28 => MandationInhibit27To28.key
   }
 
 }
