@@ -19,7 +19,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json._
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.{Eligible, Ineligible}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.{DigitallyExempt, MTDExempt26To27, MTDExempt27To28, MTDExemptEnduring, NonResidentCompanyLandlord}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
 
 class EligibilityStatusSuccessResponseSpec extends PlaySpec {
 
@@ -62,7 +62,7 @@ class EligibilityStatusSuccessResponseSpec extends PlaySpec {
 
     "write to json successfully" when {
       "the response is fully eligible" in {
-        val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
+        val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
           currentTaxYear = Eligible,
           nextTaxYear = Eligible,
           currentTaxYearFailureReasons = Seq.empty,
@@ -78,7 +78,7 @@ class EligibilityStatusSuccessResponseSpec extends PlaySpec {
       }
       "the response is eligible for next year only" when {
         "the current year failed with a non exception reason" in {
-          val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
+          val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
             currentTaxYear = Ineligible,
             nextTaxYear = Eligible,
             currentTaxYearFailureReasons = Seq(NonResidentCompanyLandlord),
@@ -93,7 +93,7 @@ class EligibilityStatusSuccessResponseSpec extends PlaySpec {
           writeJson mustBe expectedJson
         }
         "the current year failed with a exemption reason" in {
-          val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
+          val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
             currentTaxYear = Ineligible,
             nextTaxYear = Eligible,
             currentTaxYearFailureReasons = Seq(DigitallyExempt),
@@ -109,12 +109,12 @@ class EligibilityStatusSuccessResponseSpec extends PlaySpec {
         }
       }
       "the response is ineligible for both years" when {
-        "they are ineligible with a non exception reason" in {
-          val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
+        "they are ineligible with an unhandled reason" in {
+          val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
             currentTaxYear = Ineligible,
             nextTaxYear = Ineligible,
-            currentTaxYearFailureReasons = Seq(NonResidentCompanyLandlord),
-            nextTaxYearFailureReasons = Seq(NonResidentCompanyLandlord)
+            currentTaxYearFailureReasons = Seq(OutstandingReturns),
+            nextTaxYearFailureReasons = Seq(OutstandingReturns)
           ))
 
           val expectedJson = Json.obj(
@@ -124,86 +124,157 @@ class EligibilityStatusSuccessResponseSpec extends PlaySpec {
 
           writeJson mustBe expectedJson
         }
-        "they are ineligible with a exemption reason" when {
-          "there is a single exemption reason given" in {
-            val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
-              currentTaxYear = Ineligible,
-              nextTaxYear = Ineligible,
-              currentTaxYearFailureReasons = Seq(DigitallyExempt),
-              nextTaxYearFailureReasons = Seq(DigitallyExempt)
-            ))
+        "they are ineligible with a handled reason" should {
+          "return a reason of Digitally Exempt" when {
+            s"they are $DigitallyExempt" in {
+              val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
+                currentTaxYear = Ineligible,
+                nextTaxYear = Ineligible,
+                currentTaxYearFailureReasons = Seq(DigitallyExempt),
+                nextTaxYearFailureReasons = Seq(DigitallyExempt)
+              ))
 
-            val expectedJson = Json.obj(
-              "eligibleCurrentYear" -> false,
-              "eligibleNextYear" -> false,
-              "exemptionReason" -> DigitallyExempt.key
-            )
+              val expectedJson = Json.obj(
+                "eligibleCurrentYear" -> false,
+                "eligibleNextYear" -> false,
+                "exemptionReason" -> "Digitally Exempt"
+              )
 
-            writeJson mustBe expectedJson
+              writeJson mustBe expectedJson
+            }
           }
-          "there are multiple exemption reasons given and the highest priority available is digitally exempt" in {
-            val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
-              currentTaxYear = Ineligible,
-              nextTaxYear = Ineligible,
-              currentTaxYearFailureReasons = Seq(MTDExempt26To27, MTDExempt27To28, MTDExemptEnduring, DigitallyExempt),
-              nextTaxYearFailureReasons = Seq(MTDExempt26To27, MTDExempt27To28, MTDExemptEnduring, DigitallyExempt)
-            ))
 
-            val expectedJson = Json.obj(
-              "eligibleCurrentYear" -> false,
-              "eligibleNextYear" -> false,
-              "exemptionReason" -> DigitallyExempt.key
-            )
+          "return a reason of MTD Exempt Enduring" when {
+            Seq(MTDExemptEnduring, MTDExempt27To28, MarriedCouplesAllowance, MinisterOfReligion, LloydsUnderwriter, BlindPersonsAllowance) foreach { reason =>
+              s"they are $reason" in {
+                val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
+                  currentTaxYear = Ineligible,
+                  nextTaxYear = Ineligible,
+                  currentTaxYearFailureReasons = Seq(reason),
+                  nextTaxYearFailureReasons = Seq(reason)
+                ))
 
-            writeJson mustBe expectedJson
+                val expectedJson = Json.obj(
+                  "eligibleCurrentYear" -> false,
+                  "eligibleNextYear" -> false,
+                  "exemptionReason" -> "MTD Exempt Enduring"
+                )
+
+                writeJson mustBe expectedJson
+              }
+            }
           }
-          "there are multiple exemption reasons given and the highest priority available is mtd exempt enduring" in {
-            val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
-              currentTaxYear = Ineligible,
-              nextTaxYear = Ineligible,
-              currentTaxYearFailureReasons = Seq(MTDExempt26To27, MTDExempt27To28, MTDExemptEnduring),
-              nextTaxYearFailureReasons = Seq(MTDExempt26To27, MTDExempt27To28, MTDExemptEnduring)
-            ))
 
-            val expectedJson = Json.obj(
-              "eligibleCurrentYear" -> false,
-              "eligibleNextYear" -> false,
-              "exemptionReason" -> MTDExemptEnduring.key
-            )
+          "return a reason of MTD Exempt 26/27" when {
+            Seq(NonResidents, MTDExempt26To27) foreach { reason =>
+              s"they are $reason" in {
+                val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
+                  currentTaxYear = Ineligible,
+                  nextTaxYear = Ineligible,
+                  currentTaxYearFailureReasons = Seq(reason),
+                  nextTaxYearFailureReasons = Seq(reason)
+                ))
 
-            writeJson mustBe expectedJson
+                val expectedJson = Json.obj(
+                  "eligibleCurrentYear" -> false,
+                  "eligibleNextYear" -> false,
+                  "exemptionReason" -> "MTD Exempt 26/27"
+                )
+
+                writeJson mustBe expectedJson
+              }
+            }
           }
-          "there are multiple exemption reasons given and the highest priority available is mtd exempt 27-28" in {
-            val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
-              currentTaxYear = Ineligible,
-              nextTaxYear = Ineligible,
-              currentTaxYearFailureReasons = Seq(MTDExempt26To27, MTDExempt27To28),
-              nextTaxYearFailureReasons = Seq(MTDExempt26To27, MTDExempt27To28)
-            ))
 
-            val expectedJson = Json.obj(
-              "eligibleCurrentYear" -> false,
-              "eligibleNextYear" -> false,
-              "exemptionReason" -> MTDExempt27To28.key
-            )
+          "return a reason of No Data" when {
+            Seq(
+              NoDataFound, Death, NonResidentCompanyLandlord, BankruptInsolvent,
+              BankruptVoluntaryArrangement, FosterCarers, MandationInhibit26To27, MandationInhibit27To28
+            ) foreach { reason =>
+              s"they are $reason" in {
+                val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
+                  currentTaxYear = Ineligible,
+                  nextTaxYear = Ineligible,
+                  currentTaxYearFailureReasons = Seq(reason),
+                  nextTaxYearFailureReasons = Seq(reason)
+                ))
 
-            writeJson mustBe expectedJson
+                val expectedJson = Json.obj(
+                  "eligibleCurrentYear" -> false,
+                  "eligibleNextYear" -> false,
+                  "exemptionReason" -> "No Data"
+                )
+
+                writeJson mustBe expectedJson
+              }
+            }
           }
-          "there are multiple exemption reasons given and the highest priority available is mtd exempt 26-27" in {
-            val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
-              currentTaxYear = Ineligible,
-              nextTaxYear = Ineligible,
-              currentTaxYearFailureReasons = Seq(MTDExempt26To27),
-              nextTaxYearFailureReasons = Seq(MTDExempt26To27)
-            ))
 
-            val expectedJson = Json.obj(
-              "eligibleCurrentYear" -> false,
-              "eligibleNextYear" -> false,
-              "exemptionReason" -> MTDExempt26To27.key
-            )
+          "return the highest priority reason" when {
+            "there are multiple exemption reasons given and the highest priority available is digitally exempt" in {
+              val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
+                currentTaxYear = Ineligible,
+                nextTaxYear = Ineligible,
+                currentTaxYearFailureReasons = Seq(NoDataFound, MTDExempt26To27, MTDExemptEnduring, DigitallyExempt),
+                nextTaxYearFailureReasons = Seq(NoDataFound, MTDExempt26To27, MTDExemptEnduring, DigitallyExempt)
+              ))
 
-            writeJson mustBe expectedJson
+              val expectedJson = Json.obj(
+                "eligibleCurrentYear" -> false,
+                "eligibleNextYear" -> false,
+                "exemptionReason" -> "Digitally Exempt"
+              )
+
+              writeJson mustBe expectedJson
+            }
+            "there are multiple exemption reasons given and the highest priority available is mtd exempt enduring" in {
+              val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
+                currentTaxYear = Ineligible,
+                nextTaxYear = Ineligible,
+                currentTaxYearFailureReasons = Seq(NoDataFound, MTDExempt26To27, MTDExemptEnduring),
+                nextTaxYearFailureReasons = Seq(NoDataFound, MTDExempt26To27, MTDExemptEnduring)
+              ))
+
+              val expectedJson = Json.obj(
+                "eligibleCurrentYear" -> false,
+                "eligibleNextYear" -> false,
+                "exemptionReason" -> "MTD Exempt Enduring"
+              )
+
+              writeJson mustBe expectedJson
+            }
+            "there are multiple exemption reasons given and the highest priority available is mtd exempt 26-27" in {
+              val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
+                currentTaxYear = Ineligible,
+                nextTaxYear = Ineligible,
+                currentTaxYearFailureReasons = Seq(NoDataFound, MTDExempt26To27),
+                nextTaxYearFailureReasons = Seq(NoDataFound, MTDExempt26To27)
+              ))
+
+              val expectedJson = Json.obj(
+                "eligibleCurrentYear" -> false,
+                "eligibleNextYear" -> false,
+                "exemptionReason" -> "MTD Exempt 26/27"
+              )
+
+              writeJson mustBe expectedJson
+            }
+            "there are multiple exemption reasons given and the highest priority available is no data found" in {
+              val writeJson = Json.toJson[EligibilityStatusSuccessResponse](EligibilityStatusSuccessResponse(
+                currentTaxYear = Ineligible,
+                nextTaxYear = Ineligible,
+                currentTaxYearFailureReasons = Seq(NoDataFound),
+                nextTaxYearFailureReasons = Seq(NoDataFound)
+              ))
+
+              val expectedJson = Json.obj(
+                "eligibleCurrentYear" -> false,
+                "eligibleNextYear" -> false,
+                "exemptionReason" -> "No Data"
+              )
+
+              writeJson mustBe expectedJson
+            }
           }
         }
       }

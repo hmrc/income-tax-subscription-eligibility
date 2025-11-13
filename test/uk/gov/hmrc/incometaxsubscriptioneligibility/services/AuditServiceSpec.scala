@@ -19,6 +19,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 import org.scalamock.matchers.ArgCapture._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.OneInstancePerTest
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{ConfigLoader, Configuration}
@@ -42,7 +43,7 @@ class AuditServiceSpec extends FeatureSwitchingSpec with MockFactory with OneIns
   lazy val testAuditService = new AuditService(mockConfiguration, mockAuditConnector)
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit val request = FakeRequest(POST, TestConstants.testUrl)
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(POST, TestConstants.testUrl)
 
   val testAuditModel = new AuditModel {
     override val auditType = TestConstants.Audit.testAuditType

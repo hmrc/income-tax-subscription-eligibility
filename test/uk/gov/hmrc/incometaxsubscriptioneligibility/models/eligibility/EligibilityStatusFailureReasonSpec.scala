@@ -30,11 +30,6 @@ class EligibilityStatusFailureReasonSpec extends PlaySpec {
         }
       }
     }
-    "fail to read the json successfully" when {
-      "the read json does not have a recognised value" in {
-        Json.fromJson[EligibilityStatusFailureReason](JsString("Other")) mustBe JsError("Unexpected eligibility failure reason: Other")
-      }
-    }
   }
 
   lazy val readStringToFailureReason: Map[String, EligibilityStatusFailureReason] = Map(
@@ -68,6 +63,7 @@ class EligibilityStatusFailureReasonSpec extends PlaySpec {
     MTDExempt27To28.key -> MTDExempt27To28,
     MandationInhibit26To27.key -> MandationInhibit26To27,
     MandationInhibit27To28.key -> MandationInhibit27To28,
+    "other" -> Other("other")
   )
 
 }
