@@ -103,6 +103,7 @@ class EligibilityService @Inject()(auditService: AuditService,
     case MTDExempt27To28 => MTDExempt27To28.key
     case MandationInhibit26To27 => MandationInhibit26To27.key
     case MandationInhibit27To28 => MandationInhibit27To28.key
+    case Other(key) => key
   }
 
 }

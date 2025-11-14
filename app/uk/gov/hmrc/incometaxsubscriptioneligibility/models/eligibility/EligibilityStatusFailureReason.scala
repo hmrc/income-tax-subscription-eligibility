@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility
 
-import play.api.libs.json.{JsError, JsSuccess, Reads, __}
+import play.api.libs.json.{JsSuccess, Reads, __}
 
 sealed trait EligibilityStatusFailureReason {
   val key: String
@@ -144,6 +144,8 @@ object EligibilityStatusFailureReason {
     val key: String = "Mandation Inhibit 27/28"
   }
 
+  case class Other(key: String) extends EligibilityStatusFailureReason
+
   implicit val reads: Reads[EligibilityStatusFailureReason] = __.read[String].flatMapResult {
     case NoDataFound.key => JsSuccess(NoDataFound)
     case NonResidents.key => JsSuccess(NonResidents)
@@ -175,6 +177,6 @@ object EligibilityStatusFailureReason {
     case MTDExempt27To28.key => JsSuccess(MTDExempt27To28)
     case MandationInhibit26To27.key => JsSuccess(MandationInhibit26To27)
     case MandationInhibit27To28.key => JsSuccess(MandationInhibit27To28)
-    case other => JsError(s"Unexpected eligibility failure reason: $other")
+    case otherKey => JsSuccess(Other(otherKey))
   }
 }

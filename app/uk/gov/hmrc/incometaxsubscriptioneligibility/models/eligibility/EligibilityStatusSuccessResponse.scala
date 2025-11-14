@@ -40,14 +40,42 @@ object EligibilityStatusSuccessResponse {
       "eligibleNextYear" -> eligibility.nextTaxYear
     )
 
-    val exemptionReasons: Seq[EligibilityStatusFailureReason] = Seq(
-      DigitallyExempt, MTDExemptEnduring, MTDExempt27To28, MTDExempt26To27
-    )
+    val exemptionReason: Option[String] = {
 
-    val firstExceptionReason: Option[EligibilityStatusFailureReason] = exemptionReasons.find(eligibility.nextTaxYearFailureReasons.contains)
+      val digitallyExemptReason: Option[String] = eligibility.nextTaxYearFailureReasons.collectFirst {
+        case DigitallyExempt => "Digitally Exempt"
+      }
 
-    val exemptionReasonJson: JsObject = firstExceptionReason
-      .map(reason => Json.obj("exemptionReason" -> reason.key))
+      val mtdExemptEnduringReason: Option[String] = eligibility.nextTaxYearFailureReasons.collectFirst {
+        case MTDExemptEnduring |
+             MTDExempt27To28 |
+             MarriedCouplesAllowance |
+             MinisterOfReligion |
+             LloydsUnderwriter |
+             BlindPersonsAllowance => "MTD Exempt Enduring"
+      }
+
+      val mtdExempt26To27Reason: Option[String] = eligibility.nextTaxYearFailureReasons.collectFirst {
+        case MTDExempt26To27 |
+             NonResidents => "MTD Exempt 26/27"
+      }
+
+      val noDataReason: Option[String] = eligibility.nextTaxYearFailureReasons.collectFirst {
+        case NoDataFound |
+             Death |
+             NonResidentCompanyLandlord |
+             BankruptInsolvent |
+             BankruptVoluntaryArrangement |
+             FosterCarers |
+             MandationInhibit26To27 |
+             MandationInhibit27To28 => "No Data"
+      }
+
+      digitallyExemptReason orElse mtdExemptEnduringReason orElse mtdExempt26To27Reason orElse noDataReason
+    }
+
+    val exemptionReasonJson: JsObject = exemptionReason
+      .map(reason => Json.obj("exemptionReason" -> reason))
       .getOrElse(Json.obj())
 
     eligibilityStatusJson ++ exemptionReasonJson
