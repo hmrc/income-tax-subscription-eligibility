@@ -42,7 +42,7 @@ class AuditServiceSpec extends FeatureSwitchingSpec with MockFactory with OneIns
   lazy val testAuditService = new AuditService(mockConfiguration, mockAuditConnector)
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit val request = FakeRequest(POST, TestConstants.testUrl)
+  implicit val request: FakeRequest[_] = FakeRequest(POST, TestConstants.testUrl)
 
   val testAuditModel = new AuditModel {
     override val auditType = TestConstants.Audit.testAuditType
