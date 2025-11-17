@@ -85,53 +85,32 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
   s"A GET request on '/eligibility/$testSautr' route" should {
     "return an OK with '{eligibleCurrent: true}'" when {
       "the feature switch is enabled" in new Server(defaultApp) {
-        val testControlListString: String = ControlListHelper(Set()).asBinaryString
+        override def running(): Unit = {
+          val testControlListString: String = ControlListHelper(Set()).asBinaryString
 
-        val testDesJson: JsObject = Json.obj(
-          "nino" -> "AA123456A",
-          "year" -> "2019",
-          "controlListInformation" -> testControlListString
-        )
+          val testDesJson: JsObject = Json.obj(
+            "nino" -> "AA123456A",
+            "year" -> "2019",
+            "controlListInformation" -> testControlListString
+          )
 
-        stubAuth(OK, Json.obj())
-        stubGetControlList(testSautr)(OK, testDesJson)
-        enable(StubControlListEligible)
+          stubAuth(OK, Json.obj())
+          stubGetControlList(testSautr)(OK, testDesJson)
+          enable(StubControlListEligible)
 
-        val result: WSResponse = get(s"/eligibility/$testSautr")
+          val result: WSResponse = get(s"/eligibility/$testSautr")
 
-        result must have(
-          httpStatus(OK),
-          jsonBodyAs(testJson(eligibleCurrent = true, eligibleNext = true))
-        )
+          result must have(
+            httpStatus(OK),
+            jsonBodyAs(testJson(eligibleCurrent = true, eligibleNext = true))
+          )
+        }
       }
     }
 
     "return an OK with '{eligibleCurrent: true}'" when {
       "the feature switch is disabled and the returned control list has no parameters set to true" in new Server(defaultApp) {
-        val testControlListString: String = ControlListHelper(Set()).asBinaryString
-
-        val testDesJson: JsObject = Json.obj(
-          "nino" -> "AA123456A",
-          "year" -> "2019",
-          "controlListInformation" -> testControlListString
-        )
-
-        stubAuth(OK, Json.obj())
-        stubGetControlList(testSautr)(OK, testDesJson)
-
-        val result: WSResponse = get(s"/eligibility/$testSautr")
-
-        result must have(
-          httpStatus(OK),
-          jsonBodyAs(testJson(eligibleCurrent = true, eligibleNext = true))
-        )
-      }
-    }
-
-    "return an OK with '{eligibleCurrent: true}'" when {
-      "the feature switch is disabled and the returned control list has no parameters set to true and all config values are set to ineligible" in
-        new Server(app(extraConfig = toConfigList(testAllFalse, year))) {
-
+        override def running(): Unit = {
           val testControlListString: String = ControlListHelper(Set()).asBinaryString
 
           val testDesJson: JsObject = Json.obj(
@@ -150,29 +129,58 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
             jsonBodyAs(testJson(eligibleCurrent = true, eligibleNext = true))
           )
         }
+      }
+    }
+
+    "return an OK with '{eligibleCurrent: true}'" when {
+      "the feature switch is disabled and the returned control list has no parameters set to true and all config values are set to ineligible" in
+        new Server(app(extraConfig = toConfigList(testAllFalse, year))) {
+          override def running(): Unit = {
+
+            val testControlListString: String = ControlListHelper(Set()).asBinaryString
+
+            val testDesJson: JsObject = Json.obj(
+              "nino" -> "AA123456A",
+              "year" -> "2019",
+              "controlListInformation" -> testControlListString
+            )
+
+            stubAuth(OK, Json.obj())
+            stubGetControlList(testSautr)(OK, testDesJson)
+
+            val result: WSResponse = get(s"/eligibility/$testSautr")
+
+            result must have(
+              httpStatus(OK),
+              jsonBodyAs(testJson(eligibleCurrent = true, eligibleNext = true))
+            )
+          }
+        }
     }
 
     "return an OK with '{eligible: false}'" when {
       "the feature switch is disabled and the returned control list has one parameter set to true and one config values is ineligible" in
         new Server(app(extraConfig = toConfigList(Map(NonResidentCompanyLandlord -> false), year))) {
+          override def running(): Unit = {
 
-          val testControlListString: String = ControlListHelper(Set(StudentLoans)).asBinaryString
+            val testControlListString: String = ControlListHelper(Set(StudentLoans)).asBinaryString
 
-          val testDesJson: JsObject = Json.obj(
-            "nino" -> "AA123456A",
-            "year" -> "2019",
-            "controlListInformation" -> testControlListString
-          )
+            val testDesJson: JsObject = Json.obj(
+              "nino" -> "AA123456A",
+              "year" -> "2019",
+              "controlListInformation" -> testControlListString
+            )
 
-          stubAuth(OK, Json.obj())
-          stubGetControlList(testSautr)(OK, testDesJson)
+            stubAuth(OK, Json.obj())
+            stubGetControlList(testSautr)(OK, testDesJson)
 
-          val result: WSResponse = get(s"/eligibility/$testSautr")
+            val result: WSResponse = get(s"/eligibility/$testSautr")
 
-          result must have(
-            httpStatus(OK),
-            jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false))
-          )
+            result must have(
+              httpStatus(OK),
+              jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false))
+            )
+          }
         }
     }
 
@@ -187,21 +195,39 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
           year
         ))) {
 
-          val testControlListString: String = ControlListHelper(Set(
-            NonResidentCompanyLandlord,
-            StudentLoans,
-            MinistersOfReligion,
-            DividendsForeign
-          )).asBinaryString
+          override def running(): Unit = {
 
-          val testDesJson: JsObject = Json.obj(
-            "nino" -> "AA123456A",
-            "year" -> "2019",
-            "controlListInformation" -> testControlListString
-          )
+            val testControlListString: String = ControlListHelper(Set(
+              NonResidentCompanyLandlord,
+              StudentLoans,
+              MinistersOfReligion,
+              DividendsForeign
+            )).asBinaryString
 
+            val testDesJson: JsObject = Json.obj(
+              "nino" -> "AA123456A",
+              "year" -> "2019",
+              "controlListInformation" -> testControlListString
+            )
+
+            stubAuth(OK, Json.obj())
+            stubGetControlList(testSautr)(OK, testDesJson)
+
+            val result: WSResponse = get(s"/eligibility/$testSautr")
+
+            result must have(
+              httpStatus(OK),
+              jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false))
+            )
+          }
+        }
+    }
+
+    "return an OK with '{eligible: false}'" when {
+      "the feature switch is disabled and no control list was found" in new Server(defaultApp) {
+        override def running(): Unit = {
           stubAuth(OK, Json.obj())
-          stubGetControlList(testSautr)(OK, testDesJson)
+          stubGetControlList(testSautr)(NOT_FOUND)
 
           val result: WSResponse = get(s"/eligibility/$testSautr")
 
@@ -210,63 +236,52 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
             jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false))
           )
         }
+      }
     }
 
-    "return an OK with '{eligible: false}'" when {
-      "the feature switch is disabled and no control list was found" in new Server(defaultApp) {
+    "return an OK with '{eligible: true}' and pre-pop data" in new Server(defaultApp) {
+      override def running(): Unit = {
+        val testControlListString: String = ControlListHelper(Set()).asBinaryString
+
+        val testDesJson: JsObject = Json.obj(
+          "nino" -> "AA123456A",
+          "year" -> "2019",
+          "controlListInformation" -> testControlListString,
+          "prepopData" -> Json.obj(
+            "ukPropertyStartDate" -> "01012018",
+            "ukPropertyAccountingMethod" -> "Y",
+            "overseasPropertyStartDate" -> "01012018",
+            "selfEmployments" -> Json.arr(
+              Json.obj(
+                "businessName" -> "Test business name",
+                "businessTradeName" -> "Test business trade name",
+                "businessAddressFirstLine" -> "Buckingham Palace",
+                "businessAddressPostCode" -> "SW1A 1AA",
+                "businessStartDate" -> "01012018",
+                "businessAccountingMethod" -> "Y"
+              ),
+              Json.obj(
+                "businessName" -> "Test business name",
+                "businessTradeName" -> "Test business trade name",
+                "businessStartDate" -> "01012018",
+                "businessAccountingMethod" -> "Y",
+                "businessCeasedDate" -> "20180101"
+              )
+            )
+          )
+        )
+
         stubAuth(OK, Json.obj())
-        stubGetControlList(testSautr)(NOT_FOUND)
+        stubGetControlList(testSautr)(OK, testDesJson)
+        enable(StubControlListEligible)
 
         val result: WSResponse = get(s"/eligibility/$testSautr")
 
         result must have(
           httpStatus(OK),
-          jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false))
+          jsonBodyAs(testJsonWithPrepopData(eligibleCurrent = true, eligibleNext = true))
         )
       }
-    }
-
-    "return an OK with '{eligible: true}' and pre-pop data" in new Server(defaultApp) {
-      val testControlListString: String = ControlListHelper(Set()).asBinaryString
-
-      val testDesJson: JsObject = Json.obj(
-        "nino" -> "AA123456A",
-        "year" -> "2019",
-        "controlListInformation" -> testControlListString,
-        "prepopData" -> Json.obj(
-          "ukPropertyStartDate" -> "01012018",
-          "ukPropertyAccountingMethod" -> "Y",
-          "overseasPropertyStartDate" -> "01012018",
-          "selfEmployments" -> Json.arr(
-            Json.obj(
-              "businessName" -> "Test business name",
-              "businessTradeName" -> "Test business trade name",
-              "businessAddressFirstLine" -> "Buckingham Palace",
-              "businessAddressPostCode" -> "SW1A 1AA",
-              "businessStartDate" -> "01012018",
-              "businessAccountingMethod" -> "Y"
-            ),
-            Json.obj(
-              "businessName" -> "Test business name",
-              "businessTradeName" -> "Test business trade name",
-              "businessStartDate" -> "01012018",
-              "businessAccountingMethod" -> "Y",
-              "businessCeasedDate" -> "20180101"
-            )
-          )
-        )
-      )
-
-      stubAuth(OK, Json.obj())
-      stubGetControlList(testSautr)(OK, testDesJson)
-      enable(StubControlListEligible)
-
-      val result: WSResponse = get(s"/eligibility/$testSautr")
-
-      result must have(
-        httpStatus(OK),
-        jsonBodyAs(testJsonWithPrepopData(eligibleCurrent = true, eligibleNext = true))
-      )
     }
   }
 }

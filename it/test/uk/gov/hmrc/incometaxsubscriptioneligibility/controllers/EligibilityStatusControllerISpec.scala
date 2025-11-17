@@ -68,113 +68,126 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
     "return an OK with the eligibility status for current and next tax year" when {
       "the stub eligibility feature switch is disabled" when {
         "the connector returns a successful response" in new Server(defaultApp) {
-          stubAuth(OK, Json.obj())
-          stubGetEligibilityStatus(testNino)(
-            status = OK,
-            body = eligibilityStatusSuccessfulAPIJson
-          )
-
-          val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
-
-          result must have(
-            httpStatus(OK),
-            jsonBodyAs(eligibilityStatusSuccessfulControllerJson)
-          )
-
-          verifyGetEligibilityStatus(testNino)
-        }
-        "the connector returns failure reasons in the next year" which {
-          "have non exception reasons" in new Server(defaultApp) {
+          override def running(): Unit = {
             stubAuth(OK, Json.obj())
             stubGetEligibilityStatus(testNino)(
               status = OK,
-              body = eligibilityStatusSuccessfulBothYearReasons(NonResidentCompanyLandlord)
+              body = eligibilityStatusSuccessfulAPIJson
             )
 
             val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
 
             result must have(
               httpStatus(OK),
-              jsonBodyAs(
-                Json.obj(
-                  "eligibleCurrentYear" -> false,
-                  "eligibleNextYear" -> false
-                )
-              )
+              jsonBodyAs(eligibilityStatusSuccessfulControllerJson)
             )
 
             verifyGetEligibilityStatus(testNino)
           }
+        }
+        "the connector returns failure reasons in the next year" which {
+          "have non exception reasons" in new Server(defaultApp) {
+            override def running(): Unit = {
+              stubAuth(OK, Json.obj())
+              stubGetEligibilityStatus(testNino)(
+                status = OK,
+                body = eligibilityStatusSuccessfulBothYearReasons(NonResidentCompanyLandlord)
+              )
+
+              val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
+
+              result must have(
+                httpStatus(OK),
+                jsonBodyAs(
+                  Json.obj(
+                    "eligibleCurrentYear" -> false,
+                    "eligibleNextYear" -> false
+                  )
+                )
+              )
+
+              verifyGetEligibilityStatus(testNino)
+            }
+          }
           "have an exception reason" which {
             Seq(DigitallyExempt, MTDExemptEnduring, MTDExempt26To27, MTDExempt27To28) foreach { reason =>
               s"is the $reason reason" in new Server(defaultApp) {
-                stubAuth(OK, Json.obj())
-                stubGetEligibilityStatus(testNino)(
-                  status = OK,
-                  body = eligibilityStatusSuccessfulBothYearReasons(reason)
-                )
+                override def running(): Unit = {
+                  stubAuth(OK, Json.obj())
+                  stubGetEligibilityStatus(testNino)(
+                    status = OK,
+                    body = eligibilityStatusSuccessfulBothYearReasons(reason)
+                  )
 
-                val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
+                  val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
 
-                result must have(
-                  httpStatus(OK),
-                  jsonBodyAs(eligibilityStatusSuccessfulWithReasonJson(reason))
-                )
+                  result must have(
+                    httpStatus(OK),
+                    jsonBodyAs(eligibilityStatusSuccessfulWithReasonJson(reason))
+                  )
 
-                verifyGetEligibilityStatus(testNino)
+                  verifyGetEligibilityStatus(testNino)
+                }
               }
             }
           }
         }
       }
       "the stub eligibility feature switch is enabled" in new Server(defaultApp) {
-        enable(StubControlListEligible)
-        stubAuth(OK, Json.obj())
+        override def running(): Unit = {
+          enable(StubControlListEligible)
+          stubAuth(OK, Json.obj())
 
-        val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
+          val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
 
-        result must have(
-          httpStatus(OK),
-          jsonBodyAs(
-            Json.obj(
-              "eligibleCurrentYear" -> true,
-              "eligibleNextYear" -> true
+          result must have(
+            httpStatus(OK),
+            jsonBodyAs(
+              Json.obj(
+                "eligibleCurrentYear" -> true,
+                "eligibleNextYear" -> true
+              )
             )
           )
-        )
 
-        verifyGetEligibilityStatus(testNino, count = 0)
+          verifyGetEligibilityStatus(testNino, count = 0)
+        }
       }
     }
     "return an internal server error" when {
       "the connector returns invalid json" in new Server(defaultApp) {
-        stubAuth(OK, Json.obj())
-        stubGetEligibilityStatus(testNino)(
-          status = OK,
-          body = Json.obj()
-        )
+        override def running(): Unit = {
+          stubAuth(OK, Json.obj())
+          stubGetEligibilityStatus(testNino)(
+            status = OK,
+            body = Json.obj()
+          )
 
-        val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
+          val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
 
-        result must have(
-          httpStatus(INTERNAL_SERVER_ERROR)
-        )
+          result must have(
+            httpStatus(INTERNAL_SERVER_ERROR)
+          )
 
-        verifyGetEligibilityStatus(testNino)
-      }
-      "the connector returns an unexpected status" in new Server(defaultApp) {
-        stubAuth(OK, Json.obj())
-        stubGetEligibilityStatus(testNino)(
-          status = INTERNAL_SERVER_ERROR
-        )
+          verifyGetEligibilityStatus(testNino)
+        }
 
-        val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
+        "the connector returns an unexpected status" in new Server(defaultApp) {
+          override def running(): Unit = {
+            stubAuth(OK, Json.obj())
+            stubGetEligibilityStatus(testNino)(
+              status = INTERNAL_SERVER_ERROR
+            )
 
-        result must have(
-          httpStatus(INTERNAL_SERVER_ERROR)
-        )
+            val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
 
-        verifyGetEligibilityStatus(testNino)
+            result must have(
+              httpStatus(INTERNAL_SERVER_ERROR)
+            )
+
+            verifyGetEligibilityStatus(testNino)
+          }
+        }
       }
     }
   }
