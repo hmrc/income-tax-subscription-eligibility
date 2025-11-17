@@ -58,10 +58,10 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
     "eligibleNextYear" -> true
   )
 
-  def eligibilityStatusSuccessfulWithReasonJson(reason: EligibilityStatusFailureReason): JsObject = Json.obj(
+  def eligibilityStatusSuccessfulWithReasonJson(reason: String): JsObject = Json.obj(
     "eligibleCurrentYear" -> false,
     "eligibleNextYear" -> false,
-    "exemptionReason" -> reason.key
+    "exemptionReason" -> reason
   )
 
   s"GET ${routes.EligibilityStatusController.getEligibilityStatus(nino = testNino, utr = testUtr).url}" must {
@@ -72,7 +72,11 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
             stubAuth(OK, Json.obj())
             stubGetEligibilityStatus(testNino)(
               status = OK,
+<<<<<<< HEAD
               body = eligibilityStatusSuccessfulAPIJson
+=======
+              body = eligibilityStatusSuccessfulBothYearReasons(OutstandingReturns)
+>>>>>>> 331ec70fee5f0c939dffb62e58bf3bc5fd6aacf5
             )
 
             val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
@@ -110,7 +114,12 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
             }
           }
           "have an exception reason" which {
-            Seq(DigitallyExempt, MTDExemptEnduring, MTDExempt26To27, MTDExempt27To28) foreach { reason =>
+            Seq(
+              DigitallyExempt -> "Digitally Exempt",
+              MTDExemptEnduring -> "MTD Exempt Enduring",
+              MTDExempt26To27 -> "MTD Exempt 26/27",
+              NoDataFound -> "No Data"
+            ) foreach { case (reason, reasonResultKey) =>
               s"is the $reason reason" in new Server(defaultApp) {
                 override def running(): Unit = {
                   stubAuth(OK, Json.obj())
@@ -121,10 +130,17 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
 
                   val result: WSResponse = get(s"/eligibility/nino/$testNino/utr/$testUtr")
 
+<<<<<<< HEAD
                   result must have(
                     httpStatus(OK),
                     jsonBodyAs(eligibilityStatusSuccessfulWithReasonJson(reason))
                   )
+=======
+                result must have(
+                  httpStatus(OK),
+                  jsonBodyAs(eligibilityStatusSuccessfulWithReasonJson(reasonResultKey))
+                )
+>>>>>>> 331ec70fee5f0c939dffb62e58bf3bc5fd6aacf5
 
                   verifyGetEligibilityStatus(testNino)
                 }
