@@ -42,75 +42,81 @@ class GetControlListConnectorISpec extends ComponentSpecBase {
   "getControlList" should {
     "return a Right(Set[ControlListParameters])" when {
       "DES returns a valid control list string without pre-pop data" in new App(defaultApp) {
-        val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
-        val testJson: JsObject = Json.obj(
-          "nino" -> "AA123456A",
-          "year" -> "2019",
-          "controlListInformation" -> testControlListString
-        )
+        override def running(): Unit = {
+          val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
+          val testJson: JsObject = Json.obj(
+            "nino" -> "AA123456A",
+            "year" -> "2019",
+            "controlListInformation" -> testControlListString
+          )
 
-        stubGetControlList(testSautr)(status = OK, body = testJson)
+          stubGetControlList(testSautr)(status = OK, body = testJson)
 
-        val res: Future[GetControlListResponse] = connector.getControlList(testSautr)
+          val res: Future[GetControlListResponse] = connector.getControlList(testSautr)
 
-        await(res) mustBe Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord), None))
+          await(res) mustBe Right(GetControlListSuccessResponse(Set(NonResidentCompanyLandlord), None))
+        }
       }
 
       "DES returns a valid control list string with pre-pop data" in new App(defaultApp) {
-        val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
-        val testJson: JsObject = Json.obj(
-          "nino" -> "AA123456A",
-          "year" -> "2019",
-          "controlListInformation" -> testControlListString,
-          "prepopData" -> Json.obj(
-            "ukPropertyStartDate" -> "01012018",
-            "ukPropertyAccountingMethod" -> "Y",
-            "overseasPropertyStartDate" -> "01012018",
-            "selfEmployments" -> Json.arr(
-              Json.obj(
-                "businessName" -> "Test business name",
-                "businessTradeName" -> "Test business trade name",
-                "businessStartDate" -> "01012018",
-                "businessAccountingMethod" -> "Y"
+        override def running(): Unit = {
+          val testControlListString: String = ControlListHelper(Set(NonResidentCompanyLandlord)).asBinaryString
+          val testJson: JsObject = Json.obj(
+            "nino" -> "AA123456A",
+            "year" -> "2019",
+            "controlListInformation" -> testControlListString,
+            "prepopData" -> Json.obj(
+              "ukPropertyStartDate" -> "01012018",
+              "ukPropertyAccountingMethod" -> "Y",
+              "overseasPropertyStartDate" -> "01012018",
+              "selfEmployments" -> Json.arr(
+                Json.obj(
+                  "businessName" -> "Test business name",
+                  "businessTradeName" -> "Test business trade name",
+                  "businessStartDate" -> "01012018",
+                  "businessAccountingMethod" -> "Y"
+                )
               )
             )
           )
-        )
 
-        stubGetControlList(testSautr)(status = OK, body = testJson)
+          stubGetControlList(testSautr)(status = OK, body = testJson)
 
-        val res: Future[GetControlListResponse] = connector.getControlList(testSautr)
+          val res: Future[GetControlListResponse] = connector.getControlList(testSautr)
 
-        await(res) mustBe Right(GetControlListSuccessResponse(
-          controlList = Set(NonResidentCompanyLandlord),
-          prepopData = Some(PrepopData(
-            selfEmployments = Some(Vector(
-              SelfEmploymentData(
-                businessName = Some("Test business name"),
-                businessTradeName = Some("Test business trade name"),
-                businessStartDate = Some(Date("1", "1", "2018")),
-                businessAccountingMethod = Some(Accruals)
-              )
-            )),
-            ukProperty = Some(UkProperty(
-              ukPropertyStartDate = Some(Date("1", "1", "2018")),
-              ukPropertyAccountingMethod = Some(Accruals)
-            )),
-            overseasProperty = Some(OverseasProperty(
-              overseasPropertyStartDate = Some(Date("1", "1", "2018"))
+          await(res) mustBe Right(GetControlListSuccessResponse(
+            controlList = Set(NonResidentCompanyLandlord),
+            prepopData = Some(PrepopData(
+              selfEmployments = Some(Vector(
+                SelfEmploymentData(
+                  businessName = Some("Test business name"),
+                  businessTradeName = Some("Test business trade name"),
+                  businessStartDate = Some(Date("1", "1", "2018")),
+                  businessAccountingMethod = Some(Accruals)
+                )
+              )),
+              ukProperty = Some(UkProperty(
+                ukPropertyStartDate = Some(Date("1", "1", "2018")),
+                ukPropertyAccountingMethod = Some(Accruals)
+              )),
+              overseasProperty = Some(OverseasProperty(
+                overseasPropertyStartDate = Some(Date("1", "1", "2018"))
+              ))
             ))
           ))
-        ))
+        }
       }
     }
 
     "return a Left(ControlListDataNotFound)" when {
       "DES returns a NOT_FOUND" in new App(defaultApp) {
-        stubGetControlList(testSautr)(status = NOT_FOUND)
+        override def running(): Unit = {
+          stubGetControlList(testSautr)(status = NOT_FOUND)
 
-        val res: Future[GetControlListResponse] = connector.getControlList(testSautr)
+          val res: Future[GetControlListResponse] = connector.getControlList(testSautr)
 
-        await(res) mustBe Left(ControlListDataNotFound)
+          await(res) mustBe Left(ControlListDataNotFound)
+        }
       }
     }
   }

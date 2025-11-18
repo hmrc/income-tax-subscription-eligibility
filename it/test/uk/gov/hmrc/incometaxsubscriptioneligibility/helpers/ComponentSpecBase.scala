@@ -24,6 +24,7 @@ import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.test.Helpers._
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
 
 trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   with WiremockHelper with BeforeAndAfterAll with BeforeAndAfterEach {

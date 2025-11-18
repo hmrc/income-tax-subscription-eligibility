@@ -27,54 +27,64 @@ class ConvertConfigValuesServicesISpec extends ComponentSpecBase with ControlLis
   "convertConfigValues" should {
     "return an empty set" when {
       "all config values are true" in new Server(app(extraConfig = toConfigList(testAllTrue, year))) {
-        val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
-
-        val result: Set[ControlListParameter] = convertConfigValuesService.convertConfigValues(year)
-
-        result mustBe Set()
-      }
-    }
-
-    "return a set with a value" when {
-      "Student Loans is false" in new Server(app(extraConfig = toConfigList(testAllTrue.updated(StudentLoans, false), year))) {
-        val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
-
-        val result: Set[ControlListParameter] = convertConfigValuesService.convertConfigValues(year)
-
-        result mustBe Set(StudentLoans)
-      }
-    }
-
-    "return a set of values with all the control list parameters" when {
-      "all config values are false" in new Server(app(toConfigList(testAllFalse, year))) {
-        val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
-
-        val result: Set[ControlListParameter] = convertConfigValuesService.convertConfigValues(year)
-
-        result mustBe allControlListParameters
-      }
-    }
-
-    "returns an empty set and ignores the incorrect parameter" when {
-      "a control list parameter with all values as true and one an incorrect parameter" in
-        new Server(app(extraConfig = toConfigList(testAllTrue, year).updated("control-list.some-incorrect-param.eligible", "false"))) {
-
+        override def running(): Unit = {
           val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
 
           val result: Set[ControlListParameter] = convertConfigValuesService.convertConfigValues(year)
 
           result mustBe Set()
         }
+      }
+    }
+
+    "return a set with a value" when {
+      "Student Loans is false" in new Server(app(extraConfig = toConfigList(testAllTrue.updated(StudentLoans, false), year))) {
+        override def running(): Unit = {
+          val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
+
+          val result: Set[ControlListParameter] = convertConfigValuesService.convertConfigValues(year)
+
+          result mustBe Set(StudentLoans)
+        }
+      }
+    }
+
+    "return a set of values with all the control list parameters" when {
+      "all config values are false" in new Server(app(toConfigList(testAllFalse, year))) {
+        override def running(): Unit = {
+          val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
+
+          val result: Set[ControlListParameter] = convertConfigValuesService.convertConfigValues(year)
+
+          result mustBe allControlListParameters
+        }
+      }
+    }
+
+    "returns an empty set and ignores the incorrect parameter" when {
+      "a control list parameter with all values as true and one an incorrect parameter" in
+        new Server(app(extraConfig = toConfigList(testAllTrue, year).updated("control-list.some-incorrect-param.eligible", "false"))) {
+          override def running(): Unit = {
+
+            val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
+
+            val result: Set[ControlListParameter] = convertConfigValuesService.convertConfigValues(year)
+
+            result mustBe Set()
+          }
+        }
     }
 
     "throws an exception for incorrect value" when {
       "a control list parameter are true but one has an incorrect value" in
         new Server(app(extraConfig = toConfigList(testAllTrue, year).updated(s"control-list.$year.${StudentLoans.configKey}", "ineligible"))) {
+          override def running(): Unit = {
 
-          val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
+            val convertConfigValuesService: ConvertConfigValuesService = app.injector.instanceOf[ConvertConfigValuesService]
 
-          intercept[IllegalArgumentException] {
-            convertConfigValuesService.convertConfigValues(year)
+            intercept[IllegalArgumentException] {
+              convertConfigValuesService.convertConfigValues(year)
+            }
           }
         }
     }

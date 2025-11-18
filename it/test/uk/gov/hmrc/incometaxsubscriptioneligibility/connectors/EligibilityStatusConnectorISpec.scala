@@ -41,61 +41,67 @@ class EligibilityStatusConnectorISpec extends ComponentSpecBase {
   "getEligibilityStatus" must {
     "return a eligibility status success response" when {
       "the API returns an OK status with valid json" in new App(defaultApp) {
-        stubGetEligibilityStatus(testNino)(
-          status = OK,
-          body = Json.obj(
-            "CY" -> "No",
-            "CY1" -> "Yes",
-            "ReasonKeyCY" -> Json.arr(
-              "No Data Found", "Non-residents", "Non-resident Company Landlord", "Debt Management", "Minister of Religion",
-              "Lloyds Underwriter", "Averaging Adjustment", "Trust Income", "Partnership Income", "Blind Person's Allowance",
-              "Foster Carers", "Married Couple's Allowance", "Compliance Activity", "Budget Payment Plan", "Death",
-              "Time To Pay", "Time To Pay (Self Serve)", "Disguised Renumeration Involvement", "No Repayment Signal",
-              "Outstanding Returns", "Enforcement Signal", "Collection Priority Signal", "Bankrupt - Insolvent",
-              "Bankrupt - Voluntary Arrangement", "Digitally Exempt", "MTD Exempt (Enduring)", "MTD Exempt 26/27",
-              "MTD Exempt 27/28", "Mandation Inhibit 26/27", "Mandation Inhibit 27/28"
-            ),
-            "ReasonKeyCY1" -> Json.arr()
+        override def running(): Unit = {
+          stubGetEligibilityStatus(testNino)(
+            status = OK,
+            body = Json.obj(
+              "CY" -> "No",
+              "CY1" -> "Yes",
+              "ReasonKeyCY" -> Json.arr(
+                "No Data Found", "Non-residents", "Non-resident Company Landlord", "Debt Management", "Minister of Religion",
+                "Lloyds Underwriter", "Averaging Adjustment", "Trust Income", "Partnership Income", "Blind Person's Allowance",
+                "Foster Carers", "Married Couple's Allowance", "Compliance Activity", "Budget Payment Plan", "Death",
+                "Time To Pay", "Time To Pay (Self Serve)", "Disguised Renumeration Involvement", "No Repayment Signal",
+                "Outstanding Returns", "Enforcement Signal", "Collection Priority Signal", "Bankrupt - Insolvent",
+                "Bankrupt - Voluntary Arrangement", "Digitally Exempt", "MTD Exempt (Enduring)", "MTD Exempt 26/27",
+                "MTD Exempt 27/28", "Mandation Inhibit 26/27", "Mandation Inhibit 27/28"
+              ),
+              "ReasonKeyCY1" -> Json.arr()
+            )
           )
-        )
 
-        val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino)
+          val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino)
 
-        await(result) mustBe Right(EligibilityStatusSuccessResponse(
-          currentTaxYear = Ineligible,
-          nextTaxYear = Eligible,
-          currentTaxYearFailureReasons = Seq(
-            NoDataFound, NonResidents, NonResidentCompanyLandlord, DebtManagement, MinisterOfReligion, LloydsUnderwriter,
-            AveragingAdjustment, TrustIncome, PartnershipIncome, BlindPersonsAllowance, FosterCarers, MarriedCouplesAllowance,
-            ComplianceActivity, BudgetPaymentPlan, Death, TimeToPay, TimeToPaySelfServe, DisguisedRemunerationInvolvement,
-            NoRepaymentSignal, OutstandingReturns, EnforcementSignal, CollectionPrioritySignal, BankruptInsolvent,
-            BankruptVoluntaryArrangement, DigitallyExempt, MTDExemptEnduring, MTDExempt26To27, MTDExempt27To28,
-            MandationInhibit26To27, MandationInhibit27To28
-          ),
-          nextTaxYearFailureReasons = Seq()
-        ))
+          await(result) mustBe Right(EligibilityStatusSuccessResponse(
+            currentTaxYear = Ineligible,
+            nextTaxYear = Eligible,
+            currentTaxYearFailureReasons = Seq(
+              NoDataFound, NonResidents, NonResidentCompanyLandlord, DebtManagement, MinisterOfReligion, LloydsUnderwriter,
+              AveragingAdjustment, TrustIncome, PartnershipIncome, BlindPersonsAllowance, FosterCarers, MarriedCouplesAllowance,
+              ComplianceActivity, BudgetPaymentPlan, Death, TimeToPay, TimeToPaySelfServe, DisguisedRemunerationInvolvement,
+              NoRepaymentSignal, OutstandingReturns, EnforcementSignal, CollectionPrioritySignal, BankruptInsolvent,
+              BankruptVoluntaryArrangement, DigitallyExempt, MTDExemptEnduring, MTDExempt26To27, MTDExempt27To28,
+              MandationInhibit26To27, MandationInhibit27To28
+            ),
+            nextTaxYearFailureReasons = Seq()
+          ))
+        }
       }
     }
     "return an eligibility failure response" when {
       "the API returns an OK status with invalid json" in new App(defaultApp) {
-        stubGetEligibilityStatus(testNino)(
-          status = OK,
-          body = Json.obj()
-        )
+        override def running(): Unit = {
+          stubGetEligibilityStatus(testNino)(
+            status = OK,
+            body = Json.obj()
+          )
 
-        val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino)
+          val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino)
 
-        await(result) mustBe Left(EligibilityStatusFailure.InvalidJson)
+          await(result) mustBe Left(EligibilityStatusFailure.InvalidJson)
+        }
       }
       "the API returns an unexpected status" in new App(defaultApp) {
-        stubGetEligibilityStatus(testNino)(
-          status = INTERNAL_SERVER_ERROR,
-          body = Json.obj()
-        )
+        override def running(): Unit = {
+          stubGetEligibilityStatus(testNino)(
+            status = INTERNAL_SERVER_ERROR,
+            body = Json.obj()
+          )
 
-        val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino)
+          val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino)
 
-        await(result) mustBe Left(EligibilityStatusFailure.UnexpectedStatus)
+          await(result) mustBe Left(EligibilityStatusFailure.UnexpectedStatus)
+        }
       }
     }
   }
