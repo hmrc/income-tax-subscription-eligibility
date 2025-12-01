@@ -77,7 +77,7 @@ class EligibilityServiceSpec extends PlaySpec
         "a successful response is returned from the connector" which {
           "audits the full details of the response" when {
             "there is no agent reference number available" in {
-              mockGetEligibilityStatus(testNino)(Right(eligibilityStatusSuccessResponseEligible))
+              mockGetEligibilityStatus(testNino, testUTR)(Right(eligibilityStatusSuccessResponseEligible))
               mockAudit(currentYearEligibleAuditModel)(hc, global, request)(Future.successful(Success))
               mockAudit(nextYearEligibleAuditModel)(hc, global, request)(Future.successful(Success))
 
@@ -86,7 +86,7 @@ class EligibilityServiceSpec extends PlaySpec
               await(result) mustBe Right(eligibilityStatusSuccessResponseEligible)
             }
             "there is an agent reference number available" in {
-              mockGetEligibilityStatus(testNino)(Right(eligibilityStatusSuccessResponseIneligible))
+              mockGetEligibilityStatus(testNino, testUTR)(Right(eligibilityStatusSuccessResponseIneligible))
               mockAudit(currentYearIneligibleAuditModel)(hc, global, request)(Future.successful(Success))
               mockAudit(nextYearIneligibleAuditModel)(hc, global, request)(Future.successful(Success))
 
@@ -99,7 +99,7 @@ class EligibilityServiceSpec extends PlaySpec
       }
       "return a failure eligibility response" when {
         "a failure response is returned from the connector" in {
-          mockGetEligibilityStatus(testNino)(Left(EligibilityStatusFailure.UnexpectedStatus))
+          mockGetEligibilityStatus(testNino, testUTR)(Left(EligibilityStatusFailure.UnexpectedStatus))
 
           val result = TestEligibilityService.getEligibilityStatus(testNino, testUTR, None)
 

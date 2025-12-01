@@ -44,7 +44,7 @@ class EligibilityService @Inject()(auditService: AuditService,
     if (isEnabled(StubControlListEligible)) {
       Future.successful(Right(EligibilityStatusSuccessResponse(Eligible, Eligible, Seq.empty, Seq.empty)))
     } else {
-      eligibilityStatusConnector.getEligibilityStatus(nino) flatMap {
+      eligibilityStatusConnector.getEligibilityStatus(nino, utr) flatMap {
         case Right(success) => auditResults(utr, arn)(success).map(_ => Right(success))
         case Left(failure) => Future.successful(Left(failure))
       }

@@ -19,7 +19,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Json}
-import play.api.libs.ws.WSResponse
+import play.api.libs.ws.`WSResponse`
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.AuthStub.stubAuth
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.EligibilityStatusAPIStub.{stubGetEligibilityStatus, verifyGetEligibilityStatus}
@@ -70,7 +70,7 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
         "the connector returns a successful response" in new Server(defaultApp) {
           override def running(): Unit = {
             stubAuth(OK, Json.obj())
-            stubGetEligibilityStatus(testNino)(
+            stubGetEligibilityStatus(testNino, testUtr)(
               status = OK,
               body = eligibilityStatusSuccessfulAPIJson
             )
@@ -82,14 +82,14 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
               jsonBodyAs(eligibilityStatusSuccessfulControllerJson)
             )
 
-            verifyGetEligibilityStatus(testNino)
+            verifyGetEligibilityStatus(testNino, testUtr)
           }
         }
         "the connector returns failure reasons in the next year" which {
           "have non exception reasons" in new Server(defaultApp) {
             override def running(): Unit = {
               stubAuth(OK, Json.obj())
-              stubGetEligibilityStatus(testNino)(
+              stubGetEligibilityStatus(testNino, testUtr)(
                 status = OK,
                 body = eligibilityStatusSuccessfulBothYearReasons(OutstandingReturns)
               )
@@ -106,7 +106,7 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
                 )
               )
 
-              verifyGetEligibilityStatus(testNino)
+              verifyGetEligibilityStatus(testNino, testUtr)
             }
           }
           "have an exception reason" which {
@@ -119,7 +119,7 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
               s"is the $reason reason" in new Server(defaultApp) {
                 override def running(): Unit = {
                   stubAuth(OK, Json.obj())
-                  stubGetEligibilityStatus(testNino)(
+                  stubGetEligibilityStatus(testNino, testUtr)(
                     status = OK,
                     body = eligibilityStatusSuccessfulBothYearReasons(reason)
                   )
@@ -131,7 +131,7 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
                     jsonBodyAs(eligibilityStatusSuccessfulWithReasonJson(reasonResultKey))
                   )
 
-                  verifyGetEligibilityStatus(testNino)
+                  verifyGetEligibilityStatus(testNino, testUtr)
                 }
               }
             }
@@ -155,7 +155,7 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
             )
           )
 
-          verifyGetEligibilityStatus(testNino, count = 0)
+          verifyGetEligibilityStatus(testNino, testUtr, count = 0)
         }
       }
     }
@@ -163,7 +163,7 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
       "the connector returns invalid json" in new Server(defaultApp) {
         override def running(): Unit = {
           stubAuth(OK, Json.obj())
-          stubGetEligibilityStatus(testNino)(
+          stubGetEligibilityStatus(testNino, testUtr)(
             status = OK,
             body = Json.obj()
           )
@@ -174,13 +174,13 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
             httpStatus(INTERNAL_SERVER_ERROR)
           )
 
-          verifyGetEligibilityStatus(testNino)
+          verifyGetEligibilityStatus(testNino, testUtr)
         }
       }
       "the connector returns an unexpected status" in new Server(defaultApp) {
         override def running(): Unit = {
           stubAuth(OK, Json.obj())
-          stubGetEligibilityStatus(testNino)(
+          stubGetEligibilityStatus(testNino, testUtr)(
             status = INTERNAL_SERVER_ERROR
           )
 
@@ -190,7 +190,7 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlLis
             httpStatus(INTERNAL_SERVER_ERROR)
           )
 
-          verifyGetEligibilityStatus(testNino)
+          verifyGetEligibilityStatus(testNino, testUtr)
         }
       }
     }
