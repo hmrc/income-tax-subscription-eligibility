@@ -35,6 +35,7 @@ class EligibilityStatusConnectorISpec extends ComponentSpecBase {
   def connector(implicit app: Application): EligibilityStatusConnector = app.injector.instanceOf[EligibilityStatusConnector]
 
   val testNino: String = "test-nino"
+  val testUTR: String = "test-utr"
 
   implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
 
@@ -42,7 +43,7 @@ class EligibilityStatusConnectorISpec extends ComponentSpecBase {
     "return a eligibility status success response" when {
       "the API returns an OK status with valid json" in new App(defaultApp) {
         override def running(): Unit = {
-          stubGetEligibilityStatus(testNino)(
+          stubGetEligibilityStatus(testNino, testUTR)(
             status = OK,
             body = Json.obj(
               "CY" -> "No",
@@ -60,8 +61,8 @@ class EligibilityStatusConnectorISpec extends ComponentSpecBase {
             )
           )
 
-          val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino)
-
+          val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino, testUTR)
+          
           await(result) mustBe Right(EligibilityStatusSuccessResponse(
             currentTaxYear = Ineligible,
             nextTaxYear = Eligible,
@@ -81,24 +82,24 @@ class EligibilityStatusConnectorISpec extends ComponentSpecBase {
     "return an eligibility failure response" when {
       "the API returns an OK status with invalid json" in new App(defaultApp) {
         override def running(): Unit = {
-          stubGetEligibilityStatus(testNino)(
+          stubGetEligibilityStatus(testNino, testUTR)(
             status = OK,
             body = Json.obj()
           )
 
-          val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino)
+          val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino, testUTR)
 
           await(result) mustBe Left(EligibilityStatusFailure.InvalidJson)
         }
       }
       "the API returns an unexpected status" in new App(defaultApp) {
         override def running(): Unit = {
-          stubGetEligibilityStatus(testNino)(
+          stubGetEligibilityStatus(testNino, testUTR)(
             status = INTERNAL_SERVER_ERROR,
             body = Json.obj()
           )
 
-          val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino)
+          val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino, testUTR)
 
           await(result) mustBe Left(EligibilityStatusFailure.UnexpectedStatus)
         }

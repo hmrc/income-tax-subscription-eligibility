@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks
 
-import org.scalamock.handlers.CallHandler2
+import org.scalamock.handlers.{CallHandler2, CallHandler3}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.TestSuite
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,11 +30,10 @@ trait MockEligibilityStatusConnector extends MockFactory {
 
   val mockEligibilityStatusConnector: EligibilityStatusConnector = mock[EligibilityStatusConnector]
 
-  def mockGetEligibilityStatus(nino: String)
-                              (response: EligibilityStatusResponse): CallHandler2[String, HeaderCarrier, Future[EligibilityStatusResponse]] = {
-    (mockEligibilityStatusConnector.getEligibilityStatus(_: String)(_: HeaderCarrier))
-      .expects(nino, *)
+  def mockGetEligibilityStatus(nino: String, utr: String)
+                              (response: EligibilityStatusResponse): CallHandler3[String, String, HeaderCarrier, Future[EligibilityStatusResponse]] = {
+    (mockEligibilityStatusConnector.getEligibilityStatus(_: String, _: String)(_: HeaderCarrier))
+      .expects(nino, utr, *)
       .returning(Future.successful(response))
   }
-
 }

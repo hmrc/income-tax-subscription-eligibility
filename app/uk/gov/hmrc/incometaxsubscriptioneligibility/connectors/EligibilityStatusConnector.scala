@@ -27,9 +27,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class EligibilityStatusConnector @Inject()(http: HttpClientV2, appConfig: AppConfig)
                                           (implicit ec: ExecutionContext) {
 
-  def getEligibilityStatus(nino: String)(implicit hc: HeaderCarrier): Future[EligibilityStatusResponse] = {
+  def getEligibilityStatus(nino: String, utr: String)(implicit hc: HeaderCarrier): Future[EligibilityStatusResponse] = {
     http
-      .get(url"${appConfig.hipBaseUrl}/personal-tax/income-tax-self-assessment/signUpEligibility?nino=$nino")
+      .get(url"${appConfig.hipBaseUrl}/personal-tax/income-tax-self-assessment/signUpEligibility?nino=$nino&utr=$utr")
       .setHeader(HeaderNames.authorisation -> appConfig.hipAuthorizationToken)
       .execute[EligibilityStatusResponse]
   }

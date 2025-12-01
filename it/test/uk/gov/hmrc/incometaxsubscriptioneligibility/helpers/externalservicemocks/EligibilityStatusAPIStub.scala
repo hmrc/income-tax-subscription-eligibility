@@ -22,13 +22,13 @@ import play.api.libs.json.{JsObject, Json}
 
 object EligibilityStatusAPIStub extends WireMockMethods {
 
-  def stubGetEligibilityStatus(nino: String)(status: Int, body: JsObject = Json.obj()): StubMapping = {
-    when(method = GET, uri = s"/personal-tax/income-tax-self-assessment/signUpEligibility\\?nino=$nino")
+  def stubGetEligibilityStatus(nino: String, utr: String)(status: Int, body: JsObject = Json.obj()): StubMapping = {
+    when(method = GET, uri = s"/personal-tax/income-tax-self-assessment/signUpEligibility\\?nino=$nino&utr=$utr")
       .thenReturn(status = status, body = body)
   }
 
-  def verifyGetEligibilityStatus(nino: String, count: Int = 1): Unit = {
-    verify(method = GET, uri = s"/personal-tax/income-tax-self-assessment/signUpEligibility?nino=$nino", count = count)
+  def verifyGetEligibilityStatus(nino: String, utr: String, count: Int = 1): Unit = {
+    verify(method = GET, uri = s"/personal-tax/income-tax-self-assessment/signUpEligibility?nino=$nino&utr=$utr", count = count)
   }
 
 }
