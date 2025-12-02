@@ -17,7 +17,7 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist
 
 object ControlListMessages {
-
+  
   val nonResidentCompanyLandlordMessage = "Non Resident Company Landlord"
   val studentLoansMessage = "Student Loans"
   val marriageAllowanceMessage = "Transfers/receives Marriage Allowance"
@@ -58,5 +58,5 @@ object ControlListMessages {
   val marriedCouplesAllowanceMessage = "Receives Married Couple's Allowance"
   val capacitorMessage = "Capacitor"
   val disguisedRenumerationInvlovementMessage = "In A Disguised Renumeration Scheme"
-  
+
 }

@@ -17,9 +17,9 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility
 
 import org.scalatestplus.play.PlaySpec
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.{Eligible, Ineligible}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 
 class EligibilityStatusSuccessResponseSpec extends PlaySpec {
 
@@ -166,7 +166,9 @@ class EligibilityStatusSuccessResponseSpec extends PlaySpec {
           }
 
           "return a reason of MTD Exempt 26/27" when {
-            Seq(NonResidents, MTDExempt26To27) foreach { reason =>
+            Seq(
+              AveragingAdjustment, TrustIncome, FosterCarers, NonResidents, MTDExempt26To27
+            ) foreach { reason =>
               s"they are $reason" in {
                 val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
                   currentTaxYear = Ineligible,
@@ -189,7 +191,7 @@ class EligibilityStatusSuccessResponseSpec extends PlaySpec {
           "return a reason of No Data" when {
             Seq(
               NoDataFound, Death, NonResidentCompanyLandlord, BankruptInsolvent,
-              BankruptVoluntaryArrangement, FosterCarers, MandationInhibit26To27, MandationInhibit27To28
+              BankruptVoluntaryArrangement, MandationInhibit26To27, MandationInhibit27To28
             ) foreach { reason =>
               s"they are $reason" in {
                 val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
