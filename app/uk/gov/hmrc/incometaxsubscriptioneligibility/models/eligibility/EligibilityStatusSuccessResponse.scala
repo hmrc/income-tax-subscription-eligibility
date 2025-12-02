@@ -59,7 +59,6 @@ object EligibilityStatusSuccessResponse {
         case MTDExempt26To27 |
              AveragingAdjustment |
              TrustIncome |
-             NonResidentEntertainersSportsPeople |
              FosterCarers |
              NonResidents => "MTD Exempt 26/27"
       }

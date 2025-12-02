@@ -167,8 +167,7 @@ class EligibilityStatusSuccessResponseSpec extends PlaySpec {
 
           "return a reason of MTD Exempt 26/27" when {
             Seq(
-              AveragingAdjustment, TrustIncome, NonResidentEntertainersSportsPeople,
-              FosterCarers, NonResidents, MTDExempt26To27
+              AveragingAdjustment, TrustIncome, FosterCarers, NonResidents, MTDExempt26To27
             ) foreach { reason =>
               s"they are $reason" in {
                 val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
