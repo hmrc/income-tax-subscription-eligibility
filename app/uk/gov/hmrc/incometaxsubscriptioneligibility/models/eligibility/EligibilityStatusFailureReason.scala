@@ -36,6 +36,10 @@ object EligibilityStatusFailureReason {
     val key: String = "Non-resident Company Landlord"
   }
 
+  case object NonResidentEntertainersSportsPeople extends EligibilityStatusFailureReason {
+    val key: String = "Non-resident foreign entertainers and sports people"
+  }
+
   case object DebtManagement extends EligibilityStatusFailureReason {
     val key: String = "Debt Management"
   }
@@ -150,6 +154,7 @@ object EligibilityStatusFailureReason {
     case NoDataFound.key => JsSuccess(NoDataFound)
     case NonResidents.key => JsSuccess(NonResidents)
     case NonResidentCompanyLandlord.key => JsSuccess(NonResidentCompanyLandlord)
+    case NonResidentEntertainersSportsPeople.key => JsSuccess(NonResidentEntertainersSportsPeople)
     case DebtManagement.key => JsSuccess(DebtManagement)
     case MinisterOfReligion.key => JsSuccess(MinisterOfReligion)
     case LloydsUnderwriter.key => JsSuccess(LloydsUnderwriter)

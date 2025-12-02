@@ -57,6 +57,10 @@ object EligibilityStatusSuccessResponse {
 
       val mtdExempt26To27Reason: Option[String] = eligibility.nextTaxYearFailureReasons.collectFirst {
         case MTDExempt26To27 |
+             AveragingAdjustment |
+             TrustIncome |
+             NonResidentEntertainersSportsPeople |
+             FosterCarers |
              NonResidents => "MTD Exempt 26/27"
       }
 
@@ -66,7 +70,6 @@ object EligibilityStatusSuccessResponse {
              NonResidentCompanyLandlord |
              BankruptInsolvent |
              BankruptVoluntaryArrangement |
-             FosterCarers |
              MandationInhibit26To27 |
              MandationInhibit27To28 => "No Data"
       }

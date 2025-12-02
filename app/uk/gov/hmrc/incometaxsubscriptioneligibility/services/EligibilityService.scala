@@ -76,6 +76,7 @@ class EligibilityService @Inject()(auditService: AuditService,
     case NoDataFound => ControlListDataNotFound.errorMessage
     case NonResidents => ControlListMessages.nonResidentsMessage
     case NonResidentCompanyLandlord => ControlListMessages.nonResidentCompanyLandlordMessage
+    case NonResidentEntertainersSportsPeople => ControlListMessages.nonResidentEntertainersSportsPeople
     case DebtManagement => ControlListMessages.existingIdmsDebtMessage
     case MinisterOfReligion => ControlListMessages.ministersOfReligionMessage
     case LloydsUnderwriter => ControlListMessages.lloydsUnderwriterMessage

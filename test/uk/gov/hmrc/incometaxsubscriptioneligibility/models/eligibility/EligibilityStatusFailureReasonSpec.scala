@@ -36,6 +36,7 @@ class EligibilityStatusFailureReasonSpec extends PlaySpec {
     NoDataFound.key -> NoDataFound,
     NonResidents.key -> NonResidents,
     NonResidentCompanyLandlord.key -> NonResidentCompanyLandlord,
+    NonResidentEntertainersSportsPeople.key -> NonResidentEntertainersSportsPeople,
     DebtManagement.key -> DebtManagement,
     MinisterOfReligion.key -> MinisterOfReligion,
     LloydsUnderwriter.key -> LloydsUnderwriter,

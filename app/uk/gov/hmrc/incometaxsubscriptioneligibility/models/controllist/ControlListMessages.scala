@@ -18,6 +18,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist
 
 object ControlListMessages {
 
+  val nonResidentEntertainersSportsPeople = "Non-resident foreign entertainers and sports people"
   val nonResidentCompanyLandlordMessage = "Non Resident Company Landlord"
   val studentLoansMessage = "Student Loans"
   val marriageAllowanceMessage = "Transfers/receives Marriage Allowance"
