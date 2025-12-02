@@ -58,5 +58,5 @@ object ControlListMessages {
   val marriedCouplesAllowanceMessage = "Receives Married Couple's Allowance"
   val capacitorMessage = "Capacitor"
   val disguisedRenumerationInvlovementMessage = "In A Disguised Renumeration Scheme"
-  
+
 }
