@@ -44,7 +44,7 @@ class ControlListEligibilityService @Inject()(convertConfigValuesService: Conver
     eligibleCurrentYear = isEligible(eligibilityStatus.current)
     eligibleNextYear = isEligible(eligibilityStatus.next)
   } yield {
-    EligibilityStatus(eligible = eligibleCurrentYear, eligibleCurrentYear, eligibleNextYear, prepopData)
+    EligibilityStatus(eligible = eligibleCurrentYear, eligibleCurrentYear, eligibleNextYear, eligibilityStatus.next, prepopData)
   }
 
   private def auditControlListResults(eligibilityStatus: EligibilityByYear, sautr: String, agentReferenceNumber: Option[String])

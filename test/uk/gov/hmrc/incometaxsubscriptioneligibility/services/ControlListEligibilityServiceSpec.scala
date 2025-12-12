@@ -284,6 +284,7 @@ class ControlListEligibilityServiceSpec extends FeatureSwitchingSpec
         eligible = true,
         eligibleCurrentYear = true,
         eligibleNextYear = true,
+        nextYearFailureReasons = Set.empty,
         prepopData = Some(PrepopData(
           selfEmployments = Some(Seq(
             SelfEmploymentData(
