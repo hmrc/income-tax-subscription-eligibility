@@ -34,8 +34,8 @@ class ControlListEligibilityController @Inject()(cc: ControllerComponents,
                                                 (implicit ec: ExecutionContext) extends BackendController(cc) with AuthorisedFunctions with Extractors {
   def getEligibilityStatus(sautr: String): Action[AnyContent] = Action.async { implicit request =>
     authorised().retrieve(Retrievals.allEnrolments) { enrolments =>
-      controlListEligibilityService.getEligibilityStatus(sautr, getArnFromEnrolments(enrolments)) map {
-        eligibilityStatus => Ok(Json.toJson(eligibilityStatus))
+      controlListEligibilityService.getEligibilityStatus(sautr, getArnFromEnrolments(enrolments)) map { eligibilityStatus =>
+        Ok(Json.toJson(eligibilityStatus))
       }
     }
   }

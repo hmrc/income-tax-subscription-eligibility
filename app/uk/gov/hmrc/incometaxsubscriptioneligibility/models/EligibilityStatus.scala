@@ -16,12 +16,59 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsObject, Json, OWrites}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.*
 
-case class EligibilityStatus(eligible: Boolean, eligibleCurrentYear: Boolean, eligibleNextYear: Boolean, prepopData: Option[PrepopData] = None)
+case class EligibilityStatus(eligible: Boolean,
+                             eligibleCurrentYear: Boolean,
+                             eligibleNextYear: Boolean,
+                             nextYearFailureReasons: Set[String],
+                             prepopData: Option[PrepopData] = None)
 
 object EligibilityStatus {
-  implicit val format: OFormat[EligibilityStatus] = Json.format[EligibilityStatus]
+  implicit val writes: OWrites[EligibilityStatus] = OWrites { eligibilityStatus =>
+
+    val eligibilityStatusJson = Json.obj(
+      "eligibleCurrentYear" -> eligibilityStatus.eligibleCurrentYear,
+      "eligibleNextYear" -> eligibilityStatus.eligibleNextYear
+    )
+
+    val exemptionReason: Option[String] = {
+
+      val mtdExemptEnduringReason: Option[String] = eligibilityStatus.nextYearFailureReasons.collectFirst {
+        case MarriedCouplesAllowance.errorMessage |
+             MinistersOfReligion.errorMessage |
+             LloydsUnderwriter.errorMessage |
+             BlindPersonsAllowance.errorMessage => "MTD Exempt Enduring"
+      }
+
+      val mtdExempt26To27Reason: Option[String] = eligibilityStatus.nextYearFailureReasons.collectFirst {
+        case AveragingAdjustment.errorMessage |
+             TrustIncome.errorMessage |
+             FosterCarers.errorMessage |
+             NonResidents.errorMessage => "MTD Exempt 26/27"
+      }
+
+      val noDataReason: Option[String] = eligibilityStatus.nextYearFailureReasons.collectFirst {
+        case ControlListDataNotFound.errorMessage |
+             Deceased.errorMessage |
+             NonResidentCompanyLandlord.errorMessage |
+             BankruptInsolvent.errorMessage |
+             BankruptVoluntaryArrangement.errorMessage |
+             Capacitor.errorMessage => "No Data"
+      }
+
+      mtdExemptEnduringReason orElse mtdExempt26To27Reason orElse noDataReason
+    }
+
+    val exemptionReasonJson: JsObject = exemptionReason
+      .map(reason => Json.obj("exemptionReason" -> reason))
+      .getOrElse(Json.obj())
+
+    eligibilityStatusJson ++ exemptionReasonJson
+
+  }
 }
 
 case class EligibilityByYear(current: Set[String], next: Set[String])

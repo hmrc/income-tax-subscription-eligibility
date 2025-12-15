@@ -39,47 +39,14 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
   val testSautr = "1234567890"
   private val year = "2021-2022"
 
-  def testJson(eligibleCurrent: Boolean, eligibleNext: Boolean): JsObject = Json.obj(
-    "eligible" -> eligibleCurrent,
+  def testJson(eligibleCurrent: Boolean, eligibleNext: Boolean, exemptionMessage: Option[String] = None): JsObject = Json.obj(
     "eligibleCurrentYear" -> eligibleCurrent,
     "eligibleNextYear" -> eligibleNext
-  )
+  ) ++ exemptionMessage.map(message => Json.obj("exemptionReason" -> message)).getOrElse(Json.obj())
 
   def testJsonWithPrepopData(eligibleCurrent: Boolean, eligibleNext: Boolean): JsObject = Json.obj(
-    "eligible" -> eligibleCurrent,
     "eligibleCurrentYear" -> eligibleCurrent,
-    "eligibleNextYear" -> eligibleNext,
-    "prepopData" -> Json.obj(
-      "ukProperty" -> Json.obj(
-        "ukPropertyStartDate" -> Json.obj(
-          "day" -> "1",
-          "month" -> "1",
-          "year" -> "2018"
-        ),
-        "ukPropertyAccountingMethod" -> "Accruals"
-      ),
-      "overseasProperty" -> Json.obj(
-        "overseasPropertyStartDate" -> Json.obj(
-          "day" -> "1",
-          "month" -> "1",
-          "year" -> "2018"
-        )
-      ),
-      "selfEmployments" -> Json.arr(
-        Json.obj(
-          "businessName" -> "Test business name",
-          "businessTradeName" -> "Test business trade name",
-          "businessAddressFirstLine" -> "Buckingham Palace",
-          "businessAddressPostCode" -> "SW1A 1AA",
-          "businessStartDate" -> Json.obj(
-            "day" -> "1",
-            "month" -> "1",
-            "year" -> "2018"
-          ),
-          "businessAccountingMethod" -> "Accruals"
-        )
-      )
-    )
+    "eligibleNextYear" -> eligibleNext
   )
 
   s"A GET request on '/eligibility/$testSautr' route" should {
@@ -232,7 +199,7 @@ class ControlListEligibilityControllerISpec extends ComponentSpecBase with Contr
 
           result must have(
             httpStatus(OK),
-            jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false))
+            jsonBodyAs(testJson(eligibleCurrent = false, eligibleNext = false, exemptionMessage = Some("No Data")))
           )
         }
       }

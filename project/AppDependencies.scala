@@ -2,7 +2,7 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapVersion = "10.3.0"
+  private val bootstrapVersion = "10.4.0"
   private val domainVersion = "11.0.0"
 
   val compile: Seq[ModuleID] = Seq(
@@ -12,7 +12,7 @@ object AppDependencies {
 
   val test: Seq[ModuleID] = Seq(
     "uk.gov.hmrc" %% "bootstrap-test-play-30" % bootstrapVersion % "test",
-    "org.scalamock" %% "scalamock" % "7.5.0" % "test",
+    "org.scalamock" %% "scalamock" % "7.5.2" % "test",
   )
 
   val itTest: Seq[ModuleID] = Seq()

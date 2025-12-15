@@ -20,13 +20,15 @@ import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockAuthConnector
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.*
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.{AveragingAdjustment, BankruptInsolvent, BankruptVoluntaryArrangement, BlindPersonsAllowance, Capacitor, Deceased, FosterCarers, LloydsUnderwriter, MarriedCouplesAllowance, MinistersOfReligion, NonResidentCompanyLandlord, NonResidents, TrustIncome}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockControlListEligibilityService
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
@@ -44,13 +46,11 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
   implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global
-  val eligible: String = "eligible"
   val eligibleCurrent: String = "eligibleCurrentYear"
   val eligibleNext: String = "eligibleNextYear"
-  val prepopData: String = "prepopData"
 
   "getEligibilityStatus" should {
-    val eligibleBoth = Future.successful(EligibilityStatus(eligible = true, eligibleCurrentYear = true, eligibleNextYear = true))
+    val eligibleBoth = Future.successful(EligibilityStatus(eligible = true, eligibleCurrentYear = true, nextYearFailureReasons = Set.empty, eligibleNextYear = true))
     "return OK with body 'eligible: true'" in {
       mockIsEligible(testSautr, None)(isEligible = eligibleBoth)
       mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
@@ -58,18 +58,180 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
       status(result) mustBe OK
-      contentAsJson(result) mustBe Json.obj(eligible -> true, eligibleCurrent -> true, eligibleNext -> true)
+      contentAsJson(result) mustBe Json.obj(eligibleCurrent -> true, eligibleNext -> true)
     }
 
-    "return OK with body 'eligible: false'" in {
-      val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, eligibleNextYear = true))
-      mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
-      mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+    "return OK with body 'eligible: false'" when {
+      "including a exemption reason of MTD Exempt Enduring" when {
+        "next year includes Married Couples Allowance as a failure reason" in {
+          val failureReasons: Set[String] = Set(MarriedCouplesAllowance.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
 
-      val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
-      status(result) mustBe OK
-      contentAsJson(result) mustBe Json.obj(eligible -> false, eligibleCurrent -> false, eligibleNext -> true)
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "MTD Exempt Enduring")
+        }
+        "next year includes Ministers Of Religion as a failure reason" in {
+          val failureReasons: Set[String] = Set(MinistersOfReligion.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "MTD Exempt Enduring")
+        }
+        "next year includes Lloyds Underwriter as a failure reason" in {
+          val failureReasons: Set[String] = Set(LloydsUnderwriter.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "MTD Exempt Enduring")
+        }
+        "next year includes Blind Persons Allowance as a failure reason" in {
+          val failureReasons: Set[String] = Set(BlindPersonsAllowance.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "MTD Exempt Enduring")
+        }
+      }
+      "including a exemption reason of MTD Exempt 26/27" when {
+        "next year includes Averaging Adjustment as a failure reason" in {
+          val failureReasons: Set[String] = Set(AveragingAdjustment.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "MTD Exempt 26/27")
+        }
+        "next year includes Trust Income as a failure reason" in {
+          val failureReasons: Set[String] = Set(TrustIncome.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "MTD Exempt 26/27")
+        }
+        "next year includes Foster Carers as a failure reason" in {
+          val failureReasons: Set[String] = Set(FosterCarers.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "MTD Exempt 26/27")
+        }
+        "next year includes Non Residents as a failure reason" in {
+          val failureReasons: Set[String] = Set(NonResidents.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "MTD Exempt 26/27")
+        }
+      }
+      "including a exemption reason of No Data" when {
+        "next year includes Control List Data Not Found as a failure reason" in {
+          val failureReasons: Set[String] = Set(ControlListDataNotFound.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "No Data")
+        }
+        "next year includes Deceased as a failure reason" in {
+          val failureReasons: Set[String] = Set(Deceased.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "No Data")
+        }
+        "next year includes Non Resident Company Landlord as a failure reason" in {
+          val failureReasons: Set[String] = Set(NonResidentCompanyLandlord.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "No Data")
+        }
+        "next year includes Bankrupt Insolvent as a failure reason" in {
+          val failureReasons: Set[String] = Set(BankruptInsolvent.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "No Data")
+        }
+        "next year includes Bankrupt Voluntary Arrangement as a failure reason" in {
+          val failureReasons: Set[String] = Set(BankruptVoluntaryArrangement.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "No Data")
+        }
+        "next year includes Capacitor as a failure reason" in {
+          val failureReasons: Set[String] = Set(Capacitor.errorMessage)
+          val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = failureReasons, eligibleNextYear = true))
+          mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+          mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+          val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true, "exemptionReason" -> "No Data")
+        }
+      }
+      "not including an exemption reason" in {
+        val notEligibleCurrentYear = Future.successful(EligibilityStatus(eligible = false, eligibleCurrentYear = false, nextYearFailureReasons = Set.empty, eligibleNextYear = true))
+        mockIsEligible(testSautr, None)(isEligible = notEligibleCurrentYear)
+        mockAuthorise(EmptyPredicate, Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
+
+        val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
+
+        status(result) mustBe OK
+        contentAsJson(result) mustBe Json.obj(eligibleCurrent -> false, eligibleNext -> true)
+      }
     }
 
     "return OK with body 'eligible: true' with an Agent" in {
@@ -80,7 +242,7 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
       val result = TestControlListEligibilityController.getEligibilityStatus(testSautr)(fakeRequest)
 
       status(result) mustBe OK
-      contentAsJson(result) mustBe Json.obj(eligible -> true, eligibleCurrent -> true, eligibleNext -> true)
+      contentAsJson(result) mustBe Json.obj(eligibleCurrent -> true, eligibleNext -> true)
     }
 
     "return OK with body 'eligible: true' with pre-pop data" in {
@@ -89,6 +251,7 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
           eligible = false,
           eligibleCurrentYear = false,
           eligibleNextYear = true,
+          nextYearFailureReasons = Set.empty,
           prepopData = Some(PrepopData(
             selfEmployments = Some(Seq(
               SelfEmploymentData(
@@ -116,39 +279,8 @@ class ControlListEligibilityControllerSpec extends PlaySpec with MockControlList
 
       status(result) mustBe OK
       contentAsJson(result) mustBe Json.obj(
-        eligible -> false,
         eligibleCurrent -> false,
-        eligibleNext -> true,
-        prepopData -> Json.obj(
-          "ukProperty" -> Json.obj(
-            "ukPropertyStartDate" -> Json.obj(
-              "day" -> "01",
-              "month" -> "01",
-              "year" -> "2018"
-            ),
-            "ukPropertyAccountingMethod" -> "Accruals"
-          ),
-          "overseasProperty" -> Json.obj(
-            "overseasPropertyStartDate" -> Json.obj(
-              "day" -> "01",
-              "month" -> "01",
-              "year" -> "2018"
-            ),
-            "overseasPropertyAccountingMethod" -> "Accruals",
-          ),
-          "selfEmployments" -> Json.arr(
-            Json.obj(
-              "businessName" -> "Test business name",
-              "businessTradeName" -> "Test business trade name",
-              "businessStartDate" -> Json.obj(
-                "day" -> "01",
-                "month" -> "01",
-                "year" -> "2018"
-              ),
-              "businessAccountingMethod" -> "Accruals"
-            )
-          )
-        )
+        eligibleNext -> true
       )
     }
   }
