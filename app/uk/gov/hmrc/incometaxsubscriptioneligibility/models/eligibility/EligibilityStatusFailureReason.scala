@@ -128,6 +128,10 @@ object EligibilityStatusFailureReason {
     val key: String = "MTD Exempt (Enduring)"
   }
 
+  case object MTDExempt28to29 extends EligibilityStatusFailureReason {
+    val key: String = "MTD Exempt 28/29"
+  }
+
   case object MTDExempt26To27 extends EligibilityStatusFailureReason {
     val key: String = "MTD Exempt 26/27"
   }
