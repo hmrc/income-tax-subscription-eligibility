@@ -145,7 +145,7 @@ class EligibilityStatusSuccessResponseSpec extends PlaySpec {
           }
 
           "return a reason of MTD Exempt Enduring" when {
-            Seq(MTDExemptEnduring, MTDExempt27To28, MarriedCouplesAllowance, MinisterOfReligion, LloydsUnderwriter, BlindPersonsAllowance) foreach { reason =>
+            Seq(MTDExemptEnduring, MTDExempt28to29, MTDExempt27To28, MarriedCouplesAllowance, MinisterOfReligion, LloydsUnderwriter, BlindPersonsAllowance) foreach { reason =>
               s"they are $reason" in {
                 val writeJson = Json.toJson(EligibilityStatusSuccessResponse(
                   currentTaxYear = Ineligible,

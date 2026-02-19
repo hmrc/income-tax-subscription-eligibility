@@ -48,6 +48,7 @@ object EligibilityStatusSuccessResponse {
 
       val mtdExemptEnduringReason: Option[String] = eligibility.nextTaxYearFailureReasons.collectFirst {
         case MTDExemptEnduring |
+             MTDExempt28to29 |
              MTDExempt27To28 |
              MarriedCouplesAllowance |
              MinisterOfReligion |
