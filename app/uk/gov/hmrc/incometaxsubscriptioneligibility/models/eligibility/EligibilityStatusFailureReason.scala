@@ -36,10 +36,6 @@ object EligibilityStatusFailureReason {
     val key: String = "Non-resident Company Landlord"
   }
 
-  case object DebtManagement extends EligibilityStatusFailureReason {
-    val key: String = "Debt Management"
-  }
-
   case object MinisterOfReligion extends EligibilityStatusFailureReason {
     val key: String = "Minister of Religion"
   }
@@ -76,12 +72,20 @@ object EligibilityStatusFailureReason {
     val key: String = "Compliance Activity"
   }
 
+  case object DebtManagement extends EligibilityStatusFailureReason {
+    val key: String = "Debt Management"
+  }
+
   case object BudgetPaymentPlan extends EligibilityStatusFailureReason {
     val key: String = "Budget Payment Plan"
   }
 
   case object Death extends EligibilityStatusFailureReason {
     val key: String = "Death"
+  }
+
+  case object Capacitor extends EligibilityStatusFailureReason {
+    val key: String = "Capacitor"
   }
 
   case object TimeToPay extends EligibilityStatusFailureReason {
@@ -128,16 +132,16 @@ object EligibilityStatusFailureReason {
     val key: String = "MTD Exempt (Enduring)"
   }
 
-  case object MTDExempt28to29 extends EligibilityStatusFailureReason {
-    val key: String = "MTD Exempt 28/29"
-  }
-
   case object MTDExempt26To27 extends EligibilityStatusFailureReason {
     val key: String = "MTD Exempt 26/27"
   }
 
   case object MTDExempt27To28 extends EligibilityStatusFailureReason {
     val key: String = "MTD Exempt 27/28"
+  }
+
+  case object MTDExempt28To29 extends EligibilityStatusFailureReason {
+    val key: String = "MTD Exempt 28/29"
   }
 
   case object MandationInhibit26To27 extends EligibilityStatusFailureReason {
@@ -154,7 +158,6 @@ object EligibilityStatusFailureReason {
     case NoDataFound.key => JsSuccess(NoDataFound)
     case NonResidents.key => JsSuccess(NonResidents)
     case NonResidentCompanyLandlord.key => JsSuccess(NonResidentCompanyLandlord)
-    case DebtManagement.key => JsSuccess(DebtManagement)
     case MinisterOfReligion.key => JsSuccess(MinisterOfReligion)
     case LloydsUnderwriter.key => JsSuccess(LloydsUnderwriter)
     case AveragingAdjustment.key => JsSuccess(AveragingAdjustment)
@@ -164,8 +167,10 @@ object EligibilityStatusFailureReason {
     case FosterCarers.key => JsSuccess(FosterCarers)
     case MarriedCouplesAllowance.key => JsSuccess(MarriedCouplesAllowance)
     case ComplianceActivity.key => JsSuccess(ComplianceActivity)
+    case DebtManagement.key => JsSuccess(DebtManagement)
     case BudgetPaymentPlan.key => JsSuccess(BudgetPaymentPlan)
     case Death.key => JsSuccess(Death)
+    case Capacitor.key => JsSuccess(Capacitor)
     case TimeToPay.key => JsSuccess(TimeToPay)
     case TimeToPaySelfServe.key => JsSuccess(TimeToPaySelfServe)
     case DisguisedRemunerationInvolvement.key => JsSuccess(DisguisedRemunerationInvolvement)
@@ -179,6 +184,7 @@ object EligibilityStatusFailureReason {
     case MTDExemptEnduring.key => JsSuccess(MTDExemptEnduring)
     case MTDExempt26To27.key => JsSuccess(MTDExempt26To27)
     case MTDExempt27To28.key => JsSuccess(MTDExempt27To28)
+    case MTDExempt28To29.key => JsSuccess(MTDExempt28To29)
     case MandationInhibit26To27.key => JsSuccess(MandationInhibit26To27)
     case MandationInhibit27To28.key => JsSuccess(MandationInhibit27To28)
     case otherKey => JsSuccess(Other(otherKey))

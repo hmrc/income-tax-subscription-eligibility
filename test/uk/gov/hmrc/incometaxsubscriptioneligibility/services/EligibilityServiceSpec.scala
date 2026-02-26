@@ -29,7 +29,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHt
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListMessages
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.{Eligible, Ineligible}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.{EligibilityStatusFailure, EligibilityStatusSuccessResponse}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockAuditService
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
@@ -127,7 +127,6 @@ class EligibilityServiceSpec extends PlaySpec
     NoDataFound,
     NonResidents,
     NonResidentCompanyLandlord,
-    DebtManagement,
     MinisterOfReligion,
     LloydsUnderwriter,
     AveragingAdjustment,
@@ -137,8 +136,10 @@ class EligibilityServiceSpec extends PlaySpec
     FosterCarers,
     MarriedCouplesAllowance,
     ComplianceActivity,
+    DebtManagement,
     BudgetPaymentPlan,
     Death,
+    Capacitor,
     TimeToPay,
     TimeToPaySelfServe,
     DisguisedRemunerationInvolvement,
@@ -152,6 +153,7 @@ class EligibilityServiceSpec extends PlaySpec
     MTDExemptEnduring,
     MTDExempt26To27,
     MTDExempt27To28,
+    MTDExempt28To29,
     MandationInhibit26To27,
     MandationInhibit27To28
   )
@@ -172,6 +174,7 @@ class EligibilityServiceSpec extends PlaySpec
     ControlListMessages.complianceMessage,
     ControlListMessages.budgetPaymentPlanMessage,
     ControlListMessages.deceasedMessage,
+    ControlListMessages.capacitorMessage,
     ControlListMessages.timeToPayMessage,
     ControlListMessages.selfServeTimeToPayMessage,
     ControlListMessages.disguisedRenumerationInvlovementMessage,
@@ -185,6 +188,7 @@ class EligibilityServiceSpec extends PlaySpec
     MTDExemptEnduring.key,
     MTDExempt26To27.key,
     MTDExempt27To28.key,
+    MTDExempt28To29.key,
     MandationInhibit26To27.key,
     MandationInhibit27To28.key
   )
