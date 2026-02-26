@@ -17,8 +17,8 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json._
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
+import play.api.libs.json.*
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 
 case class EligibilityStatusSuccessResponse(currentTaxYear: EligibilityStatus,
                                             nextTaxYear: EligibilityStatus,
@@ -48,7 +48,7 @@ object EligibilityStatusSuccessResponse {
 
       val mtdExemptEnduringReason: Option[String] = eligibility.nextTaxYearFailureReasons.collectFirst {
         case MTDExemptEnduring |
-             MTDExempt28to29 |
+             MTDExempt28To29 |
              MTDExempt27To28 |
              MarriedCouplesAllowance |
              MinisterOfReligion |
@@ -67,6 +67,7 @@ object EligibilityStatusSuccessResponse {
       val noDataReason: Option[String] = eligibility.nextTaxYearFailureReasons.collectFirst {
         case NoDataFound |
              Death |
+             Capacitor |
              NonResidentCompanyLandlord |
              BankruptInsolvent |
              BankruptVoluntaryArrangement |

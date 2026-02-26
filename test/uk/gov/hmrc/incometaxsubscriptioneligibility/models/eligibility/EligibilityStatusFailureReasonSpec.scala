@@ -17,8 +17,8 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility
 
 import org.scalatestplus.play.PlaySpec
-import play.api.libs.json.{JsError, JsString, JsSuccess, Json}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
+import play.api.libs.json.{JsString, JsSuccess, Json}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 
 class EligibilityStatusFailureReasonSpec extends PlaySpec {
 
@@ -36,7 +36,6 @@ class EligibilityStatusFailureReasonSpec extends PlaySpec {
     NoDataFound.key -> NoDataFound,
     NonResidents.key -> NonResidents,
     NonResidentCompanyLandlord.key -> NonResidentCompanyLandlord,
-    DebtManagement.key -> DebtManagement,
     MinisterOfReligion.key -> MinisterOfReligion,
     LloydsUnderwriter.key -> LloydsUnderwriter,
     AveragingAdjustment.key -> AveragingAdjustment,
@@ -46,8 +45,10 @@ class EligibilityStatusFailureReasonSpec extends PlaySpec {
     FosterCarers.key -> FosterCarers,
     MarriedCouplesAllowance.key -> MarriedCouplesAllowance,
     ComplianceActivity.key -> ComplianceActivity,
+    DebtManagement.key -> DebtManagement,
     BudgetPaymentPlan.key -> BudgetPaymentPlan,
     Death.key -> Death,
+    Capacitor.key -> Capacitor,
     TimeToPay.key -> TimeToPay,
     TimeToPaySelfServe.key -> TimeToPaySelfServe,
     DisguisedRemunerationInvolvement.key -> DisguisedRemunerationInvolvement,
@@ -61,6 +62,7 @@ class EligibilityStatusFailureReasonSpec extends PlaySpec {
     MTDExemptEnduring.key -> MTDExemptEnduring,
     MTDExempt26To27.key -> MTDExempt26To27,
     MTDExempt27To28.key -> MTDExempt27To28,
+    MTDExempt28To29.key -> MTDExempt28To29,
     MandationInhibit26To27.key -> MandationInhibit26To27,
     MandationInhibit27To28.key -> MandationInhibit27To28,
     "other" -> Other("other")

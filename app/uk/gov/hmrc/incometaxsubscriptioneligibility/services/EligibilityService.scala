@@ -21,12 +21,12 @@ import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.EligibilityStatusConnector
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.EligibilityStatusHttpParser._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.EligibilityStatusHttpParser.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListMessages
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus._
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.*
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.{EligibilityStatusFailureReason, EligibilityStatusSuccessResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
@@ -76,7 +76,6 @@ class EligibilityService @Inject()(auditService: AuditService,
     case NoDataFound => ControlListDataNotFound.errorMessage
     case NonResidents => ControlListMessages.nonResidentsMessage
     case NonResidentCompanyLandlord => ControlListMessages.nonResidentCompanyLandlordMessage
-    case DebtManagement => ControlListMessages.existingIdmsDebtMessage
     case MinisterOfReligion => ControlListMessages.ministersOfReligionMessage
     case LloydsUnderwriter => ControlListMessages.lloydsUnderwriterMessage
     case AveragingAdjustment => ControlListMessages.averagingAdjustmentMessage
@@ -86,8 +85,10 @@ class EligibilityService @Inject()(auditService: AuditService,
     case FosterCarers => ControlListMessages.fosterCarersMessage
     case MarriedCouplesAllowance => ControlListMessages.marriedCouplesAllowanceMessage
     case ComplianceActivity => ControlListMessages.complianceMessage
+    case DebtManagement => ControlListMessages.existingIdmsDebtMessage
     case BudgetPaymentPlan => ControlListMessages.budgetPaymentPlanMessage
     case Death => ControlListMessages.deceasedMessage
+    case Capacitor => ControlListMessages.capacitorMessage
     case TimeToPay => ControlListMessages.timeToPayMessage
     case TimeToPaySelfServe => ControlListMessages.selfServeTimeToPayMessage
     case DisguisedRemunerationInvolvement => ControlListMessages.disguisedRenumerationInvlovementMessage
@@ -101,6 +102,7 @@ class EligibilityService @Inject()(auditService: AuditService,
     case MTDExemptEnduring => MTDExemptEnduring.key
     case MTDExempt26To27 => MTDExempt26To27.key
     case MTDExempt27To28 => MTDExempt27To28.key
+    case MTDExempt28To29 => MTDExempt28To29.key
     case MandationInhibit26To27 => MandationInhibit26To27.key
     case MandationInhibit27To28 => MandationInhibit27To28.key
     case Other(key) => key
