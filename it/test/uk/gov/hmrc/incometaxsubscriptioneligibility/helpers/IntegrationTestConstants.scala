@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.helpers
 
-import uk.gov.hmrc.domain.Generator
+import uk.gov.hmrc.domain.*
 
 object IntegrationTestConstants {
 
@@ -30,7 +30,7 @@ object IntegrationTestConstants {
     val testDetail = Map("foo" -> "bar")
     val agentServiceIdentifierKey = "AgentReferenceNumber"
     val agentServiceEnrolmentName = "HMRC-AS-AGENT"
-    lazy val testARN = new Generator().nextAtedUtr.utr //Not a valid ARN, for test purposes only
+    lazy val testARN: String = new AtedUtrGenerator().nextAtedUtr.utr //Not a valid ARN, for test purposes only
   }
 
 }
