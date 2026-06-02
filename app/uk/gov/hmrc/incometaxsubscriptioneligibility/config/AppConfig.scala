@@ -18,7 +18,6 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.config
 
 import play.api.{Configuration, Logging}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListParameter
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.util.Base64
@@ -59,35 +58,4 @@ class AppConfig @Inject()(servicesConfig: ServicesConfig, val configuration: Con
       case _ => Some(servicesConfig.getString(key))
     }
   }
-
-  def isEligible(year: String, param: ControlListParameter): Boolean =
-    loadConfigFromEnv(s"control-list.${year}.${param.configKey}") match {
-      case Some(bool) => bool.toBoolean
-      case _ => throw new Exception(s"Unknown eligibility config key: ${param.configKey}")
-    }
-
-  def isControlListConfigurationValid(): Boolean = {
-    val currentYear = TaxYear.getCurrentTaxYear()
-    val nextYear = TaxYear.getNextTaxYear()
-
-    ControlListParameter.getParameterMap.values.foldLeft(true)((accumulator, param) => {
-      // False in the config means "do the check", true means "don't do the check"
-      val doCheck = false
-      val dontCheck = true
-
-      // We choose to make "missing" mean "don't check"
-      // If a missing control list item is later requested, we will throw an request specific error (see above).
-
-      val checkCurrentYear = Try(isEligible(currentYear, param)).toOption.getOrElse(dontCheck) == doCheck
-      val checkNextYear = Try(isEligible(nextYear, param)).toOption.getOrElse(dontCheck) == doCheck
-      if (!checkCurrentYear && checkNextYear) {
-        logger.info(s"Control list param $param is not checked in the current year and checked in the following year")
-        false
-      } else
-        accumulator
-    })
-  }
-
-  if (!isControlListConfigurationValid())
-    logger.error(s"Control list params are not valid")
 }

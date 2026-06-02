@@ -22,9 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.EligibilityStatusConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.EligibilityStatusHttpParser.*
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListMessages
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.{EligibilityStatusFailureReason, EligibilityStatusSuccessResponse}
@@ -73,31 +71,31 @@ class EligibilityService @Inject()(auditService: AuditService,
   }
 
   private val failureReasonToReasonKey: EligibilityStatusFailureReason => String = {
-    case NoDataFound => ControlListDataNotFound.errorMessage
-    case NonResidents => ControlListMessages.nonResidentsMessage
-    case NonResidentCompanyLandlord => ControlListMessages.nonResidentCompanyLandlordMessage
-    case MinisterOfReligion => ControlListMessages.ministersOfReligionMessage
-    case LloydsUnderwriter => ControlListMessages.lloydsUnderwriterMessage
-    case AveragingAdjustment => ControlListMessages.averagingAdjustmentMessage
-    case TrustIncome => ControlListMessages.trustIncomeMessage
-    case PartnershipIncome => ControlListMessages.partnershipIncomeMessage
-    case BlindPersonsAllowance => ControlListMessages.blindPersonsAllowanceMessage
-    case FosterCarers => ControlListMessages.fosterCarersMessage
-    case MarriedCouplesAllowance => ControlListMessages.marriedCouplesAllowanceMessage
-    case ComplianceActivity => ControlListMessages.complianceMessage
-    case DebtManagement => ControlListMessages.existingIdmsDebtMessage
-    case BudgetPaymentPlan => ControlListMessages.budgetPaymentPlanMessage
-    case Death => ControlListMessages.deceasedMessage
-    case Capacitor => ControlListMessages.capacitorMessage
-    case TimeToPay => ControlListMessages.timeToPayMessage
-    case TimeToPaySelfServe => ControlListMessages.selfServeTimeToPayMessage
-    case DisguisedRemunerationInvolvement => ControlListMessages.disguisedRenumerationInvlovementMessage
-    case NoRepaymentSignal => ControlListMessages.noRepaymentMessage
-    case OutstandingReturns => ControlListMessages.outstandingReturnsMessage
-    case EnforcementSignal => ControlListMessages.enforcementMessage
-    case CollectionPrioritySignal => ControlListMessages.collectionPriorityMessage
-    case BankruptInsolvent => ControlListMessages.bankruptInsolvementMessage
-    case BankruptVoluntaryArrangement => ControlListMessages.bankruptVoluntaryArrangementMessage
+    case NoDataFound => NoDataFound.key
+    case NonResidents => NonResidents.key
+    case NonResidentCompanyLandlord => NonResidentCompanyLandlord.key
+    case MinisterOfReligion => MinisterOfReligion.key
+    case LloydsUnderwriter => LloydsUnderwriter.key
+    case AveragingAdjustment => AveragingAdjustment.key
+    case TrustIncome => TrustIncome.key
+    case PartnershipIncome => PartnershipIncome.key
+    case BlindPersonsAllowance => BlindPersonsAllowance.key
+    case FosterCarers => FosterCarers.key
+    case MarriedCouplesAllowance => MarriedCouplesAllowance.key
+    case ComplianceActivity => ComplianceActivity.key
+    case DebtManagement => DebtManagement.key
+    case BudgetPaymentPlan => BudgetPaymentPlan.key
+    case Death => Death.key
+    case Capacitor => Capacitor.key
+    case TimeToPay => TimeToPay.key
+    case TimeToPaySelfServe => TimeToPaySelfServe.key
+    case DisguisedRemunerationInvolvement => DisguisedRemunerationInvolvement.key
+    case NoRepaymentSignal => NoRepaymentSignal.key
+    case OutstandingReturns => OutstandingReturns.key
+    case EnforcementSignal => EnforcementSignal.key
+    case CollectionPrioritySignal => CollectionPrioritySignal.key
+    case BankruptInsolvent =>BankruptInsolvent.key
+    case BankruptVoluntaryArrangement => BankruptVoluntaryArrangement.key
     case DigitallyExempt => DigitallyExempt.key
     case MTDExemptEnduring => MTDExemptEnduring.key
     case MTDExempt26To27 => MTDExempt26To27.key

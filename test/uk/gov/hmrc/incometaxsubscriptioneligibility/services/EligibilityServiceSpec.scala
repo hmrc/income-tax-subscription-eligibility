@@ -25,9 +25,7 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockEligibilityStatusConnector
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListMessages
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.{Eligible, Ineligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.{EligibilityStatusFailure, EligibilityStatusSuccessResponse}
@@ -159,31 +157,31 @@ class EligibilityServiceSpec extends PlaySpec
   )
 
   lazy val allReasons = Set(
-    ControlListDataNotFound.errorMessage,
-    ControlListMessages.nonResidentsMessage,
-    ControlListMessages.nonResidentCompanyLandlordMessage,
-    ControlListMessages.existingIdmsDebtMessage,
-    ControlListMessages.ministersOfReligionMessage,
-    ControlListMessages.lloydsUnderwriterMessage,
-    ControlListMessages.averagingAdjustmentMessage,
-    ControlListMessages.trustIncomeMessage,
-    ControlListMessages.partnershipIncomeMessage,
-    ControlListMessages.blindPersonsAllowanceMessage,
-    ControlListMessages.fosterCarersMessage,
-    ControlListMessages.marriedCouplesAllowanceMessage,
-    ControlListMessages.complianceMessage,
-    ControlListMessages.budgetPaymentPlanMessage,
-    ControlListMessages.deceasedMessage,
-    ControlListMessages.capacitorMessage,
-    ControlListMessages.timeToPayMessage,
-    ControlListMessages.selfServeTimeToPayMessage,
-    ControlListMessages.disguisedRenumerationInvlovementMessage,
-    ControlListMessages.noRepaymentMessage,
-    ControlListMessages.outstandingReturnsMessage,
-    ControlListMessages.enforcementMessage,
-    ControlListMessages.collectionPriorityMessage,
-    ControlListMessages.bankruptInsolvementMessage,
-    ControlListMessages.bankruptVoluntaryArrangementMessage,
+    NoDataFound.key,
+    NonResidents.key,
+    NonResidentCompanyLandlord.key,
+    MinisterOfReligion.key,
+    LloydsUnderwriter.key,
+    AveragingAdjustment.key,
+    TrustIncome.key,
+    PartnershipIncome.key,
+    BlindPersonsAllowance.key,
+    FosterCarers.key,
+    MarriedCouplesAllowance.key,
+    ComplianceActivity.key,
+    DebtManagement.key,
+    BudgetPaymentPlan.key,
+    Death.key,
+    Capacitor.key,
+    TimeToPay.key,
+    TimeToPaySelfServe.key,
+    DisguisedRemunerationInvolvement.key,
+    NoRepaymentSignal.key,
+    OutstandingReturns.key,
+    EnforcementSignal.key,
+    CollectionPrioritySignal.key,
+    BankruptInsolvent.key,
+    BankruptVoluntaryArrangement.key,
     DigitallyExempt.key,
     MTDExemptEnduring.key,
     MTDExempt26To27.key,
