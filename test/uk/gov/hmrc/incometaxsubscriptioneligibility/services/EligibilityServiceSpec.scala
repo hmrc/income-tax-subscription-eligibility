@@ -27,7 +27,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSw
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockEligibilityStatusConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.{Eligible, Ineligible}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.{AveragingAdjustment, BankruptInsolvent, BankruptVoluntaryArrangement, BlindPersonsAllowance, BudgetPaymentPlan, Capacitor, CollectionPrioritySignal, ComplianceActivity, Death, DebtManagement, DisguisedRemunerationInvolvement, EnforcementSignal, FosterCarers, LloydsUnderwriter, MarriedCouplesAllowance, MinisterOfReligion, NoDataFound, NoRepaymentSignal, NonResidentCompanyLandlord, NonResidents, OutstandingReturns, PartnershipIncome, TimeToPay, TimeToPaySelfServe, TrustIncome, *}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.{EligibilityStatusFailure, EligibilityStatusSuccessResponse}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockAuditService
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
@@ -157,31 +157,31 @@ class EligibilityServiceSpec extends PlaySpec
   )
 
   lazy val allReasons = Set(
-    NoDataFound.key,
-    NonResidents.key,
-    NonResidentCompanyLandlord.key,
-    MinisterOfReligion.key,
-    LloydsUnderwriter.key,
-    AveragingAdjustment.key,
-    TrustIncome.key,
-    PartnershipIncome.key,
-    BlindPersonsAllowance.key,
-    FosterCarers.key,
-    MarriedCouplesAllowance.key,
-    ComplianceActivity.key,
-    DebtManagement.key,
-    BudgetPaymentPlan.key,
-    Death.key,
-    Capacitor.key,
-    TimeToPay.key,
-    TimeToPaySelfServe.key,
-    DisguisedRemunerationInvolvement.key,
-    NoRepaymentSignal.key,
-    OutstandingReturns.key,
-    EnforcementSignal.key,
-    CollectionPrioritySignal.key,
-    BankruptInsolvent.key,
-    BankruptVoluntaryArrangement.key,
+    NoDataFound.message,
+    NonResidents.message,
+    NonResidentCompanyLandlord.message,
+    MinisterOfReligion.message,
+    LloydsUnderwriter.message,
+    AveragingAdjustment.message,
+    TrustIncome.message,
+    PartnershipIncome.message,
+    BlindPersonsAllowance.message,
+    FosterCarers.message,
+    MarriedCouplesAllowance.message,
+    ComplianceActivity.message,
+    DebtManagement.message,
+    BudgetPaymentPlan.message,
+    Death.message,
+    Capacitor.message,
+    TimeToPay.message,
+    TimeToPaySelfServe.message,
+    DisguisedRemunerationInvolvement.message,
+    NoRepaymentSignal.message,
+    OutstandingReturns.message,
+    EnforcementSignal.message,
+    CollectionPrioritySignal.message,
+    BankruptInsolvent.message,
+    BankruptVoluntaryArrangement.message,
     DigitallyExempt.key,
     MTDExemptEnduring.key,
     MTDExempt26To27.key,

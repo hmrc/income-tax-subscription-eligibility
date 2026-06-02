@@ -20,108 +20,134 @@ import play.api.libs.json.{JsSuccess, Reads, __}
 
 sealed trait EligibilityStatusFailureReason {
   val key: String
+  def message: String = key
 }
 
 object EligibilityStatusFailureReason {
 
   case object NoDataFound extends EligibilityStatusFailureReason {
     val key: String = "No Data Found"
+    override val message: String = "No control list data for specified UTR"
   }
 
   case object NonResidents extends EligibilityStatusFailureReason {
     val key: String = "Non-residents"
+    override val message: String = "Declared on SA109"
   }
 
   case object NonResidentCompanyLandlord extends EligibilityStatusFailureReason {
     val key: String = "Non-resident Company Landlord"
+    override val message: String = "Non Resident Company Landlord"
   }
 
   case object MinisterOfReligion extends EligibilityStatusFailureReason {
     val key: String = "Minister of Religion"
+    override val message: String = "Minister Of Religion"
   }
 
   case object LloydsUnderwriter extends EligibilityStatusFailureReason {
     val key: String = "Lloyds Underwriter"
+    override val message: String = "Lloyds Underwriter"
   }
 
   case object AveragingAdjustment extends EligibilityStatusFailureReason {
     val key: String = "Averaging Adjustment"
+    override val message: String = "Claims Everything"
   }
 
   case object TrustIncome extends EligibilityStatusFailureReason {
     val key: String = "Trust Income"
+    override val message: String = "Declares Income From Trust"
   }
 
   case object PartnershipIncome extends EligibilityStatusFailureReason {
     val key: String = "Partnership Income"
+    override val message: String = "Declares Partnership Profits"
   }
 
   case object BlindPersonsAllowance extends EligibilityStatusFailureReason {
     val key: String = "Blind Person's Allowance"
+    override val message: String = "Receives Blind Person's Allowance"
   }
 
   case object FosterCarers extends EligibilityStatusFailureReason {
     val key: String = "Foster Carers"
+    override val message: String = "Foster Carer"
   }
 
   case object MarriedCouplesAllowance extends EligibilityStatusFailureReason {
     val key: String = "Married Couple's Allowance"
+    override val message: String = "Receives Married Couple's Allowance"
   }
 
   case object ComplianceActivity extends EligibilityStatusFailureReason {
     val key: String = "Compliance Activity"
+    override val message: String = "Open Enquiries"
   }
 
   case object DebtManagement extends EligibilityStatusFailureReason {
     val key: String = "Debt Management"
+    override val message: String = "Existing debt passed to IDMS"
   }
 
   case object BudgetPaymentPlan extends EligibilityStatusFailureReason {
     val key: String = "Budget Payment Plan"
+    override val message: String = "Budget Payment Plan"
   }
 
   case object Death extends EligibilityStatusFailureReason {
     val key: String = "Death"
+    override val message: String = "Deceased"
   }
 
   case object Capacitor extends EligibilityStatusFailureReason {
     val key: String = "Capacitor"
+    override val message: String = "Capacitor"
   }
 
   case object TimeToPay extends EligibilityStatusFailureReason {
     val key: String = "Time To Pay"
+    override val message: String = "Time To Pay Arrangement"
   }
 
   case object TimeToPaySelfServe extends EligibilityStatusFailureReason {
     val key: String = "Time To Pay (Self Serve)"
+    override val message: String = "Self Serve Time To Pay Arrangement"
   }
 
   case object DisguisedRemunerationInvolvement extends EligibilityStatusFailureReason {
     val key: String = "Disguised Renumeration Involvement"
+    override val message: String = "In A Disguised Renumeration Scheme"
   }
 
   case object NoRepaymentSignal extends EligibilityStatusFailureReason {
     val key: String = "No Repayment Signal"
+    override val message: String = "No Repayment"
   }
 
   case object OutstandingReturns extends EligibilityStatusFailureReason {
     val key: String = "Outstanding Returns"
+    override val message: String = "Outstanding Returns"
   }
 
   case object EnforcementSignal extends EligibilityStatusFailureReason {
     val key: String = "Enforcement Signal"
+    override val message: String = "Enforcement"
   }
 
   case object CollectionPrioritySignal extends EligibilityStatusFailureReason {
     val key: String = "Collection Priority Signal"
+    override val message: String = "Collection Priority"
   }
 
   case object BankruptInsolvent extends EligibilityStatusFailureReason {
     val key: String = "Bankrupt - Insolvent"
+    override val message: String = "Insolvent"
   }
 
   case object BankruptVoluntaryArrangement extends EligibilityStatusFailureReason {
     val key: String = "Bankrupt - Voluntary Arrangement"
+    override val message: String = "Voluntary Arrangement"
   }
 
   case object DigitallyExempt extends EligibilityStatusFailureReason {
@@ -190,3 +216,4 @@ object EligibilityStatusFailureReason {
     case otherKey => JsSuccess(Other(otherKey))
   }
 }
+
