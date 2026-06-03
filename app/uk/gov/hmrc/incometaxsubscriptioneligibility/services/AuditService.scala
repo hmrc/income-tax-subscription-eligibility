@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
@@ -24,6 +23,7 @@ import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

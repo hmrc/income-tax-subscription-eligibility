@@ -18,7 +18,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemock
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.IntegrationTestConstants.Audit._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.IntegrationTestConstants.Audit.*
 
 object AuthStub extends WireMockMethods {
   val authority = "/auth/authorise"
