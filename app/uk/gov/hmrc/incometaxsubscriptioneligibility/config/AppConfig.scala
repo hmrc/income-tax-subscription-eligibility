@@ -17,29 +17,15 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.config
 
 import play.api.{Configuration, Logging}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.TaxYear
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
-import scala.util.Try
 
 @Singleton
 class AppConfig @Inject()(servicesConfig: ServicesConfig, val configuration: Configuration) extends Logging {
 
   private def loadConfig(key: String) = servicesConfig.getString(key) //throws RuntimeException(s"Could not find config key '$key'") if key not found
-
-  def desUrl(stubDesConnection: Boolean): String =
-    loadConfig(
-      if (stubDesConnection)
-        "microservice.services.des.stub-url"
-      else
-        "microservice.services.des.url"
-    )
-
-  lazy val desAuthorisationToken: String = s"Bearer ${loadConfig("microservice.services.des.authorisation-token")}"
-
-  lazy val desEnvironmentHeader: (String, String) = "Environment" -> loadConfig("microservice.services.des.environment")
 
   lazy val hipBaseUrl: String = servicesConfig.baseUrl("hip")
 
@@ -50,12 +36,5 @@ class AppConfig @Inject()(servicesConfig: ServicesConfig, val configuration: Con
     val encoded: String = Base64.getEncoder.encodeToString(s"$clientId:$clientSecret".getBytes("UTF-8"))
 
     s"Basic $encoded"
-  }
-
-  def loadConfigFromEnv(key: String): Option[String] = {
-    sys.props.get(key) match {
-      case r@Some(result) if result.nonEmpty => r
-      case _ => Some(servicesConfig.getString(key))
-    }
   }
 }

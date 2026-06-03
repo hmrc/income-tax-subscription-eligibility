@@ -71,30 +71,4 @@ class FeatureSwitchingSpec extends PlaySpec with MockitoSugar with FeatureSwitch
       isEnabled(StubControlListEligible) mustBe true
     }
   }
-
-  "UseStubForDesConnection" should {
-    "return true if UseStubForDesConnection feature switch is enabled in sys.props" in {
-      enable(UseStubForDesConnection)
-      isEnabled(UseStubForDesConnection) mustBe true
-    }
-    "return false if UseStubForDesConnection feature switch is disabled in sys.props" in {
-      disable(UseStubForDesConnection)
-      isEnabled(UseStubForDesConnection) mustBe false
-    }
-
-    "return false if UseStubForDesConnection feature switch does not exist" in {
-      when(mockConfig.getOptional[String]("feature-switch.use-stub-for-des-connection")).thenReturn(None)
-      isEnabled(UseStubForDesConnection) mustBe false
-    }
-
-    "return false if UseStubForDesConnection feature switch is not in sys.props but is set to 'off' in config" in {
-      when(mockConfig.getOptional[String]("feature-switch.use-stub-for-des-connection")).thenReturn(Some(FEATURE_SWITCH_OFF))
-      isEnabled(UseStubForDesConnection) mustBe false
-    }
-
-    "return true if UseStubForDesConnection feature switch is not in sys.props but is set to 'on' in config" in {
-      when(mockConfig.getOptional[String]("feature-switch.use-stub-for-des-connection")).thenReturn(Some(FEATURE_SWITCH_ON))
-      isEnabled(UseStubForDesConnection) mustBe true
-    }
-  }
 }

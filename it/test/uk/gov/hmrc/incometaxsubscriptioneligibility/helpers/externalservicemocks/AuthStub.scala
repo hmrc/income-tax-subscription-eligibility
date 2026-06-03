@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ object AuthStub extends WireMockMethods {
   )
 
   private def successfulAuthResponse(enrolments: JsObject*): JsObject =
-  //Written out manually as the json writer for Enrolment doesn't match the reader
+    //Written out manually as the json writer for Enrolment doesn't match the reader
     Json.obj(
       "allEnrolments" -> enrolments
     )
