@@ -24,8 +24,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.ComponentSpecBase
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.EligibilityStatusAPIStub.stubGetEligibilityStatus
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.EligibilityStatusHttpParser.EligibilityStatusResponse
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus._
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.*
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.{EligibilityStatusFailure, EligibilityStatusSuccessResponse}
 
 import scala.concurrent.Future

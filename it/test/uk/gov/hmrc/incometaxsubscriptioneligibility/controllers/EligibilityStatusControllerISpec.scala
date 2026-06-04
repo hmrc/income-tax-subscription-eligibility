@@ -17,17 +17,17 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 
 import org.scalatestplus.mockito.MockitoSugar.mock
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.{JsObject, Json}
 import play.api.libs.ws.`WSResponse`
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.ComponentSpecBase
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.AuthStub.stubAuth
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.EligibilityStatusAPIStub.{stubGetEligibilityStatus, verifyGetEligibilityStatus}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.{ComponentSpecBase, ControlListConfigTestHelper}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason._
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 
-class EligibilityStatusControllerISpec extends ComponentSpecBase with ControlListConfigTestHelper with FeatureSwitching {
+class EligibilityStatusControllerISpec extends ComponentSpecBase with FeatureSwitching {
 
   override def beforeEach(): Unit = {
     super.beforeEach()

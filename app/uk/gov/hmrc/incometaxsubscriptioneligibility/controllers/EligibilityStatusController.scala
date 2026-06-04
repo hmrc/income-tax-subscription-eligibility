@@ -17,8 +17,8 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.controllers
 
 import play.api.libs.json.Json
-import play.api.mvc._
-import uk.gov.hmrc.auth.core._
+import play.api.mvc.*
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.incometaxsubscriptioneligibility.common.Extractors
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailure

@@ -25,11 +25,9 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockEligibilityStatusConnector
-import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.GetControlListHttpParser.ControlListDataNotFound
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.controllist.ControlListMessages
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.{Eligible, Ineligible}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.{AveragingAdjustment, BankruptInsolvent, BankruptVoluntaryArrangement, BlindPersonsAllowance, BudgetPaymentPlan, Capacitor, CollectionPrioritySignal, ComplianceActivity, Death, DebtManagement, DisguisedRemunerationInvolvement, EnforcementSignal, FosterCarers, LloydsUnderwriter, MarriedCouplesAllowance, MinisterOfReligion, NoDataFound, NoRepaymentSignal, NonResidentCompanyLandlord, NonResidents, OutstandingReturns, PartnershipIncome, TimeToPay, TimeToPaySelfServe, TrustIncome, *}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.{EligibilityStatusFailure, EligibilityStatusSuccessResponse}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockAuditService
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
@@ -159,31 +157,31 @@ class EligibilityServiceSpec extends PlaySpec
   )
 
   lazy val allReasons = Set(
-    ControlListDataNotFound.errorMessage,
-    ControlListMessages.nonResidentsMessage,
-    ControlListMessages.nonResidentCompanyLandlordMessage,
-    ControlListMessages.existingIdmsDebtMessage,
-    ControlListMessages.ministersOfReligionMessage,
-    ControlListMessages.lloydsUnderwriterMessage,
-    ControlListMessages.averagingAdjustmentMessage,
-    ControlListMessages.trustIncomeMessage,
-    ControlListMessages.partnershipIncomeMessage,
-    ControlListMessages.blindPersonsAllowanceMessage,
-    ControlListMessages.fosterCarersMessage,
-    ControlListMessages.marriedCouplesAllowanceMessage,
-    ControlListMessages.complianceMessage,
-    ControlListMessages.budgetPaymentPlanMessage,
-    ControlListMessages.deceasedMessage,
-    ControlListMessages.capacitorMessage,
-    ControlListMessages.timeToPayMessage,
-    ControlListMessages.selfServeTimeToPayMessage,
-    ControlListMessages.disguisedRenumerationInvlovementMessage,
-    ControlListMessages.noRepaymentMessage,
-    ControlListMessages.outstandingReturnsMessage,
-    ControlListMessages.enforcementMessage,
-    ControlListMessages.collectionPriorityMessage,
-    ControlListMessages.bankruptInsolvementMessage,
-    ControlListMessages.bankruptVoluntaryArrangementMessage,
+    NoDataFound.message,
+    NonResidents.message,
+    NonResidentCompanyLandlord.message,
+    MinisterOfReligion.message,
+    LloydsUnderwriter.message,
+    AveragingAdjustment.message,
+    TrustIncome.message,
+    PartnershipIncome.message,
+    BlindPersonsAllowance.message,
+    FosterCarers.message,
+    MarriedCouplesAllowance.message,
+    ComplianceActivity.message,
+    DebtManagement.message,
+    BudgetPaymentPlan.message,
+    Death.message,
+    Capacitor.message,
+    TimeToPay.message,
+    TimeToPaySelfServe.message,
+    DisguisedRemunerationInvolvement.message,
+    NoRepaymentSignal.message,
+    OutstandingReturns.message,
+    EnforcementSignal.message,
+    CollectionPrioritySignal.message,
+    BankruptInsolvent.message,
+    BankruptVoluntaryArrangement.message,
     DigitallyExempt.key,
     MTDExemptEnduring.key,
     MTDExempt26To27.key,

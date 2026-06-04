@@ -17,7 +17,7 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.testonly.controllers
 
 import play.api.libs.json.Json
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.FeatureSwitch.switches
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitch, FeatureSwitchSetting, FeatureSwitching}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController

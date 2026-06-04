@@ -17,7 +17,7 @@
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility
 
 import org.scalatestplus.play.PlaySpec
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.{Eligible, Ineligible}
 
 class EligibilityStatusSpec extends PlaySpec {

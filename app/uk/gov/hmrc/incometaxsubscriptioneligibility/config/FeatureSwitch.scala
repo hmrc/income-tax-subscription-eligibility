@@ -26,8 +26,7 @@ object FeatureSwitch {
   val prefix: String = "feature-switch"
   val switches: Set[FeatureSwitch] =
     Set(
-      StubControlListEligible,
-      UseStubForDesConnection
+      StubControlListEligible
     )
 
   def apply(switchName: String): FeatureSwitch = switches find (_.name == switchName) match {
@@ -45,9 +44,4 @@ object FeatureSwitch {
 case object StubControlListEligible extends FeatureSwitch {
   override val name: String = s"${FeatureSwitch.prefix}.control-list-eligible"
   override val displayName: String = "Stub eligibility response to always return Eligible"
-}
-
-case object UseStubForDesConnection extends FeatureSwitch {
-  override val name: String = s"${FeatureSwitch.prefix}.use-stub-for-des-connection"
-  override val displayName: String = "Use stub for DES connection"
 }

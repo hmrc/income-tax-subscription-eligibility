@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 sealed trait EligibilityStatus
 

@@ -20,11 +20,11 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.play.{MixedPlaySpec, PortNumber}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Writes
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
 import play.api.libs.ws.{WSClient, WSResponse}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
-import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
 
 trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
   with WiremockHelper with BeforeAndAfterAll with BeforeAndAfterEach {

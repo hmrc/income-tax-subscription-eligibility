@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors
 
-import java.util.UUID
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, StringContextOps}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.AppConfig
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.EligibilityStatusHttpParser.*
 
+import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
