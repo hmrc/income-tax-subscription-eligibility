@@ -22,6 +22,6 @@ object EligibilityStatusFailure {
 
   case object InvalidJson extends EligibilityStatusFailure
 
-  case object UnexpectedStatus extends EligibilityStatusFailure
+  case class UnexpectedStatus(status: Int) extends EligibilityStatusFailure
 
 }

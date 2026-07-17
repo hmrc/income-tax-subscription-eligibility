@@ -41,7 +41,7 @@ class EligibilityStatusController @Inject()(cc: ControllerComponents,
           Ok(Json.toJsObject(value))
         case Left(EligibilityStatusFailure.InvalidJson) =>
           InternalServerError("Unable to parse json from API")
-        case Left(EligibilityStatusFailure.UnexpectedStatus) =>
+        case Left(EligibilityStatusFailure.UnexpectedStatus(_)) =>
           InternalServerError(s"Unexpected status received from API")
       }
     }
