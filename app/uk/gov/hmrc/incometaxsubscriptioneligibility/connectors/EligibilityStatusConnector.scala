@@ -34,13 +34,13 @@ class EligibilityStatusConnector @Inject()(http: HttpClientV2, appConfig: AppCon
                                           (implicit ec: ExecutionContext) extends ConnectorRetries {
 
   def getEligibilityStatus(nino: String, utr: String)(implicit hc: HeaderCarrier): Future[EligibilityStatusResponse] = {
-    
+
     retryFor[EligibilityStatusResponse](EligibilityStatusReads.apiNumber, EligibilityStatusReads.apiName) {
       case Left(EligibilityStatusFailure.UnexpectedStatus(SERVICE_UNAVAILABLE)) => true
       case Left(EligibilityStatusFailure.UnexpectedStatus(BAD_GATEWAY)) => true
       case Left(EligibilityStatusFailure.UnexpectedStatus(INTERNAL_SERVER_ERROR)) => true
     }
-    
+
     http
       .get(url"${appConfig.hipBaseUrl}/personal-tax/income-tax-self-assessment/signUpEligibility?nino=$nino&utr=$utr")
       .setHeader(HeaderNames.authorisation -> appConfig.hipAuthorizationToken)

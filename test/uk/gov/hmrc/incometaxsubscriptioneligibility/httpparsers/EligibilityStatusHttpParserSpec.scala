@@ -62,7 +62,7 @@ class EligibilityStatusHttpParserSpec extends PlaySpec {
           json = Json.obj()
         )
 
-        result mustBe Left(EligibilityStatusFailure.UnexpectedStatus)
+        result mustBe Left(EligibilityStatusFailure.UnexpectedStatus(500))
       }
     }
   }

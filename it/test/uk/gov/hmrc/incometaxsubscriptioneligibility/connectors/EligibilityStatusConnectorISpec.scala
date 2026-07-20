@@ -101,7 +101,7 @@ class EligibilityStatusConnectorISpec extends ComponentSpecBase {
 
           val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino, testUTR)
 
-          await(result) mustBe Left(EligibilityStatusFailure.UnexpectedStatus)
+          await(result) mustBe Left(EligibilityStatusFailure.UnexpectedStatus(500))
         }
       }
     }
