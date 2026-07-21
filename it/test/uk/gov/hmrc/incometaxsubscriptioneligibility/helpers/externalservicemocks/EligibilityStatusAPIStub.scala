@@ -18,7 +18,10 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemock
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.{JsObject, Json}
-
+import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.{Scenario, StubMapping}
+import play.api.libs.json.{JsObject, Json}
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, OK}
 
 object EligibilityStatusAPIStub extends WireMockMethods {
 
@@ -29,6 +32,39 @@ object EligibilityStatusAPIStub extends WireMockMethods {
 
   def verifyGetEligibilityStatus(nino: String, utr: String, count: Int = 1): Unit = {
     verify(method = GET, uri = s"/personal-tax/income-tax-self-assessment/signUpEligibility?nino=$nino&utr=$utr", count = count)
+  }
+
+  def stubGetEligibilityStatusRetry(
+                                     nino: String,
+                                     utr: String,
+                                     body: JsObject
+                                   ): Unit = {
+
+    stubFor(
+      get(urlPathEqualTo("/personal-tax/income-tax-self-assessment/signUpEligibility"))
+        .withQueryParam("nino", equalTo(nino))
+        .withQueryParam("utr", equalTo(utr))
+        .inScenario("Eligibility Retry")
+        .whenScenarioStateIs(Scenario.STARTED)
+        .willReturn(
+          aResponse()
+            .withStatus(INTERNAL_SERVER_ERROR)
+        )
+        .willSetStateTo("SECOND_CALL")
+    )
+
+    stubFor(
+      get(urlPathEqualTo("/personal-tax/income-tax-self-assessment/signUpEligibility"))
+        .withQueryParam("nino", equalTo(nino))
+        .withQueryParam("utr", equalTo(utr))
+        .inScenario("Eligibility Retry")
+        .whenScenarioStateIs("SECOND_CALL")
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(body.toString())
+        )
+    )
   }
 
 }

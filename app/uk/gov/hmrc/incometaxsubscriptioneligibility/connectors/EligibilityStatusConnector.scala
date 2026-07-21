@@ -39,13 +39,13 @@ class EligibilityStatusConnector @Inject()(http: HttpClientV2, appConfig: AppCon
       case Left(EligibilityStatusFailure.UnexpectedStatus(SERVICE_UNAVAILABLE)) => true
       case Left(EligibilityStatusFailure.UnexpectedStatus(BAD_GATEWAY)) => true
       case Left(EligibilityStatusFailure.UnexpectedStatus(INTERNAL_SERVER_ERROR)) => true
+    } {
+      http
+        .get(url"${appConfig.hipBaseUrl}/personal-tax/income-tax-self-assessment/signUpEligibility?nino=$nino&utr=$utr")
+        .setHeader(HeaderNames.authorisation -> appConfig.hipAuthorizationToken)
+        .setHeader("CorrelationId" -> UUID.randomUUID().toString)
+        .execute[EligibilityStatusResponse]
     }
 
-    http
-      .get(url"${appConfig.hipBaseUrl}/personal-tax/income-tax-self-assessment/signUpEligibility?nino=$nino&utr=$utr")
-      .setHeader(HeaderNames.authorisation -> appConfig.hipAuthorizationToken)
-      .setHeader("CorrelationId" -> UUID.randomUUID().toString)
-      .execute[EligibilityStatusResponse]
   }
-
 }
