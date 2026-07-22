@@ -190,7 +190,7 @@ class EligibilityStatusControllerISpec extends ComponentSpecBase with FeatureSwi
             httpStatus(INTERNAL_SERVER_ERROR)
           )
 
-          verifyGetEligibilityStatus(testNino, testUtr)
+          verifyGetEligibilityStatus(testNino, testUtr, 4)
         }
       }
     }

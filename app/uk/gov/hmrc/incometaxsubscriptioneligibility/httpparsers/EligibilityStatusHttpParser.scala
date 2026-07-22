@@ -27,21 +27,31 @@ object EligibilityStatusHttpParser extends Logging {
   type EligibilityStatusResponse = Either[EligibilityStatusFailure, EligibilityStatusSuccessResponse]
 
   implicit object EligibilityStatusReads extends HttpReads[EligibilityStatusResponse] {
+    val apiNumber: Int = 5734
+    val apiName: String = "Signal control gateway"
+
     override def read(method: String, url: String, response: HttpResponse): EligibilityStatusResponse = {
       response.status match {
         case OK =>
-          response.json.validate[EligibilityStatusSuccessResponse] match {
-            case JsSuccess(value, _) =>
-              Right(value)
-            case JsError(errors) =>
-              logger.error(s"[EligibilityStatusHttpParser] - Unable to parse json. Errors: $errors")
-              Left(EligibilityStatusFailure.InvalidJson)
-          }
+          handleCreatedResponse(response.json)
         case status =>
-          logger.error(s"[EligibilityStatusHttpParser] - Unexpected status returned from API. Status: $status")
-          Left(EligibilityStatusFailure.UnexpectedStatus)
+          handleOther(status)
       }
     }
+
+    private def handleCreatedResponse(json: JsValue): EligibilityStatusResponse = {
+      json.validate[EligibilityStatusSuccessResponse] match {
+        case JsSuccess(value, _) => Right(value)
+        case JsError(errors) => logger.error(s"[EligibilityStatusHttpParser] - Unable to parse json. Errors: $errors")
+          Left(EligibilityStatusFailure.InvalidJson)
+      }
+    }
+
+    private def handleOther(status: Int): EligibilityStatusResponse = {
+      logger.error(s"[EligibilityStatusHttpParser] - Unexpected status returned from API. Status: $status")
+      Left(EligibilityStatusFailure.UnexpectedStatus(status))
+    }
   }
+    
 
 }

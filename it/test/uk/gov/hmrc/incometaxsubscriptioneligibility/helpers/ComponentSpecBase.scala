@@ -53,7 +53,10 @@ trait ComponentSpecBase extends MixedPlaySpec with CustomMatchers
     "microservice.services.base.port" -> mockPort,
     "microservice.services.des.url" -> mockUrl,
     "microservice.services.hip.host" -> mockHost,
-    "microservice.services.hip.port" -> mockPort
+    "microservice.services.hip.port" -> mockPort,
+    "retries.intervals.0" -> "10.milliseconds",
+    "retries.intervals.1" -> "10.milliseconds",
+    "retries.intervals.2" -> "10.milliseconds"
   )
 
   override def beforeAll(): Unit = {

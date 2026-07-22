@@ -16,6 +16,9 @@ object AppDependencies {
     "org.scalamock" %% "scalamock" % "7.5.2" % "test",
   )
 
-  val itTest: Seq[ModuleID] = Seq()
+  val itTest: Seq[ModuleID] = Seq(
+    "uk.gov.hmrc" %% "bootstrap-test-play-30" % bootstrapVersion % "test",
+    "uk.gov.hmrc" %% "domain-test-play-30" % domainVersion % "test"
+  )
 
 }

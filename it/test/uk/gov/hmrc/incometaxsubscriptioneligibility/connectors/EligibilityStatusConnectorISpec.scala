@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.ComponentSpecBase
-import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.EligibilityStatusAPIStub.stubGetEligibilityStatus
+import uk.gov.hmrc.incometaxsubscriptioneligibility.helpers.externalservicemocks.EligibilityStatusAPIStub.{stubGetEligibilityStatus, stubGetEligibilityStatusRetry, verifyGetEligibilityStatus}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers.EligibilityStatusHttpParser.EligibilityStatusResponse
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
@@ -101,8 +101,37 @@ class EligibilityStatusConnectorISpec extends ComponentSpecBase {
 
           val result: Future[EligibilityStatusResponse] = connector.getEligibilityStatus(testNino, testUTR)
 
-          await(result) mustBe Left(EligibilityStatusFailure.UnexpectedStatus)
+          await(result) mustBe Left(EligibilityStatusFailure.UnexpectedStatus(500))
         }
+      }
+    }
+
+    "retry when the API initially returns an internal server error" in new App(defaultApp) {
+      override def running(): Unit = {
+
+        stubGetEligibilityStatusRetry(
+          testNino,
+          testUTR,
+          Json.obj(
+            "CY" -> "No",
+            "CY1" -> "Yes",
+            "ReasonKeyCY" -> Json.arr(),
+            "ReasonKeyCY1" -> Json.arr()
+          )
+        )
+
+        val result = connector.getEligibilityStatus(testNino, testUTR)
+
+        await(result) mustBe Right(
+          EligibilityStatusSuccessResponse(
+            currentTaxYear = Ineligible,
+            nextTaxYear = Eligible,
+            currentTaxYearFailureReasons = Seq.empty,
+            nextTaxYearFailureReasons = Seq.empty
+          )
+        )
+
+        verifyGetEligibilityStatus(testNino, testUTR, count = 2)
       }
     }
   }

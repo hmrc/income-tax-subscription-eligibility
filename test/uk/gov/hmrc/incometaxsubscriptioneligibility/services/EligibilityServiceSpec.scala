@@ -19,6 +19,7 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.PlaySpec
 import play.api.Configuration
+import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
@@ -27,7 +28,7 @@ import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSw
 import uk.gov.hmrc.incometaxsubscriptioneligibility.connectors.mocks.MockEligibilityStatusConnector
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.audits.EligibilityAuditModel
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatus.{Eligible, Ineligible}
-import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.{AveragingAdjustment, BankruptInsolvent, BankruptVoluntaryArrangement, BlindPersonsAllowance, BudgetPaymentPlan, Capacitor, CollectionPrioritySignal, ComplianceActivity, Death, DebtManagement, DisguisedRemunerationInvolvement, EnforcementSignal, FosterCarers, LloydsUnderwriter, MarriedCouplesAllowance, MinisterOfReligion, NoDataFound, NoRepaymentSignal, NonResidentCompanyLandlord, NonResidents, OutstandingReturns, PartnershipIncome, TimeToPay, TimeToPaySelfServe, TrustIncome, *}
+import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.EligibilityStatusFailureReason.*
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.{EligibilityStatusFailure, EligibilityStatusSuccessResponse}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.services.mocks.MockAuditService
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
@@ -35,6 +36,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Left
 
 class EligibilityServiceSpec extends PlaySpec
   with MockEligibilityStatusConnector with MockAuditService with FeatureSwitching with BeforeAndAfterEach {
@@ -97,11 +99,11 @@ class EligibilityServiceSpec extends PlaySpec
       }
       "return a failure eligibility response" when {
         "a failure response is returned from the connector" in {
-          mockGetEligibilityStatus(testNino, testUTR)(Left(EligibilityStatusFailure.UnexpectedStatus))
+          mockGetEligibilityStatus(testNino, testUTR) (Left(EligibilityStatusFailure.UnexpectedStatus(INTERNAL_SERVER_ERROR)))
 
           val result = TestEligibilityService.getEligibilityStatus(testNino, testUTR, None)
 
-          await(result) mustBe Left(EligibilityStatusFailure.UnexpectedStatus)
+          await(result) mustBe Left(EligibilityStatusFailure.UnexpectedStatus(500))
         }
       }
     }
