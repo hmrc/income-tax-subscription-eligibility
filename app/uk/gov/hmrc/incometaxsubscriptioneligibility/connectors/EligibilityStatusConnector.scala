@@ -35,7 +35,7 @@ class EligibilityStatusConnector @Inject()(http: HttpClientV2, appConfig: AppCon
 
   def getEligibilityStatus(nino: String, utr: String)(implicit hc: HeaderCarrier): Future[EligibilityStatusResponse] = {
 
-    retryFor[EligibilityStatusResponse](EligibilityStatusReads.apiNumber, EligibilityStatusReads.apiName) {
+    retryFor[EligibilityStatusResponse](EligibilityStatusReads.apiNumber, EligibilityStatusReads.apiName, logError) {
       case Left(EligibilityStatusFailure.UnexpectedStatus(SERVICE_UNAVAILABLE)) => true
       case Left(EligibilityStatusFailure.UnexpectedStatus(BAD_GATEWAY)) => true
       case Left(EligibilityStatusFailure.UnexpectedStatus(INTERNAL_SERVER_ERROR)) => true
@@ -46,6 +46,15 @@ class EligibilityStatusConnector @Inject()(http: HttpClientV2, appConfig: AppCon
         .setHeader("CorrelationId" -> UUID.randomUUID().toString)
         .execute[EligibilityStatusResponse]
     }
-
+  }
+  
+  private def logError(result: EligibilityStatusResponse) = {
+    result match {
+      case Left(EligibilityStatusFailure.UnexpectedStatus(status)) =>
+        logger.error(s"[${EligibilityStatusReads.apiName}] Unexpected status: Status = $status")
+      case Left(EligibilityStatusFailure.InvalidJson) =>
+        logger.error(s"[${EligibilityStatusReads.apiName}] Unable to parse json")
+      case _ => {}
+    }
   }
 }
