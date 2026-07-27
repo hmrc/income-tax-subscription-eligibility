@@ -160,5 +160,21 @@ class ConnectorRetriesSpec extends PlaySpec
         fallbackUsed = true
       )
     }
+
+    "logs a single error" in {
+      var counter = 0
+      var errors = 0
+
+      val result = connectorRetries.retryFor[String](apiOne, "Test API failure retry", _ => errors += 1) {
+        case FAILURE => true
+      } {
+        counter += 1
+        Future.successful(FAILURE)
+      }
+
+      result.futureValue mustBe FAILURE
+      counter mustBe 4
+      errors mustBe 1
+    }
   }
 }

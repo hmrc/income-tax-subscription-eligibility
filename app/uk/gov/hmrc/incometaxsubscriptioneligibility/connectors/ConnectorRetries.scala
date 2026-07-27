@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters.*
-import scala.util.{Try, Success}
+import scala.util.{Try, Success, Failure}
 
 trait ConnectorRetries extends Logging {
 
@@ -34,7 +34,7 @@ trait ConnectorRetries extends Logging {
 
   protected def configuration: Config
 
-  def retryFor[A](apiNumber: Int, desc: String)
+  def retryFor[A](apiNumber: Int, desc: String, logError: A => Unit = (_: A) => ())
                  (condition: PartialFunction[A, Boolean])
                  (block: => Future[A])
                  (implicit ec: ExecutionContext): Future[A] = {
@@ -56,7 +56,12 @@ trait ConnectorRetries extends Logging {
       }
     }
 
-    loop(intervals(apiNumber))
+    val result = loop(intervals(apiNumber))
+    result.onComplete {
+      case Success(r) => logError(r)
+      case _ => {}
+    }
+    result
   }
 
   private def intervals(apiNumber: Int): Seq[FiniteDuration] = {

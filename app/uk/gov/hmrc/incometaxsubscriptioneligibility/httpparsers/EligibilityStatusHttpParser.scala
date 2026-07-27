@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.httpparsers
 
-import play.api.Logging
 import play.api.http.Status.*
 import play.api.libs.json.*
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.incometaxsubscriptioneligibility.models.eligibility.{EligibilityStatusFailure, EligibilityStatusSuccessResponse}
 
-object EligibilityStatusHttpParser extends Logging {
+object EligibilityStatusHttpParser {
 
   type EligibilityStatusResponse = Either[EligibilityStatusFailure, EligibilityStatusSuccessResponse]
 
@@ -42,16 +41,13 @@ object EligibilityStatusHttpParser extends Logging {
     private def handleCreatedResponse(json: JsValue): EligibilityStatusResponse = {
       json.validate[EligibilityStatusSuccessResponse] match {
         case JsSuccess(value, _) => Right(value)
-        case JsError(errors) => logger.error(s"[EligibilityStatusHttpParser] - Unable to parse json. Errors: $errors")
+        case JsError(errors) =>
           Left(EligibilityStatusFailure.InvalidJson)
       }
     }
 
     private def handleOther(status: Int): EligibilityStatusResponse = {
-      logger.error(s"[EligibilityStatusHttpParser] - Unexpected status returned from API. Status: $status")
       Left(EligibilityStatusFailure.UnexpectedStatus(status))
     }
   }
-    
-
 }
