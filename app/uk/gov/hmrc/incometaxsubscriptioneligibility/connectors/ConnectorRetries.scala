@@ -59,7 +59,7 @@ trait ConnectorRetries extends Logging {
     val result = loop(intervals(apiNumber))
     result.onComplete {
       case Success(r) => logError(r)
-      case Failure(exception) => throw exception
+      case _ => {}
     }
     result
   }
