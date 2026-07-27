@@ -51,10 +51,18 @@ class EligibilityStatusConnector @Inject()(http: HttpClientV2, appConfig: AppCon
   private def logError(result: EligibilityStatusResponse) = {
     result match {
       case Left(EligibilityStatusFailure.UnexpectedStatus(status)) =>
-        logger.error(s"[${EligibilityStatusReads.apiName}] Unexpected status: Status = $status")
+        error(status, "Unexpected Status")
       case Left(EligibilityStatusFailure.InvalidJson) =>
-        logger.error(s"[${EligibilityStatusReads.apiName}] Unable to parse json")
+        error(OK, "Invalid Json")
       case _ => {}
     }
   }
+  
+  private def error(status: Int,
+                    message: String) =
+    logger.error(Seq(
+      s"API #${EligibilityStatusReads.apiNumber}: ${EligibilityStatusReads.apiName}",
+      s"Status: $status",
+      s"Message: $message"
+    ).mkString(", "))
 }

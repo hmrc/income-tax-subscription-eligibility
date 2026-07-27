@@ -50,6 +50,4 @@ object EligibilityStatusHttpParser {
       Left(EligibilityStatusFailure.UnexpectedStatus(status))
     }
   }
-    
-
 }
