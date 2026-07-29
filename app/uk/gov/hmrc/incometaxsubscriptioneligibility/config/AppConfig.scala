@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.config
 
-import play.api.{Configuration, Logging}
+import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AppConfig @Inject()(servicesConfig: ServicesConfig, val configuration: Configuration) extends Logging {
+class AppConfig @Inject()(servicesConfig: ServicesConfig, val configuration: Configuration) {
 
   private def loadConfig(key: String) = servicesConfig.getString(key) //throws RuntimeException(s"Could not find config key '$key'") if key not found
 

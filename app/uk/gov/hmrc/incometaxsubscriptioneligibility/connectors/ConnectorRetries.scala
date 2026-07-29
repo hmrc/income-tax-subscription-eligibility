@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters.*
-import scala.util.{Try, Success, Failure}
+import scala.util.{Success, Try}
 
 trait ConnectorRetries extends Logging {
 
