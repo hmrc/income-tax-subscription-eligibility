@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.incometaxsubscriptioneligibility.services
 
-import play.api.Logging
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.incometaxsubscriptioneligibility.config.{AppConfig, FeatureSwitching, StubControlListEligible}
@@ -35,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class EligibilityService @Inject()(auditService: AuditService,
                                    eligibilityStatusConnector: EligibilityStatusConnector)
                                   (val appConfig: AppConfig)
-                                  (implicit ec: ExecutionContext) extends FeatureSwitching with Logging {
+                                  (implicit ec: ExecutionContext) extends FeatureSwitching {
 
   def getEligibilityStatus(nino: String, utr: String, arn: Option[String])
                           (implicit request: Request[_], hc: HeaderCarrier): Future[EligibilityStatusResponse] = {

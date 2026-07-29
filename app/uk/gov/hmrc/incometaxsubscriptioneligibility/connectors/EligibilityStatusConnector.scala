@@ -60,9 +60,9 @@ class EligibilityStatusConnector @Inject()(http: HttpClientV2, appConfig: AppCon
   
   private def error(status: Int,
                     message: String) =
-    logger.error(Seq(
+    Seq(
       s"API #${EligibilityStatusReads.apiNumber}: ${EligibilityStatusReads.apiName}",
       s"Status: $status",
       s"Message: $message"
-    ).mkString(", "))
+    ).mkString(", ")
 }

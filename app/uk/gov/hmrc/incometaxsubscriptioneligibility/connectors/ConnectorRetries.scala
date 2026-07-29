@@ -19,7 +19,6 @@ package uk.gov.hmrc.incometaxsubscriptioneligibility.connectors
 import com.typesafe.config.Config
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.pattern.after
-import play.api.Logging
 import uk.gov.hmrc.mdc.Mdc
 
 import java.util.concurrent.TimeUnit
@@ -28,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters.*
 import scala.util.{Try, Success, Failure}
 
-trait ConnectorRetries extends Logging {
+trait ConnectorRetries {
 
   protected def actorSystem: ActorSystem
 
@@ -44,7 +43,6 @@ trait ConnectorRetries extends Logging {
         val mustRetry: Boolean = condition.lift(result).getOrElse(false)
         if (mustRetry && remainingIntervals.nonEmpty) {
           val delay = remainingIntervals.head
-          logger.warn(s"Retrying [API #$apiNumber - $desc] in $delay due to error")
           val mdcData = Mdc.mdcData
           after(delay, actorSystem.scheduler) {
             Mdc.putMdc(mdcData)
